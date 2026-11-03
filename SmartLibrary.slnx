@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Library.BLL/Library.BLL.csproj" />
+  <Project Path="Library.DAL/Library.DAL.csproj" />
+  <Project Path="Library.DTO/Library.DTO.csproj" />
+  <Project Path="Library.Tests/Library.Tests.csproj" />
+  <Project Path="Library.UI/Library.UI.csproj" />
+</Solution>
