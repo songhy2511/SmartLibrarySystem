@@ -40,7 +40,7 @@ namespace Library.UI
 
             try
             {
-                var (isSuccess, message, user) = _nguoiDungBLL.DangNhap(username, password);
+                var (isSuccess, message, user, librarian) = _nguoiDungBLL.DangNhap(username, password);
 
                 if (!isSuccess || user == null)
                 {
@@ -50,15 +50,28 @@ namespace Library.UI
                     return;
                 }
 
-                // Lưu thông tin phiên đăng nhập
+                // 1. Lưu phiên làm việc toàn cục
                 SessionContext.CurrentUser = user;
+                SessionContext.CurrentLibrarian = librarian;
+                SessionContext.LoginTime = DateTime.Now;
 
-                MessageBox.Show($"Đăng nhập thành công với vai trò: {user.Vai_Tro}!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // TODO: Chuyển hướng Form theo vai trò
-                // if (user.Vai_Tro == "Admin") new FormAdminDashboard().Show();
-                // else new FormLibrarianDesk().Show();
-                // this.Hide();
+                // 2. Phân quyền và điều hướng giao diện tương ứng
+                if (user.Vai_Tro == "Admin")
+                {
+                    var adminForm = new FormAdminDashboard();
+                    adminForm.Show();
+                    this.Hide();
+                }
+                else if (user.Vai_Tro == "Librarian")
+                {
+                    var librarianForm = new FormThuThuDashboard();
+                    librarianForm.Show();
+                    this.Hide();
+                }
+                else
+                {
+                    MessageBox.Show("Vai trò người dùng không hợp lệ trong hệ thống!", "Lỗi phân quyền", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
@@ -94,6 +107,11 @@ namespace Library.UI
             {
                 ThucHienDangNhap();
             }
+        }
+
+        private void pnlLoginArea_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
