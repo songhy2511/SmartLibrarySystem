@@ -16,5 +16,6 @@ namespace Library.DTO
         public decimal SoTienPhat { get; set; }
         public string TrangThaiThanhToan { get; set; }
         public DateTime NgayTao { get; set; }
+
     }
 }
