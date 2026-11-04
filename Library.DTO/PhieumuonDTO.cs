@@ -20,5 +20,6 @@ namespace Library.DTO
         public int SoLanGiaHan { get; set; }
         public string TrangThai { get; set; }
         public string GhiChu { get; set; }
+
     }
 }
