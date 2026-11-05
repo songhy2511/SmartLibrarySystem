@@ -25,20 +25,23 @@ namespace Library.UI
 
         private void FormBanLuuThong_Load(object sender, EventArgs e)
         {
-            // 1. Cấu hình giao diện DataGridView chuẩn
+            // BƯỚC 1: Khởi tạo giao diện DataGridView và nạp danh sách độc giả lên ComboBox
             SetupDataGridView();
-
-            // 2. Load danh sách độc giả vào ComboBox trước
             LoadDanhSachDocGia();
 
-            // 3. Đánh dấu đã load xong để kích hoạt sự kiện SelectedIndexChanged của ComboBox
+            // Thiết lập giá trị mặc định cho thời gian mượn / hẹn trả (Hôm nay & +14 ngày)
+            dtpNgayMuon.Value = DateTime.Now;
+            dtpNgayHenHan.Value = DateTime.Now.AddDays(14);
+
             _isInitialized = true;
 
-            // 4. Load dữ liệu bảng ứng với độc giả đầu tiên đang chọn trên ComboBox
+            // Tự động load danh sách phiếu mượn của độc giả đầu tiên
             if (cboDocGia.SelectedValue != null)
             {
                 LoadDanhSachDangMuon(cboDocGia.SelectedValue.ToString() ?? "");
             }
+
+            
         }
 
         private void SetupDataGridView()
@@ -49,22 +52,19 @@ namespace Library.UI
             dgvSachDangMuon.ReadOnly = true;
             dgvSachDangMuon.BackgroundColor = Color.White;
 
-            // Tắt chế độ Fill tự động toàn phần để cho phép set cứng chiều rộng từng cột rõ ràng, không bị bóp méo chữ
             dgvSachDangMuon.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             dgvSachDangMuon.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             dgvSachDangMuon.DefaultCellStyle.Font = new Font("Segoe UI", 9.5F);
 
-            // Đặt chiều cao hàng và tiêu đề thoáng đãng
             dgvSachDangMuon.RowTemplate.Height = 28;
             dgvSachDangMuon.ColumnHeadersHeight = 35;
         }
 
-        // Sự kiện liên kết quan trọng: Khi chọn độc giả khác trên ComboBox, bảng dữ liệu tự động thay đổi theo
+        // --- BƯỚC 1: CHỌN ĐỘC GIẢ VÀ XEM THÔNG TIN PHIẾU MƯỢN ---
         private void cboDocGia_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (_isInitialized && cboDocGia.SelectedValue != null)
             {
-                // Kiểm tra nếu SelectedValue là DataRowView thì lấy trực tiếp cột MaDocGia
                 string selectedMaDocGia = string.Empty;
 
                 if (cboDocGia.SelectedItem is DataRowView drv)
@@ -87,7 +87,6 @@ namespace Library.UI
         {
             try
             {
-                // Đảm bảo truy vấn lấy đúng cột khóa chính Ma_So làm ValueMember
                 string query = "SELECT Ma_So AS MaDocGia, Ho_Ten AS TenDocGia FROM Doc_Gia";
                 DataTable dt = DatabaseHelper.ExecuteQuery(query);
 
@@ -95,7 +94,7 @@ namespace Library.UI
 
                 cboDocGia.DataSource = dt;
                 cboDocGia.DisplayMember = "HienThi";
-                cboDocGia.ValueMember = "MaDocGia"; // Giá trị này phải khớp chính xác với Ma_So trong CSDL
+                cboDocGia.ValueMember = "MaDocGia";
             }
             catch (Exception ex)
             {
@@ -110,7 +109,7 @@ namespace Library.UI
                 DataTable dt = _phieuMuonBLL.LayDanhSachDangMuon(maDocGia);
                 dgvSachDangMuon.DataSource = dt;
 
-                // Tùy chỉnh độ rộng từng cột cố định để không bị ép chữ xuống dòng
+                // Định dạng hiển thị các cột trực quan trên DataGridView
                 if (dgvSachDangMuon.Columns["MaPhieu"] != null) { dgvSachDangMuon.Columns["MaPhieu"].HeaderText = "Mã Phiếu"; dgvSachDangMuon.Columns["MaPhieu"].Width = 95; }
                 if (dgvSachDangMuon.Columns["TenDocGia"] != null) { dgvSachDangMuon.Columns["TenDocGia"].HeaderText = "Tên Độc Giả"; dgvSachDangMuon.Columns["TenDocGia"].Width = 150; }
                 if (dgvSachDangMuon.Columns["TenSach"] != null) { dgvSachDangMuon.Columns["TenSach"].HeaderText = "Tên Sách"; dgvSachDangMuon.Columns["TenSach"].Width = 160; }
@@ -125,13 +124,15 @@ namespace Library.UI
             }
         }
 
+        // --- BƯỚC 2: LẬP PHIẾU MƯỢN MỚI ---
         private void btnLapPhieuMuon_Click(object sender, EventArgs e)
         {
             try
             {
-                string maDocGia = cboDocGia.SelectedValue?.ToString() ?? "DG0001";
-                string maSach = "B0001";
+                string maDocGia = cboDocGia.SelectedValue?.ToString() ?? "1";
+                string maSach = "B0001"; // Có thể thay thế bằng giá trị nhập từ ô tìm kiếm/quét mã vạch
                 DateTime ngayMuon = dtpNgayMuon.Value;
+                DateTime ngayHenHan = dtpNgayHenHan.Value;
 
                 string maPhieu = _phieuMuonBLL.LapPhieuMuon(maDocGia, maSach, ngayMuon);
                 if (!string.IsNullOrEmpty(maPhieu))
@@ -146,34 +147,35 @@ namespace Library.UI
             }
         }
 
-        private void btnXacNhanTra_Click(object sender, EventArgs e)
+        // --- BƯỚC 3: LÀM MỚI DỮ LIỆU ---
+        private void btnLamMoi_Click(object sender, EventArgs e)
         {
-            if (dgvSachDangMuon.SelectedRows.Count > 0)
+            try
             {
-                string maPhieu = dgvSachDangMuon.SelectedRows[0].Cells["MaPhieu"].Value?.ToString() ?? string.Empty;
-
-                if (string.IsNullOrEmpty(maPhieu))
+                if (cboDocGia.Items.Count > 0)
                 {
-                    MessageBox.Show("Mã phiếu không hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
+                    cboDocGia.SelectedIndex = 0;
+                }
+                dtpNgayMuon.Value = DateTime.Now;
+                dtpNgayHenHan.Value = DateTime.Now.AddDays(14);
+
+                txtTimKiemSach.Text = "Nhập mã sách hoặc tên sách...";
+                txtTimKiemSach.ForeColor = Color.Gray;
+
+                if (cboDocGia.SelectedValue != null)
+                {
+                    LoadDanhSachDangMuon(cboDocGia.SelectedValue.ToString() ?? "");
                 }
 
-                DateTime ngayHenHan = Convert.ToDateTime(dgvSachDangMuon.SelectedRows[0].Cells["NgayHenHan"].Value ?? DateTime.Now);
-                DateTime ngayTra = DateTime.Now;
-
-                if (_phieuMuonBLL.TraSach(maPhieu, ngayTra, ngayHenHan, out decimal tienPhat))
-                {
-                    MessageBox.Show($"Trả sách thành công! Tiền phạt trễ hạn: {tienPhat:N0} VNĐ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    string currentDocGia = cboDocGia.SelectedValue?.ToString() ?? "DG0001";
-                    LoadDanhSachDangMuon(currentDocGia);
-                }
+                MessageBox.Show("Đã làm mới dữ liệu và bộ lọc!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Vui lòng chọn một dòng phiếu mượn trong danh sách để trả sách!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Lỗi làm mới dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // --- BƯỚC 4: GIA HẠN SÁCH ---
         private void btnGiaHan_Click(object sender, EventArgs e)
         {
             if (dgvSachDangMuon.SelectedRows.Count > 0)
@@ -194,7 +196,7 @@ namespace Library.UI
                     if (_phieuMuonBLL.GiaHanPhieu(maPhieu, soLanGiaHan, ngayHenHan))
                     {
                         MessageBox.Show("Gia hạn thời gian mượn thành công thêm 7 ngày!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        string currentDocGia = cboDocGia.SelectedValue?.ToString() ?? "DG0001";
+                        string currentDocGia = cboDocGia.SelectedValue?.ToString() ?? "1";
                         LoadDanhSachDangMuon(currentDocGia);
                     }
                 }
@@ -205,10 +207,40 @@ namespace Library.UI
             }
             else
             {
-                MessageBox.Show("Vui lòng chọn phiếu mượn cần gia hạn trên bảng!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Vui lòng chọn dòng phiếu mượn cần gia hạn trên bảng!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
+        // --- BƯỚC 5: XÁC NHẬN TRẢ SÁCH ---
+        private void btnXacNhanTra_Click(object sender, EventArgs e)
+        {
+            if (dgvSachDangMuon.SelectedRows.Count > 0)
+            {
+                string maPhieu = dgvSachDangMuon.SelectedRows[0].Cells["MaPhieu"].Value?.ToString() ?? string.Empty;
+
+                if (string.IsNullOrEmpty(maPhieu))
+                {
+                    MessageBox.Show("Mã phiếu không hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                DateTime ngayHenHan = Convert.ToDateTime(dgvSachDangMuon.SelectedRows[0].Cells["NgayHenHan"].Value ?? DateTime.Now);
+                DateTime ngayTra = DateTime.Now;
+
+                if (_phieuMuonBLL.TraSach(maPhieu, ngayTra, ngayHenHan, out decimal tienPhat))
+                {
+                    MessageBox.Show($"Trả sách thành công! Tiền phạt trễ hạn: {tienPhat:N0} VNĐ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    string currentDocGia = cboDocGia.SelectedValue?.ToString() ?? "1";
+                    LoadDanhSachDangMuon(currentDocGia);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng chọn một dòng phiếu mượn trong danh sách để trả sách!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        // Xử lý hiệu ứng gợi ý cho ô tìm kiếm
         private void TxtTimKiemSach_Enter(object sender, EventArgs e)
         {
             if (txtTimKiemSach.Text == "Nhập mã sách hoặc tên sách...")
