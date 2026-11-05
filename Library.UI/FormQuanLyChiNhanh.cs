@@ -44,6 +44,14 @@ namespace Library.UI
             var (isSuccess, message) = _chiNhanhBLL.ThemChiNhanh(tenChiNhanh, diaChi, soDienThoai);
             if (isSuccess)
             {
+                // 👉 GHI NHẬN NHẬT KÝ KIỂM TOÁN
+                SystemLogger.Log(
+                    LogLevel.INFO,
+                    "Thêm chi nhánh",
+                    $"Quản trị viên đã tạo mới chi nhánh '{tenChiNhanh}' (Địa chỉ: {diaChi}, SĐT: {soDienThoai}).",
+                    SessionContext.CurrentUser?.Ma_So
+                );
+
                 MessageBox.Show(message, "Thông báo thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 txtTenChiNhanh.Clear();
                 txtDiaChi.Clear();
