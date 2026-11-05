@@ -1,38 +1,10 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
-
 namespace Library.UI
 {
     partial class FormBanLuuThong
     {
         private System.ComponentModel.IContainer components = null;
-
-        // Các controls cho Form
-        private TabControl tabControlMain;
-        private TabPage tabMuonSach;
-        private TabPage tabTraSach;
-
-        // Controls Tab Mượn Sách
-        private Label lblMaDocGia;
-        private TextBox txtMaDocGia;
-        private ComboBox cboDocGia;
-        private Label lblMaSach;
-        private TextBox txtMaSach;
-        private Label lblNgayMuon;
-        private DateTimePicker dtpNgayMuon;
-        private Label lblNgayHenHan;
-        private DateTimePicker dtpNgayHenHan;
-        private Button btnKiemTraDieuKien;
-        private Button btnXacNhanMuon;
-        private Label lblTrangThaiThe;
-
-        // Controls Tab Trả Sách
-        private Label lblNgayTra;
-        private DateTimePicker dtpNgayTra;
-        private Button btnXacNhanTra;
-        private Button btnMoFormBiEnBan;
-        private Label lblTongTienThu;
-        private DataGridView dgvPhieuMuon;
 
         protected override void Dispose(bool disposing)
         {
@@ -45,86 +17,158 @@ namespace Library.UI
 
         private void InitializeComponent()
         {
-            this.tabControlMain = new TabControl();
-            this.tabMuonSach = new TabPage();
-            this.tabTraSach = new TabPage();
-
+            this.lblTieuDe = new System.Windows.Forms.Label();
+            this.cboDocGia = new System.Windows.Forms.ComboBox();
+            this.dtpNgayMuon = new System.Windows.Forms.DateTimePicker();
+            this.dtpNgayHenHan = new System.Windows.Forms.DateTimePicker();
+            this.dgvSachDangMuon = new System.Windows.Forms.DataGridView();
+            this.btnLapPhieuMuon = new System.Windows.Forms.Button();
+            this.btnXacNhanTra = new System.Windows.Forms.Button();
+            this.btnGiaHan = new System.Windows.Forms.Button();
+            this.btnLamMoi = new System.Windows.Forms.Button();
+            this.txtTimKiemSach = new System.Windows.Forms.TextBox();
+            this.btnTimKiem = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSachDangMuon)).BeginInit();
             this.SuspendLayout();
-
-            // 1. Cấu hình Form chính
-            this.ClientSize = new Size(880, 520);
-            this.Text = "Bàn Lưu Thông - Quản Lý Mượn Trả Sách";
-            this.StartPosition = FormStartPosition.CenterScreen;
-
-            // 2. TabControl
-            this.tabControlMain.Dock = DockStyle.Fill;
-            this.tabControlMain.Controls.Add(this.tabMuonSach);
-            this.tabControlMain.Controls.Add(this.tabTraSach);
-            this.Controls.Add(this.tabControlMain);
-
-            // ==========================================
-            // TAB 1: MƯỢN SÁCH
-            // ==========================================
-            this.tabMuonSach.Text = "Mượn Sách";
-            this.tabMuonSach.Padding = new Padding(15);
-
-            this.lblMaDocGia = new Label { Text = "Mã độc giả:", Location = new Point(20, 25), AutoSize = true };
-            this.txtMaDocGia = new TextBox { Location = new Point(120, 22), Width = 150 };
-
-            this.cboDocGia = new ComboBox { Location = new Point(280, 22), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
-            this.btnKiemTraDieuKien = new Button { Text = "Kiểm tra thẻ", Location = new Point(490, 20), Width = 110, Height = 27 };
-            this.lblTrangThaiThe = new Label { Text = "Trạng thái: Chưa kiểm tra", Location = new Point(610, 25), AutoSize = true, Font = new Font(this.Font, FontStyle.Bold) };
-
-            this.lblMaSach = new Label { Text = "Mã sách mượn:", Location = new Point(20, 65), AutoSize = true };
-            this.txtMaSach = new TextBox { Location = new Point(120, 62), Width = 360 };
-
-            this.lblNgayMuon = new Label { Text = "Ngày mượn:", Location = new Point(20, 105), AutoSize = true };
-            this.dtpNgayMuon = new DateTimePicker { Location = new Point(120, 102), Width = 150, Format = DateTimePickerFormat.Short };
-
-            this.lblNgayHenHan = new Label { Text = "Ngày hẹn trả:", Location = new Point(290, 105), AutoSize = true };
-            this.dtpNgayHenHan = new DateTimePicker { Location = new Point(380, 102), Width = 150, Format = DateTimePickerFormat.Short };
-
-            this.btnXacNhanMuon = new Button { Text = "Xác Nhận Mượn Sách", Location = new Point(120, 150), Width = 180, Height = 35, BackColor = Color.LightGreen };
-            this.btnXacNhanMuon.Click += new System.EventHandler(this.btnXacNhanMuon_Click);
-            this.btnKiemTraDieuKien.Click += new System.EventHandler(this.btnKiemTraDieuKien_Click);
-
-            this.tabMuonSach.Controls.AddRange(new Control[] {
-                lblMaDocGia, txtMaDocGia, cboDocGia, btnKiemTraDieuKien, lblTrangThaiThe,
-                lblMaSach, txtMaSach, lblNgayMuon, dtpNgayMuon, lblNgayHenHan, dtpNgayHenHan, btnXacNhanMuon
-            });
-
-            // ==========================================
-            // TAB 2: TRẢ SÁCH & GIA HẠN
-            // ==========================================
-            this.tabTraSach.Text = "Trả Sách / Gia Hạn";
-            this.tabTraSach.Padding = new Padding(15);
-
-            this.lblNgayTra = new Label { Text = "Ngày trả thực tế:", Location = new Point(20, 20), AutoSize = true };
-            this.dtpNgayTra = new DateTimePicker { Location = new Point(130, 17), Width = 150, Format = DateTimePickerFormat.Short };
-
-            this.btnXacNhanTra = new Button { Text = "Xác Nhận Trả Sách", Location = new Point(300, 15), Width = 150, Height = 30, BackColor = Color.LightSkyBlue };
-            this.btnMoFormBiEnBan = new Button { Text = "Lập Biên Bản Vi Phạm", Location = new Point(460, 15), Width = 160, Height = 30, BackColor = Color.LightCoral };
-
-            this.lblTongTienThu = new Label { Text = "Tiền phạt: 0 VNĐ", Location = new Point(640, 20), AutoSize = true, Font = new Font(this.Font, FontStyle.Bold), ForeColor = Color.Red };
-
-            this.dgvPhieuMuon = new DataGridView
-            {
-                Location = new Point(20, 60),
-                Size = new Size(820, 390),
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                MultiSelect = false,
-                ReadOnly = true
-            };
-
+            // 
+            // lblTieuDe
+            // 
+            this.lblTieuDe.AutoSize = true;
+            this.lblTieuDe.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
+            this.lblTieuDe.Location = new System.Drawing.Point(30, 20);
+            this.lblTieuDe.Name = "lblTieuDe";
+            this.lblTieuDe.Size = new System.Drawing.Size(202, 32);
+            this.lblTieuDe.TabIndex = 0;
+            this.lblTieuDe.Text = "BÀN LƯU THÔNG";
+            // 
+            // cboDocGia
+            // 
+            this.cboDocGia.FormattingEnabled = true;
+            this.cboDocGia.Location = new System.Drawing.Point(36, 110);
+            this.cboDocGia.Name = "cboDocGia";
+            this.cboDocGia.Size = new System.Drawing.Size(260, 23);
+            this.cboDocGia.TabIndex = 1;
+            // 
+            // dtpNgayMuon
+            // 
+            this.dtpNgayMuon.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpNgayMuon.Location = new System.Drawing.Point(340, 110);
+            this.dtpNgayMuon.Name = "dtpNgayMuon";
+            this.dtpNgayMuon.Size = new System.Drawing.Size(150, 23);
+            this.dtpNgayMuon.TabIndex = 2;
+            // 
+            // dtpNgayHenHan
+            // 
+            this.dtpNgayHenHan.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpNgayHenHan.Location = new System.Drawing.Point(510, 110);
+            this.dtpNgayHenHan.Name = "dtpNgayHenHan";
+            this.dtpNgayHenHan.Size = new System.Drawing.Size(150, 23);
+            this.dtpNgayHenHan.TabIndex = 3;
+            // 
+            // dgvSachDangMuon
+            // 
+            this.dgvSachDangMuon.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvSachDangMuon.Location = new System.Drawing.Point(510, 190);
+            this.dgvSachDangMuon.Name = "dgvSachDangMuon";
+            this.dgvSachDangMuon.Size = new System.Drawing.Size(430, 250);
+            this.dgvSachDangMuon.TabIndex = 4;
+            // 
+            // btnLapPhieuMuon
+            // 
+            this.btnLapPhieuMuon.BackColor = System.Drawing.Color.DodgerBlue;
+            this.btnLapPhieuMuon.ForeColor = System.Drawing.Color.White;
+            this.btnLapPhieuMuon.Location = new System.Drawing.Point(36, 460);
+            this.btnLapPhieuMuon.Name = "btnLapPhieuMuon";
+            this.btnLapPhieuMuon.Size = new System.Drawing.Size(140, 45);
+            this.btnLapPhieuMuon.TabIndex = 5;
+            this.btnLapPhieuMuon.Text = "LẬP PHIẾU MƯỢN";
+            this.btnLapPhieuMuon.UseVisualStyleBackColor = false;
+            this.btnLapPhieuMuon.Click += new System.EventHandler(this.btnLapPhieuMuon_Click);
+            // 
+            // btnXacNhanTra
+            // 
+            this.btnXacNhanTra.BackColor = System.Drawing.Color.ForestGreen;
+            this.btnXacNhanTra.ForeColor = System.Drawing.Color.White;
+            this.btnXacNhanTra.Location = new System.Drawing.Point(800, 460);
+            this.btnXacNhanTra.Name = "btnXacNhanTra";
+            this.btnXacNhanTra.Size = new System.Drawing.Size(140, 45);
+            this.btnXacNhanTra.TabIndex = 6;
+            this.btnXacNhanTra.Text = "XÁC NHẬN TRẢ";
+            this.btnXacNhanTra.UseVisualStyleBackColor = false;
             this.btnXacNhanTra.Click += new System.EventHandler(this.btnXacNhanTra_Click);
-            this.btnMoFormBiEnBan.Click += new System.EventHandler(this.btnMoFormBiEnBan_Click);
-
-            this.tabTraSach.Controls.AddRange(new Control[] {
-                lblNgayTra, dtpNgayTra, btnXacNhanTra, btnMoFormBiEnBan, lblTongTienThu, dgvPhieuMuon
-            });
-
+            // 
+            // btnGiaHan
+            // 
+            this.btnGiaHan.BackColor = System.Drawing.Color.DarkOrange;
+            this.btnGiaHan.ForeColor = System.Drawing.Color.White;
+            this.btnGiaHan.Location = new System.Drawing.Point(645, 460);
+            this.btnGiaHan.Name = "btnGiaHan";
+            this.btnGiaHan.Size = new System.Drawing.Size(140, 45);
+            this.btnGiaHan.TabIndex = 7;
+            this.btnGiaHan.Text = "GIA HẠN";
+            this.btnGiaHan.UseVisualStyleBackColor = false;
+            this.btnGiaHan.Click += new System.EventHandler(this.btnGiaHan_Click);
+            // 
+            // btnLamMoi
+            // 
+            this.btnLamMoi.Location = new System.Drawing.Point(190, 460);
+            this.btnLamMoi.Name = "btnLamMoi";
+            this.btnLamMoi.Size = new System.Drawing.Size(100, 45);
+            this.btnLamMoi.TabIndex = 8;
+            this.btnLamMoi.Text = "LÀM MỚI";
+            this.btnLamMoi.UseVisualStyleBackColor = true;
+            // 
+            // txtTimKiemSach
+            // 
+            this.txtTimKiemSach.Location = new System.Drawing.Point(36, 160);
+            this.txtTimKiemSach.Name = "txtTimKiemSach";
+            this.txtTimKiemSach.Size = new System.Drawing.Size(200, 23);
+            this.txtTimKiemSach.TabIndex = 9;
+            this.txtTimKiemSach.Text = "Nhập mã sách hoặc tên sách...";
+            // 
+            // btnTimKiem
+            // 
+            this.btnTimKiem.Location = new System.Drawing.Point(245, 160);
+            this.btnTimKiem.Name = "btnTimKiem";
+            this.btnTimKiem.Size = new System.Drawing.Size(75, 25);
+            this.btnTimKiem.TabIndex = 10;
+            this.btnTimKiem.Text = "Tìm kiếm";
+            this.btnTimKiem.UseVisualStyleBackColor = true;
+            // 
+            // FormBanLuuThong
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(964, 531);
+            this.Controls.Add(this.btnTimKiem);
+            this.Controls.Add(this.txtTimKiemSach);
+            this.Controls.Add(this.btnLamMoi);
+            this.Controls.Add(this.btnGiaHan);
+            this.Controls.Add(this.btnXacNhanTra);
+            this.Controls.Add(this.btnLapPhieuMuon);
+            this.Controls.Add(this.dgvSachDangMuon);
+            this.Controls.Add(this.dtpNgayHenHan);
+            this.Controls.Add(this.dtpNgayMuon);
+            this.Controls.Add(this.cboDocGia);
+            this.Controls.Add(this.lblTieuDe);
+            this.Name = "FormBanLuuThong";
+            this.Text = "Smart Library - Bàn lưu thông";
+            this.Load += new System.EventHandler(this.FormBanLuuThong_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSachDangMuon)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
         }
+
+        private System.Windows.Forms.Label lblTieuDe;
+        private System.Windows.Forms.ComboBox cboDocGia;
+        private System.Windows.Forms.DateTimePicker dtpNgayMuon;
+        private System.Windows.Forms.DateTimePicker dtpNgayHenHan;
+        private System.Windows.Forms.DataGridView dgvSachDangMuon;
+        private System.Windows.Forms.Button btnLapPhieuMuon;
+        private System.Windows.Forms.Button btnXacNhanTra;
+        private System.Windows.Forms.Button btnGiaHan;
+        private System.Windows.Forms.Button btnLamMoi;
+        private System.Windows.Forms.TextBox txtTimKiemSach;
+        private System.Windows.Forms.Button btnTimKiem;
     }
 }

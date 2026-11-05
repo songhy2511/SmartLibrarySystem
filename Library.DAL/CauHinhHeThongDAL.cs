@@ -1,34 +1,6 @@
-<<<<<<< HEAD
-﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Library.DAL
-{
-    public static class CauHinhHeThongDAL
-    {
-        public static int LayGiaTriInt(string tenThamSo,int giaTriMacDinh)
-        {
-            string sql = " SELECT Gia_Tri From Cau_Hinh_He_Thong WHERE Ten_Tham_So=@TenThamSo";
-            var parameters = new[] { new SqlParameter("@TenThamSo", tenThamSo)};
-            object result = DatabaseHelper.ExecuteScalar(sql, parameters);
-            if (result == null || result == DBNull.Value)
-            {
-                return giaTriMacDinh;
-            }
-            return int.TryParse(result.ToString(), out int giaTri) ? giaTri : giaTriMacDinh;
-        }
-    }
-}
-=======
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using Microsoft.Data.SqlClient;
 using Library.DTO;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace Library.DAL
 {
@@ -69,6 +41,12 @@ namespace Library.DAL
             return result != null && result != DBNull.Value ? result.ToString()! : giaTriMacDinh;
         }
 
+        public int LayGiaTriInt(string tenThamSo, int giaTriMacDinh)
+        {
+            string valStr = LayGiaTri(tenThamSo, giaTriMacDinh.ToString());
+            return int.TryParse(valStr, out int giaTri) ? giaTri : giaTriMacDinh;
+        }
+
         public bool CapNhatGiaTri(string tenThamSo, string giaTri)
         {
             string query = @"UPDATE Cau_Hinh_He_Thong 
@@ -84,4 +62,3 @@ namespace Library.DAL
         }
     }
 }
->>>>>>> 7d87851619aa3e47dfd2f64dcfc251f7899501d6

@@ -7,24 +7,6 @@ namespace Library.UI
     {
         private System.ComponentModel.IContainer components = null;
 
-        private Label lblMaBiEnBan;
-        private TextBox txtMaBiEnBan;
-        private Label lblMaPhieuMuon;
-        private TextBox txtMaPhieuMuon;
-        private Label lblMaDocGia;
-        private TextBox txtMaDocGia;
-        private Label lblLyDoPhat;
-        private ComboBox cboLyDoPhat;
-        private Label lblSoTienPhat;
-        private TextBox txtSoTienPhat;
-        private Label lblNgayLap;
-        private DateTimePicker dtpNgayLap;
-        private CheckBox chkDaThanhToan;
-        private Label lblGhiChu;
-        private TextBox txtGhiChu;
-        private Button btnXacNhanPhat;
-        private Button btnHuy;
-
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -36,174 +18,169 @@ namespace Library.UI
 
         private void InitializeComponent()
         {
-            lblMaBiEnBan = new Label();
-            txtMaBiEnBan = new TextBox();
-            lblMaPhieuMuon = new Label();
-            txtMaPhieuMuon = new TextBox();
-            lblMaDocGia = new Label();
-            txtMaDocGia = new TextBox();
-            lblLyDoPhat = new Label();
-            cboLyDoPhat = new ComboBox();
-            lblSoTienPhat = new Label();
-            txtSoTienPhat = new TextBox();
-            lblNgayLap = new Label();
-            dtpNgayLap = new DateTimePicker();
-            chkDaThanhToan = new CheckBox();
-            lblGhiChu = new Label();
-            txtGhiChu = new TextBox();
-            btnXacNhanPhat = new Button();
-            btnHuy = new Button();
-            SuspendLayout();
+            this.lblTieuDe = new System.Windows.Forms.Label();
+            this.txtMaBienBan = new System.Windows.Forms.TextBox();
+            this.dtpNgayLap = new System.Windows.Forms.DateTimePicker();
+            this.txtCanBoLap = new System.Windows.Forms.TextBox();
+            this.cboLoaiViPham = new System.Windows.Forms.ComboBox();
+            this.txtSoTienPhat = new System.Windows.Forms.TextBox();
+            this.dtpNgayHenNop = new System.Windows.Forms.DateTimePicker();
+            this.txtMoTa = new System.Windows.Forms.TextBox();
+            this.btnLuuBienBan = new System.Windows.Forms.Button();
+            this.btnLamMoi = new System.Windows.Forms.Button();
+            this.btnHuyBo = new System.Windows.Forms.Button();
+            this.dgvBienBanViPham = new System.Windows.Forms.DataGridView();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvBienBanViPham)).BeginInit();
+            this.SuspendLayout();
             // 
-            // lblMaBiEnBan
+            // lblTieuDe
             // 
-            lblMaBiEnBan.Location = new Point(0, 0);
-            lblMaBiEnBan.Name = "lblMaBiEnBan";
-            lblMaBiEnBan.Size = new Size(100, 23);
-            lblMaBiEnBan.TabIndex = 0;
+            this.lblTieuDe.AutoSize = true;
+            this.lblTieuDe.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
+            this.lblTieuDe.Location = new System.Drawing.Point(30, 20);
+            this.lblTieuDe.Name = "lblTieuDe";
+            this.lblTieuDe.Size = new System.Drawing.Size(325, 32);
+            this.lblTieuDe.TabIndex = 0;
+            this.lblTieuDe.Text = "LẬP BIÊN BẢN VI PHẠM";
             // 
-            // txtMaBiEnBan
+            // txtMaBienBan
             // 
-            txtMaBiEnBan.Location = new Point(0, 0);
-            txtMaBiEnBan.Name = "txtMaBiEnBan";
-            txtMaBiEnBan.Size = new Size(100, 27);
-            txtMaBiEnBan.TabIndex = 1;
-            // 
-            // lblMaPhieuMuon
-            // 
-            lblMaPhieuMuon.Location = new Point(0, 0);
-            lblMaPhieuMuon.Name = "lblMaPhieuMuon";
-            lblMaPhieuMuon.Size = new Size(100, 23);
-            lblMaPhieuMuon.TabIndex = 2;
-            // 
-            // txtMaPhieuMuon
-            // 
-            txtMaPhieuMuon.Location = new Point(0, 0);
-            txtMaPhieuMuon.Name = "txtMaPhieuMuon";
-            txtMaPhieuMuon.Size = new Size(100, 27);
-            txtMaPhieuMuon.TabIndex = 3;
-            // 
-            // lblMaDocGia
-            // 
-            lblMaDocGia.Location = new Point(0, 0);
-            lblMaDocGia.Name = "lblMaDocGia";
-            lblMaDocGia.Size = new Size(100, 23);
-            lblMaDocGia.TabIndex = 4;
-            // 
-            // txtMaDocGia
-            // 
-            txtMaDocGia.Location = new Point(0, 0);
-            txtMaDocGia.Name = "txtMaDocGia";
-            txtMaDocGia.Size = new Size(100, 27);
-            txtMaDocGia.TabIndex = 5;
-            // 
-            // lblLyDoPhat
-            // 
-            lblLyDoPhat.Location = new Point(0, 0);
-            lblLyDoPhat.Name = "lblLyDoPhat";
-            lblLyDoPhat.Size = new Size(100, 23);
-            lblLyDoPhat.TabIndex = 6;
-            // 
-            // cboLyDoPhat
-            // 
-            cboLyDoPhat.Location = new Point(0, 0);
-            cboLyDoPhat.Name = "cboLyDoPhat";
-            cboLyDoPhat.Size = new Size(121, 28);
-            cboLyDoPhat.TabIndex = 7;
-            cboLyDoPhat.SelectedIndexChanged += cboLyDoPhat_SelectedIndexChanged;
-            // 
-            // lblSoTienPhat
-            // 
-            lblSoTienPhat.Location = new Point(0, 0);
-            lblSoTienPhat.Name = "lblSoTienPhat";
-            lblSoTienPhat.Size = new Size(100, 23);
-            lblSoTienPhat.TabIndex = 8;
-            // 
-            // txtSoTienPhat
-            // 
-            txtSoTienPhat.Location = new Point(0, 0);
-            txtSoTienPhat.Name = "txtSoTienPhat";
-            txtSoTienPhat.Size = new Size(100, 27);
-            txtSoTienPhat.TabIndex = 9;
-            // 
-            // lblNgayLap
-            // 
-            lblNgayLap.Location = new Point(0, 0);
-            lblNgayLap.Name = "lblNgayLap";
-            lblNgayLap.Size = new Size(100, 23);
-            lblNgayLap.TabIndex = 10;
+            this.txtMaBienBan.Location = new System.Drawing.Point(450, 80);
+            this.txtMaBienBan.Name = "txtMaBienBan";
+            this.txtMaBienBan.Size = new System.Drawing.Size(200, 23);
+            this.txtMaBienBan.TabIndex = 1;
+            this.txtMaBienBan.Text = "BBVP00125";
             // 
             // dtpNgayLap
             // 
-            dtpNgayLap.Location = new Point(0, 0);
-            dtpNgayLap.Name = "dtpNgayLap";
-            dtpNgayLap.Size = new Size(200, 27);
-            dtpNgayLap.TabIndex = 11;
+            this.dtpNgayLap.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpNgayLap.Location = new System.Drawing.Point(450, 120);
+            this.dtpNgayLap.Name = "dtpNgayLap";
+            this.dtpNgayLap.Size = new System.Drawing.Size(200, 23);
+            this.dtpNgayLap.TabIndex = 2;
             // 
-            // chkDaThanhToan
+            // txtCanBoLap
             // 
-            chkDaThanhToan.Location = new Point(0, 0);
-            chkDaThanhToan.Name = "chkDaThanhToan";
-            chkDaThanhToan.Size = new Size(104, 24);
-            chkDaThanhToan.TabIndex = 12;
+            this.txtCanBoLap.Location = new System.Drawing.Point(450, 160);
+            this.txtCanBoLap.Name = "txtCanBoLap";
+            this.txtCanBoLap.Size = new System.Drawing.Size(200, 23);
+            this.txtCanBoLap.TabIndex = 3;
+            this.txtCanBoLap.Text = "Nguyễn Thị Hoa";
             // 
-            // lblGhiChu
+            // cboLoaiViPham
             // 
-            lblGhiChu.Location = new Point(0, 0);
-            lblGhiChu.Name = "lblGhiChu";
-            lblGhiChu.Size = new Size(100, 23);
-            lblGhiChu.TabIndex = 13;
+            this.cboLoaiViPham.FormattingEnabled = true;
+            this.cboLoaiViPham.Items.AddRange(new object[] {
+            "Mất sách",
+            "Trễ hạn",
+            "Làm hư sách"});
+            this.cboLoaiViPham.Location = new System.Drawing.Point(150, 220);
+            this.cboLoaiViPham.Name = "cboLoaiViPham";
+            this.cboLoaiViPham.Size = new System.Drawing.Size(200, 23);
+            this.cboLoaiViPham.TabIndex = 4;
+            this.cboLoaiViPham.Text = "Mất sách";
             // 
-            // txtGhiChu
+            // txtSoTienPhat
             // 
-            txtGhiChu.Location = new Point(0, 0);
-            txtGhiChu.Name = "txtGhiChu";
-            txtGhiChu.Size = new Size(100, 27);
-            txtGhiChu.TabIndex = 14;
+            this.txtSoTienPhat.Location = new System.Drawing.Point(750, 120);
+            this.txtSoTienPhat.Name = "txtSoTienPhat";
+            this.txtSoTienPhat.Size = new System.Drawing.Size(180, 23);
+            this.txtSoTienPhat.TabIndex = 5;
+            this.txtSoTienPhat.Text = "100000";
             // 
-            // btnXacNhanPhat
+            // dtpNgayHenNop
             // 
-            btnXacNhanPhat.Location = new Point(0, 0);
-            btnXacNhanPhat.Name = "btnXacNhanPhat";
-            btnXacNhanPhat.Size = new Size(75, 23);
-            btnXacNhanPhat.TabIndex = 15;
-            btnXacNhanPhat.Click += btnXacNhanPhat_Click;
+            this.dtpNgayHenNop.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpNgayHenNop.Location = new System.Drawing.Point(750, 160);
+            this.dtpNgayHenNop.Name = "dtpNgayHenNop";
+            this.dtpNgayHenNop.Size = new System.Drawing.Size(180, 23);
+            this.dtpNgayHenNop.TabIndex = 6;
             // 
-            // btnHuy
+            // txtMoTa
             // 
-            btnHuy.Location = new Point(0, 0);
-            btnHuy.Name = "btnHuy";
-            btnHuy.Size = new Size(75, 23);
-            btnHuy.TabIndex = 16;
-            btnHuy.Click += btnHuy_Click;
+            this.txtMoTa.Location = new System.Drawing.Point(150, 260);
+            this.txtMoTa.Multiline = true;
+            this.txtMoTa.Name = "txtMoTa";
+            this.txtMoTa.Size = new System.Drawing.Size(400, 60);
+            this.txtMoTa.TabIndex = 7;
+            this.txtMoTa.Text = "Làm mất sách \"Lập trình C#\" sau khi mượn.";
+            // 
+            // btnLuuBienBan
+            // 
+            this.btnLuuBienBan.BackColor = System.Drawing.Color.DodgerBlue;
+            this.btnLuuBienBan.ForeColor = System.Drawing.Color.White;
+            this.btnLuuBienBan.Location = new System.Drawing.Point(520, 335);
+            this.btnLuuBienBan.Name = "btnLuuBienBan";
+            this.btnLuuBienBan.Size = new System.Drawing.Size(140, 40);
+            this.btnLuuBienBan.TabIndex = 8;
+            this.btnLuuBienBan.Text = "LƯU BIÊN BẢN";
+            this.btnLuuBienBan.UseVisualStyleBackColor = false;
+            this.btnLuuBienBan.Click += new System.EventHandler(this.btnLuuBienBan_Click);
+            // 
+            // btnLamMoi
+            // 
+            this.btnLamMoi.Location = new System.Drawing.Point(675, 335);
+            this.btnLamMoi.Name = "btnLamMoi";
+            this.btnLamMoi.Size = new System.Drawing.Size(110, 40);
+            this.btnLamMoi.TabIndex = 9;
+            this.btnLamMoi.Text = "LÀM MỚI";
+            this.btnLamMoi.UseVisualStyleBackColor = true;
+            // 
+            // btnHuyBo
+            // 
+            this.btnHuyBo.BackColor = System.Drawing.Color.Crimson;
+            this.btnHuyBo.ForeColor = System.Drawing.Color.White;
+            this.btnHuyBo.Location = new System.Drawing.Point(400, 335);
+            this.btnHuyBo.Name = "btnHuyBo";
+            this.btnHuyBo.Size = new System.Drawing.Size(110, 40);
+            this.btnHuyBo.TabIndex = 10;
+            this.btnHuyBo.Text = "HỦY BỎ";
+            this.btnHuyBo.UseVisualStyleBackColor = false;
+            this.btnHuyBo.Click += new System.EventHandler(this.btnHuyBo_Click);
+            // 
+            // dgvBienBanViPham
+            // 
+            this.dgvBienBanViPham.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvBienBanViPham.Location = new System.Drawing.Point(30, 400);
+            this.dgvBienBanViPham.Name = "dgvBienBanViPham";
+            this.dgvBienBanViPham.Size = new System.Drawing.Size(900, 180);
+            this.dgvBienBanViPham.TabIndex = 11;
             // 
             // FormLapBienBanViPham
             // 
-            ClientSize = new Size(570, 401);
-            Controls.Add(lblMaBiEnBan);
-            Controls.Add(txtMaBiEnBan);
-            Controls.Add(lblMaPhieuMuon);
-            Controls.Add(txtMaPhieuMuon);
-            Controls.Add(lblMaDocGia);
-            Controls.Add(txtMaDocGia);
-            Controls.Add(lblLyDoPhat);
-            Controls.Add(cboLyDoPhat);
-            Controls.Add(lblSoTienPhat);
-            Controls.Add(txtSoTienPhat);
-            Controls.Add(lblNgayLap);
-            Controls.Add(dtpNgayLap);
-            Controls.Add(chkDaThanhToan);
-            Controls.Add(lblGhiChu);
-            Controls.Add(txtGhiChu);
-            Controls.Add(btnXacNhanPhat);
-            Controls.Add(btnHuy);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox = false;
-            Name = "FormLapBienBanViPham";
-            StartPosition = FormStartPosition.CenterParent;
-            Text = "Lập Biên Bản Vi Phạm & Thu Tiền Phạt";
-            ResumeLayout(false);
-            PerformLayout();
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(964, 600);
+            this.Controls.Add(this.dgvBienBanViPham);
+            this.Controls.Add(this.btnHuyBo);
+            this.Controls.Add(this.btnLamMoi);
+            this.Controls.Add(this.btnLuuBienBan);
+            this.Controls.Add(this.txtMoTa);
+            this.Controls.Add(this.dtpNgayHenNop);
+            this.Controls.Add(this.txtSoTienPhat);
+            this.Controls.Add(this.cboLoaiViPham);
+            this.Controls.Add(this.txtCanBoLap);
+            this.Controls.Add(this.dtpNgayLap);
+            this.Controls.Add(this.txtMaBienBan);
+            this.Controls.Add(this.lblTieuDe);
+            this.Name = "FormLapBienBanViPham";
+            this.Text = "Smart Library - Lập biên bản vi phạm";
+            ((System.ComponentModel.ISupportInitialize)(this.dgvBienBanViPham)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
         }
+
+        private System.Windows.Forms.Label lblTieuDe;
+        private System.Windows.Forms.TextBox txtMaBienBan;
+        private System.Windows.Forms.DateTimePicker dtpNgayLap;
+        private System.Windows.Forms.TextBox txtCanBoLap;
+        private System.Windows.Forms.ComboBox cboLoaiViPham;
+        private System.Windows.Forms.TextBox txtSoTienPhat;
+        private System.Windows.Forms.DateTimePicker dtpNgayHenNop;
+        private System.Windows.Forms.TextBox txtMoTa;
+        private System.Windows.Forms.Button btnLuuBienBan;
+        private System.Windows.Forms.Button btnLamMoi;
+        private System.Windows.Forms.Button btnHuyBo;
+        private System.Windows.Forms.DataGridView dgvBienBanViPham;
     }
 }

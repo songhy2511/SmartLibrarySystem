@@ -5,57 +5,80 @@ using System.Text;
 using System.Threading.Tasks;
 using Library.DAL;
 using Library.DTO;
+using System.Data;
 
 namespace Library.BLL
 {
     public class PhieuMuonBLL
     {
         private readonly PhieuMuonDAL _phieuMuonDAL = new PhieuMuonDAL();
+        private const decimal FINE_PER_DAY = 5000m; // Định mức phạt trễ hạn 5.000đ/ngày
 
-        public decimal TinhTienPhatTreHan(DateTime ngayHetHan, DateTime ngayTraActual)
+        public DataTable LayDanhSachDangMuon(string maDocGia)
         {
-            if (ngayTraActual <= ngayHetHan)
-                return 0;
-
-            int soNgayTre = (ngayTraActual.Date - ngayHetHan.Date).Days;
-            const decimal MAX_FINE_PER_DAY = 5000m; // 5.000 VNĐ / ngày trễ
-            return soNgayTre * MAX_FINE_PER_DAY;
+            return _phieuMuonDAL.LayDanhSachDangMuon(maDocGia);
         }
 
-        public (bool IsValid, string Message) KiemTraDieuKienMuon(string maDocGia)
+        public string LapPhieuMuon(string maDocGia, string maSach, DateTime ngayMuon)
         {
-            int soSachDangMuon = _phieuMuonDAL.DemSoSachDangMuon(maDocGia);
-            if (soSachDangMuon >= 3)
+            // Kiểm tra điều kiện mượn tối đa 3 cuốn[cite: 1, 2]
+            DataTable dtDangMuon = _phieuMuonDAL.LayDanhSachDangMuon(maDocGia);
+            if (dtDangMuon.Rows.Count >= 3)
             {
-                return (false, "Độc giả đã mượn tối đa 3 cuốn sách, không thể mượn thêm.");
-            }
-            return (true, "Đủ điều kiện mượn sách.");
-        }
-
-        public bool LapPhieuMuon(PhieuMuonDTO pm, out string errorMessage)
-        {
-            var check = KiemTraDieuKienMuon(pm.MaDocGia);
-            if (!check.IsValid)
-            {
-                errorMessage = check.Message;
-                return false;
+                throw new Exception("Độc giả đã đạt giới hạn mượn tối đa 3 cuốn sách!");
             }
 
-            pm.NgayMuon = DateTime.Now;
-            pm.NgayHetHan = pm.NgayMuon.AddDays(14); // Hạn mượn mặc định 14 ngày
+            string maPhieu = "BR" + new Random().Next(1000, 9999);
+            PhieuMuonDTO phieu = new PhieuMuonDTO
+            {
+                MaPhieu = maPhieu,
+                MaDocGia = maDocGia,
+                MaSach = maSach,
+                NgayMuon = ngayMuon,
+                NgayHenHan = ngayMuon.AddDays(14),
+                TrangThai = "Chưa trả",
+                SoLanGiaHan = 0
+            };
 
-            errorMessage = string.Empty;
-            return _phieuMuonDAL.TaoPhieuMuon(pm);
+            bool success = _phieuMuonDAL.ThemPhieuMuon(phieu);
+            return success ? maPhieu : string.Empty;
         }
 
-        public decimal TraSach(string maPhieuMuon, DateTime ngayTra, DateTime ngayHetHan)
+        public decimal TinhTienPhatTreHan(DateTime ngayHenHan, DateTime ngayTra)
         {
-            bool thanhCong = _phieuMuonDAL.CapNhatTraSach(maPhieuMuon, ngayTra);
-            if (thanhCong)
+            if (ngayTra > ngayHenHan)
             {
-                return TinhTienPhatTreHan(ngayHetHan, ngayTra);
+                int soNgayTre = (ngayTra - ngayHenHan).Days;
+                return soNgayTre * FINE_PER_DAY;
             }
             return 0;
+        }
+
+        public bool TraSach(string maPhieu, DateTime ngayTra, DateTime ngayHenHan, out decimal tienPhat)
+        {
+            tienPhat = TinhTienPhatTreHan(ngayHenHan, ngayTra);
+            string trangThai = "Đã trả";
+            return _phieuMuonDAL.CapNhatTraSach(maPhieu, ngayTra, trangThai);
+        }
+
+        public bool GiaHanPhieu(string maPhieu, int soLanGiaHanHienTai, DateTime ngayHenHanHienTai)
+        {
+            if (soLanGiaHanHienTai >= 1)
+            {
+                throw new Exception("Phiếu mượn này đã được gia hạn tối đa!");
+            }
+            if (DateTime.Now > ngayHenHanHienTai)
+            {
+                throw new Exception("Không thể gia hạn phiếu đã quá hạn!");
+            }
+
+            DateTime ngayMoi = ngayHenHanHienTai.AddDays(7);
+            return _phieuMuonDAL.GiaHanPhieu(maPhieu, ngayMoi, soLanGiaHanHienTai + 1);
+        }
+
+        public bool LapBienBanViPham(PhatTienDTO bienBan)
+        {
+            return _phieuMuonDAL.ThemBienBanViPham(bienBan);
         }
     }
 }

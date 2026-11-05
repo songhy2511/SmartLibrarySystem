@@ -8,88 +8,106 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+
 namespace Library.DAL
 {
     public class PhieuMuonDAL
     {
-        public List<PhieuMuonDTO> LayDanhSachPhieuMuon()
-        {
-            List<PhieuMuonDTO> list = new List<PhieuMuonDTO>();
-            string query = "SELECT Ma_Phieu_Muon, Ma_Doc_Gia, Ma_Sach, Ma_Thu_Thu, Ngay_Muon, Ngay_Het_Han, Ngay_Tra, Trang_Thai, Da_Gia_Han FROM Phieu_Muon";
+        private readonly string _connectionString = "Server=My_Lap_of_Quyen\\SQLEXPRESS;Database=LibraryDB;Trusted_Connection=True;TrustServerCertificate=True;";
 
-            using (SqlConnection conn = DatabaseHelper.GetConnection())
+        public bool ThemPhieuMuon(PhieuMuonDTO phieuMuon)
+        {
+            string query = "INSERT INTO Phieu_Muon (Ma_Phieu, Ma_Doc_Gia, Ma_Sach, Ngay_Muon, Ngay_Hen_Han, Trang_Thai, So_Lan_Gia_Han) " +
+                           "VALUES (@MaPhieu, @MaDocGia, @MaSach, @NgayMuon, @NgayHenHan, @TrangThai, @SoLanGiaHan)";
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
             {
-                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@MaPhieu", phieuMuon.MaPhieu);
+                cmd.Parameters.AddWithValue("@MaDocGia", phieuMuon.MaDocGia);
+                cmd.Parameters.AddWithValue("@MaSach", phieuMuon.MaSach);
+                cmd.Parameters.AddWithValue("@NgayMuon", phieuMuon.NgayMuon);
+                cmd.Parameters.AddWithValue("@NgayHenHan", phieuMuon.NgayHenHan);
+                cmd.Parameters.AddWithValue("@TrangThai", phieuMuon.TrangThai);
+                cmd.Parameters.AddWithValue("@SoLanGiaHan", phieuMuon.SoLanGiaHan);
+
                 conn.Open();
-                SqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
+        public DataTable LayDanhSachDangMuon(string maDocGia)
+        {
+            string query = "SELECT pm.Ma_Phieu AS MaPhieu, pm.Ma_Sach AS MaSach, s.Ten_Sach AS TenSach, " +
+                           "pm.Ngay_Muon AS NgayMuon, pm.Ngay_Hen_Han AS NgayHenHan, pm.Trang_Thai AS TrangThai " +
+                           "FROM Phieu_Muon pm JOIN Sach s ON pm.Ma_Sach = s.Ma_Sach " +
+                           "WHERE pm.Ma_Doc_Gia = @MaDocGia AND pm.Trang_Thai = N'Chưa trả'";
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@MaDocGia", maDocGia);
+                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                 {
-                    list.Add(new PhieuMuonDTO
-                    {
-                        MaPhieuMuon = reader["Ma_Phieu_Muon"].ToString(),
-                        MaDocGia = reader["Ma_Doc_Gia"].ToString(),
-                        MaSach = reader["Ma_Sach"].ToString(),
-                        MaThuThu = reader["Ma_Thu_Thu"].ToString(),
-                        NgayMuon = Convert.ToDateTime(reader["Ngay_Muon"]),
-                        NgayHetHan = Convert.ToDateTime(reader["Ngay_Het_Han"]),
-                        NgayTra = reader["Ngay_Tra"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["Ngay_Tra"]) : null,
-                        TrangThai = Convert.ToInt32(reader["Trang_Thai"]),
-                        DaGiaHan = Convert.ToBoolean(reader["Da_Gia_Han"])
-                    });
+                    DataTable dt = new DataTable();
+                    adapter.Fill(dt);
+                    return dt;
                 }
             }
-            return list;
         }
 
-        public bool TaoPhieuMuon(PhieuMuonDTO pm)
+        public bool CapNhatTraSach(string maPhieu, DateTime ngayTra, string trangThai)
         {
-            string query = @"INSERT INTO Phieu_Muon (Ma_Phieu_Muon, Ma_Doc_Gia, Ma_Sach, Ma_Thu_Thu, Ngay_Muon, Ngay_Het_Han, Trang_Thai, Da_Gia_Han) 
-                            VALUES (@MaPhieuMuon, @MaDocGia, @MaSach, @MaThuThu, @NgayMuon, @NgayHetHan, 0, 0);
-                            UPDATE Sach SET So_Luong_Kha_Dung = So_Luong_Kha_Dung - 1 WHERE Ma_So = @MaSach;";
+            string query = "UPDATE Phieu_Muon SET Ngay_Tra = @NgayTra, Trang_Thai = @TrangThai WHERE Ma_Phieu = @MaPhieu";
 
-            using (SqlConnection conn = DatabaseHelper.GetConnection())
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
             {
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@MaPhieuMuon", pm.MaPhieuMuon);
-                cmd.Parameters.AddWithValue("@MaDocGia", pm.MaDocGia);
-                cmd.Parameters.AddWithValue("@MaSach", pm.MaSach);
-                cmd.Parameters.AddWithValue("@MaThuThu", pm.MaThuThu);
-                cmd.Parameters.AddWithValue("@NgayMuon", pm.NgayMuon);
-                cmd.Parameters.AddWithValue("@NgayHetHan", pm.NgayHetHan);
-
-                conn.Open();
-                return cmd.ExecuteNonQuery() > 0;
-            }
-        }
-
-        public bool CapNhatTraSach(string maPhieuMuon, DateTime ngayTra)
-        {
-            string query = @"UPDATE Phieu_Muon 
-                            SET Ngay_Tra = @NgayTra, Trang_Thai = 1 
-                            WHERE Ma_Phieu_Muon = @MaPhieuMuon;
-                            UPDATE Sach SET So_Luong_Kha_Dung = So_Luong_Kha_Dung + 1 
-                            WHERE Ma_So = (SELECT Ma_Sach FROM Phieu_Muon WHERE Ma_Phieu_Muon = @MaPhieuMuon);";
-
-            using (SqlConnection conn = DatabaseHelper.GetConnection())
-            {
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@MaPhieuMuon", maPhieuMuon);
+                cmd.Parameters.AddWithValue("@MaPhieu", maPhieu);
                 cmd.Parameters.AddWithValue("@NgayTra", ngayTra);
+                cmd.Parameters.AddWithValue("@TrangThai", trangThai);
 
                 conn.Open();
                 return cmd.ExecuteNonQuery() > 0;
             }
         }
 
-        public int DemSoSachDangMuon(string maDocGia)
+        public bool GiaHanPhieu(string maPhieu, DateTime ngayHenHanMoi, int soLanGiaHanMoi)
         {
-            string query = "SELECT COUNT(*) FROM Phieu_Muon WHERE Ma_Doc_Gia = @MaDocGia AND Trang_Thai = 0";
-            using (SqlConnection conn = DatabaseHelper.GetConnection())
+            string query = "UPDATE Phieu_Muon SET Ngay_Hen_Han = @NgayHenHanMoi, So_Lan_Gia_Han = @SoLanGiaHanMoi WHERE Ma_Phieu = @MaPhieu";
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
             {
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@MaDocGia", maDocGia);
+                cmd.Parameters.AddWithValue("@MaPhieu", maPhieu);
+                cmd.Parameters.AddWithValue("@NgayHenHanMoi", ngayHenHanMoi);
+                cmd.Parameters.AddWithValue("@SoLanGiaHanMoi", soLanGiaHanMoi);
+
                 conn.Open();
-                return (int)cmd.ExecuteScalar();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
+        public bool ThemBienBanViPham(PhatTienDTO bb)
+        {
+            string query = "INSERT INTO Phat_Tien (Ma_Bien_Ban, Ma_Doc_Gia, Loai_Vi_Pham, Mo_Ta, So_Tien_Phat, Ngay_Lap, Ngay_Hen_Nop, Trang_Thai, Can_Bo_Lap) " +
+                           "VALUES (@MaBB, @MaDG, @LoaiVP, @MoTa, @SoTien, @NgayLap, @NgayNop, @TrangThai, @CanBo)";
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@MaBB", bb.MaBienBan);
+                cmd.Parameters.AddWithValue("@MaDG", bb.MaDocGia);
+                cmd.Parameters.AddWithValue("@LoaiVP", bb.LoaiViPham);
+                cmd.Parameters.AddWithValue("@MoTa", bb.MoTa);
+                cmd.Parameters.AddWithValue("@SoTien", bb.SoTienPhat);
+                cmd.Parameters.AddWithValue("@NgayLap", bb.NgayLap);
+                cmd.Parameters.AddWithValue("@NgayNop", bb.NgayHenNop);
+                cmd.Parameters.AddWithValue("@TrangThai", bb.TrangThai);
+                cmd.Parameters.AddWithValue("@CanBo", bb.CanBoLap);
+
+                conn.Open();
+                return cmd.ExecuteNonQuery() > 0;
             }
         }
     }
