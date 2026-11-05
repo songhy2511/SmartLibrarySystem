@@ -32,6 +32,7 @@ namespace Library.UI
         }
 
         // Hàm cập nhật màu sắc nút Sidebar khi được chọn
+        // 1. Cập nhật hàm HighlightButton để reset màu cho cả nút Chi Nhánh
         private void HighlightButton(Button selectedButton)
         {
             // Reset toàn bộ các nút về màu Sidebar mặc định
@@ -40,6 +41,10 @@ namespace Library.UI
 
             btnNhanSu.BackColor = Color.FromArgb(15, 23, 42);
             btnNhanSu.ForeColor = Color.FromArgb(203, 213, 225);
+
+            // 👉 Bổ sung nút Chi Nhánh:
+            btnChiNhanh.BackColor = Color.FromArgb(15, 23, 42);
+            btnChiNhanh.ForeColor = Color.FromArgb(203, 213, 225);
 
             btnCaTruc.BackColor = Color.FromArgb(15, 23, 42);
             btnCaTruc.ForeColor = Color.FromArgb(203, 213, 225);
@@ -54,6 +59,12 @@ namespace Library.UI
             _currentActiveButton = selectedButton;
             _currentActiveButton.BackColor = Color.FromArgb(30, 41, 59);
             _currentActiveButton.ForeColor = Color.White;
+        }
+
+        // 2. Thêm sự kiện Click để nạp FormQuanLyChiNhanh vào vùng làm việc chính
+        private void btnChiNhanh_Click(object sender, EventArgs e)
+        {
+            LoadChildForm(new FormQuanLyChiNhanh(), "QUẢN LÝ HỆ THỐNG CHI NHÁNH", (Button)sender);
         }
 
         private void LoadChildForm(Form childForm, string pageTitle, Button senderButton)
