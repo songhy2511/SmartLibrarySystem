@@ -19,6 +19,7 @@
         {
             pnlSidebar = new System.Windows.Forms.Panel();
             btnDangXuat = new System.Windows.Forms.Button();
+            btnBaoCaoThongKe = new System.Windows.Forms.Button();
             btnDoiMatKhau = new System.Windows.Forms.Button();
             btnLichTruc = new System.Windows.Forms.Button();
             btnXuLyViPham = new System.Windows.Forms.Button();
@@ -41,6 +42,7 @@
             // 
             pnlSidebar.BackColor = System.Drawing.Color.FromArgb(19, 78, 74);
             pnlSidebar.Controls.Add(btnDangXuat);
+            pnlSidebar.Controls.Add(btnBaoCaoThongKe);
             pnlSidebar.Controls.Add(btnDoiMatKhau);
             pnlSidebar.Controls.Add(btnLichTruc);
             pnlSidebar.Controls.Add(btnXuLyViPham);
@@ -63,10 +65,28 @@
             btnDangXuat.Location = new System.Drawing.Point(0, 635);
             btnDangXuat.Name = "btnDangXuat";
             btnDangXuat.Size = new System.Drawing.Size(230, 45);
-            btnDangXuat.TabIndex = 5;
+            btnDangXuat.TabIndex = 6;
             btnDangXuat.Text = "🚪 Đăng Xuất";
             btnDangXuat.UseVisualStyleBackColor = false;
             btnDangXuat.Click += btnDangXuat_Click;
+            // 
+            // btnBaoCaoThongKe
+            // 
+            btnBaoCaoThongKe.Dock = System.Windows.Forms.DockStyle.Top;
+            btnBaoCaoThongKe.FlatAppearance.BorderSize = 0;
+            btnBaoCaoThongKe.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnBaoCaoThongKe.Font = new System.Drawing.Font("Segoe UI", 10F);
+            btnBaoCaoThongKe.ForeColor = System.Drawing.Color.FromArgb(204, 251, 241);
+            btnBaoCaoThongKe.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            btnBaoCaoThongKe.Location = new System.Drawing.Point(0, 265);
+            btnBaoCaoThongKe.Name = "btnBaoCaoThongKe";
+            btnBaoCaoThongKe.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
+            btnBaoCaoThongKe.Size = new System.Drawing.Size(230, 45);
+            btnBaoCaoThongKe.TabIndex = 5;
+            btnBaoCaoThongKe.Text = "📊  Báo Cáo & Thống Kê";
+            btnBaoCaoThongKe.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            btnBaoCaoThongKe.UseVisualStyleBackColor = true;
+            btnBaoCaoThongKe.Click += btnBaoCaoThongKe_Click;
             // 
             // btnDoiMatKhau
             // 
@@ -263,6 +283,7 @@
         private System.Windows.Forms.Button btnXuLyViPham;
         private System.Windows.Forms.Button btnLichTruc;
         private System.Windows.Forms.Button btnDoiMatKhau;
+        private System.Windows.Forms.Button btnBaoCaoThongKe;
         private System.Windows.Forms.Button btnDangXuat;
         private System.Windows.Forms.Panel pnlHeader;
         private System.Windows.Forms.Label lblPageTitle;

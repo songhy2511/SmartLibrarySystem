@@ -25,6 +25,22 @@ namespace Library.UI
             lblLibrarianInfo.Text = $"Thủ thư: {librarianName} | {desk} | Đăng nhập: {SessionContext.LoginTime:HH:mm:ss}";
         }
 
+        // 👉 Thêm sự kiện mở Form Báo Cáo Thống Kê
+        private void btnBaoCaoThongKe_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var form = new FormBaoCaoThongKe())
+                {
+                    form.ShowDialog(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Không thể mở màn hình báo cáo: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void btnDoiMatKhau_Click(object sender, EventArgs e)
         {
             using var form = new FormDoiMatKhau();
