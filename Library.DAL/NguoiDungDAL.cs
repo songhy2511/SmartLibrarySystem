@@ -75,5 +75,19 @@ namespace Library.DAL
 
             return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
         }
+
+        public bool CapNhatTrangThaiHoatDong(int maSoNguoiDung, bool dangHoatDong)
+        {
+            string query = @"UPDATE Nguoi_Dung 
+                     SET Dang_Hoat_Dong = @DangHoatDong 
+                     WHERE Ma_So = @MaSo";
+
+            SqlParameter[] parameters = {
+        new SqlParameter("@DangHoatDong", dangHoatDong),
+        new SqlParameter("@MaSo", maSoNguoiDung)
+    };
+
+            return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
+        }
     }
 }
