@@ -94,6 +94,7 @@ namespace Library.UI
         {
             HighlightButton(btnTongQuan);
             lblCurrentPageTitle.Text = "TỔNG QUAN QUẢN TRỊ";
+
             if (_activeChildForm != null)
             {
                 _activeChildForm.Close();
@@ -101,6 +102,9 @@ namespace Library.UI
             }
             pnlContent.Controls.Clear();
             pnlContent.Controls.Add(lblWelcome);
+
+            // Giữ lại lệnh LoadChildForm mới của bạn:
+            LoadChildForm(new FormTongQuanHeThong(), "TỔNG QUAN HỆ THỐNG & ĐỐI SOÁT KPI", (Button)sender);
         }
 
         private void btnNhanSu_Click(object sender, EventArgs e)
@@ -146,11 +150,6 @@ namespace Library.UI
         private void btnCaTruc_Click(object sender, EventArgs e)
         {
             LoadChildForm(new FormPhanCaTruc(), "PHÂN CÔNG CA LÀM VIỆC & ĐỐI SOÁT", (Button)sender);
-        }
-
-        private void btnTongQuan_Click_1(object sender, EventArgs e)
-        {
-            LoadChildForm(new FormTongQuanHeThong(), "TỔNG QUAN HỆ THỐNG & ĐỐI SOÁT KPI", (Button)sender);
         }
 
         private void btnQuyChe_Click(object sender, EventArgs e)

@@ -5,19 +5,13 @@ using System.Text.RegularExpressions;
 
 namespace Library.BLL.Security
 {
-    /// <summary>
-    /// Cung cấp các tiện ích mã hóa mật khẩu chuẩn SHA-256 kết hợp chuỗi muối (Salt)
-    /// Đảm bảo tương thích 100% với hàm HASHBYTES('SHA2_256', ...) của SQL Server.
-    /// </summary>
     public static class PasswordHasher
     {
-        private const int DefaultSaltSize = 16; // 128-bit Salt
+        private const int DefaultSaltSize = 16;        // 128-bit Salt
+        private const int HashByteSize = 32;           // 256-bit Key (64 ký tự Hex)
+        private const int Iterations = 100_000;        // 100.000 vòng lặp theo chuẩn OWASP/NIST
+        private static readonly HashAlgorithmName Algorithm = HashAlgorithmName.SHA256;
 
-        /// <summary>
-        /// Sinh chuỗi muối (Salt) ngẫu nhiên an toàn bằng bộ sinh số ngẫu nhiên mật mã (CSPRNG).
-        /// </summary>
-        /// <param name="size">Kích thước byte của muối (mặc định 16 bytes)</param>
-        /// <returns>Chuỗi Salt biểu diễn dưới dạng Base64</returns>
         public static string GenerateSalt(int size = DefaultSaltSize)
         {
             byte[] saltBytes = RandomNumberGenerator.GetBytes(size);
@@ -25,12 +19,8 @@ namespace Library.BLL.Security
         }
 
         /// <summary>
-        /// Băm mật khẩu kết hợp với Salt bằng thuật toán SHA-256.
-        /// Kết quả trả về là chuỗi Hex 64 ký tự in hoa, khớp với định dạng CONVERT(VARCHAR(64), HASHBYTES(...), 2) trong CSDL.
+        /// Băm mật khẩu chậm bằng thuật toán PBKDF2-HMAC-SHA256 (100.000 vòng lặp)
         /// </summary>
-        /// <param name="password">Mật khẩu thô dạng văn bản rõ</param>
-        /// <param name="salt">Chuỗi muối đã sinh</param>
-        /// <returns>Chuỗi băm Hex 64 ký tự</returns>
         public static string HashPassword(string password, string salt)
         {
             if (string.IsNullOrEmpty(password))
@@ -39,22 +29,22 @@ namespace Library.BLL.Security
             if (string.IsNullOrEmpty(salt))
                 throw new ArgumentException("Chuỗi muối (Salt) không được để trống.", nameof(salt));
 
-            // Ghép password thô và salt theo đúng thứ tự trong kịch bản CSDL (password + salt)
-            byte[] combinedBytes = Encoding.UTF8.GetBytes(password + salt);
-            byte[] hashBytes = SHA256.HashData(combinedBytes);
+            byte[] saltBytes = Convert.FromBase64String(salt);
 
-            // Chuyển sang chuỗi HEX viết hoa (không có dấu gạch ngang)
-            return Convert.ToHexString(hashBytes);
+            byte[] hashBytes = Rfc2898DeriveBytes.Pbkdf2(
+                password,
+                saltBytes,
+                Iterations,
+                Algorithm,
+                HashByteSize
+            );
+
+            return Convert.ToHexString(hashBytes); // Trả về 64 ký tự Hex in hoa
         }
 
         /// <summary>
-        /// So khớp mật khẩu nhập vào với mã băm lưu trữ trong CSDL.
-        /// Sử dụng CryptographicOperations.FixedTimeEquals để ngăn chặn tấn công Timing Attack.
+        /// Xác thực mật khẩu với thời gian cố định (FixedTimeEquals) chống Timing Attack
         /// </summary>
-        /// <param name="inputPassword">Mật khẩu người dùng nhập</param>
-        /// <param name="storedHash">Mã băm lưu trong CSDL (cột Mat_Khau_Ma_Hoa)</param>
-        /// <param name="storedSalt">Chuỗi muối lưu trong CSDL (cột Chuoi_Muoi)</param>
-        /// <returns>True nếu mật khẩu hợp lệ, False nếu sai</returns>
         public static bool VerifyPassword(string inputPassword, string storedHash, string storedSalt)
         {
             if (string.IsNullOrEmpty(inputPassword) || string.IsNullOrEmpty(storedHash) || string.IsNullOrEmpty(storedSalt))
@@ -62,10 +52,7 @@ namespace Library.BLL.Security
 
             try
             {
-                // Tính toán mã băm cho mật khẩu vừa nhập
                 string computedHash = HashPassword(inputPassword, storedSalt);
-
-                // Chuyển cả 2 chuỗi Hex về mảng byte để so sánh với thời gian cố định
                 byte[] computedBytes = Convert.FromHexString(computedHash);
                 byte[] storedBytes = Convert.FromHexString(storedHash);
 
@@ -73,17 +60,43 @@ namespace Library.BLL.Security
             }
             catch
             {
-                // Bắt ngoại lệ nếu chuỗi Hex trong DB bị hỏng hoặc định dạng sai
                 return false;
             }
         }
 
         /// <summary>
-        /// Kiểm tra độ mạnh của mật khẩu theo chuẩn an toàn thông tin:
-        /// Tối thiểu 6 ký tự, có ít nhất 1 chữ hoa, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt.
+        /// Sinh mật khẩu tạm thời ngẫu nhiên an toàn khi Admin Reset mật khẩu
         /// </summary>
-        /// <param name="password">Mật khẩu cần thẩm định</param>
-        /// <returns>(IsValid, Thông báo chi tiết)</returns>
+        public static string GenerateTemporaryPassword(int length = 10)
+        {
+            const string upper = "ABCDEFGHJKLMNOPQRSTUVWXYZ";
+            const string lower = "abcdefghijkmnopqrstuvwxyz";
+            const string digits = "0123456789";
+            const string special = "!@#$%^&*";
+
+            var randomChars = new char[length];
+            // Đảm bảo thỏa mãn đủ 4 tiêu chí độ mạnh
+            randomChars[0] = upper[RandomNumberGenerator.GetInt32(upper.Length)];
+            randomChars[1] = lower[RandomNumberGenerator.GetInt32(lower.Length)];
+            randomChars[2] = digits[RandomNumberGenerator.GetInt32(digits.Length)];
+            randomChars[3] = special[RandomNumberGenerator.GetInt32(special.Length)];
+
+            string allChars = upper + lower + digits + special;
+            for (int i = 4; i < length; i++)
+            {
+                randomChars[i] = allChars[RandomNumberGenerator.GetInt32(allChars.Length)];
+            }
+
+            // Trộn ngẫu nhiên vị trí các ký tự (Fisher-Yates)
+            for (int i = length - 1; i > 0; i--)
+            {
+                int j = RandomNumberGenerator.GetInt32(i + 1);
+                (randomChars[i], randomChars[j]) = (randomChars[j], randomChars[i]);
+            }
+
+            return new string(randomChars);
+        }
+
         public static (bool IsValid, string ErrorMessage) ValidatePasswordStrength(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
