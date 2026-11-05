@@ -22,42 +22,47 @@ namespace Library.Tests
 
         [TestMethod]
         [TestCategory("Authentication")]
-        public void VerifyPassword_AdminSeedAccount_MatchesExpectedSqlHash()
+        public void VerifyPassword_Pbkdf2_SeedAdminMatchesCorrectHash()
         {
-            // Arrange: Chuỗi muối và mật khẩu khai báo đúng trong script Database Seed
+            // Mật khẩu và Salt của Admin trong LibraryDB.sql
             string plainPass = "Admin@123";
-            string seedSalt = "Salt_Admin_2026_Secure_Key==";
+            string salt = "q3Z8vX1mK9pL2oW5yR7tEw==";
+            string expectedHash = "03FC1949AB5D0389D245EAC6834C156273213A780EB92A922CA04EAC0BE8636E";
 
-            // Băm thử nghiệm theo thuật toán C#
-            string computedHash = PasswordHasher.HashPassword(plainPass, seedSalt);
+            bool isCorrect = PasswordHasher.VerifyPassword(plainPass, expectedHash, salt);
+            Assert.IsTrue(isCorrect, "PBKDF2 không xác thực khớp với hash seed của Admin!");
 
-            // Act & Assert
-            // 1. Phải là chuỗi Hex 64 ký tự (256 bits) viết hoa
-            Assert.AreEqual(64, computedHash.Length);
-            Assert.AreEqual(computedHash.ToUpper(), computedHash);
-
-            // 2. Hàm verify phải chấp thuận mật khẩu seed
-            bool isCorrect = PasswordHasher.VerifyPassword(plainPass, computedHash, seedSalt);
-            Assert.IsTrue(isCorrect, "Hàm VerifyPassword không khớp với tài khoản seed Admin trong SQL!");
-
-            // 3. Nhập sai mật khẩu phải từ chối ngay lập tức
-            bool isWrong = PasswordHasher.VerifyPassword("Admin@999", computedHash, seedSalt);
-            Assert.IsFalse(isWrong, "Hệ thống vẫn xác thực thành công khi nhập sai mật khẩu Admin!");
+            bool isWrong = PasswordHasher.VerifyPassword("WrongPass@123", expectedHash, salt);
+            Assert.IsFalse(isWrong, "Mật khẩu sai vẫn được PBKDF2 chấp thuận!");
         }
 
         [TestMethod]
         [TestCategory("Authentication")]
-        public void VerifyPassword_LibrarianSeedAccount_MatchesCorrectHash()
+        public void VerifyPassword_Pbkdf2_SeedLibrarianMatchesCorrectHash()
         {
-            // Arrange: Salt của thủ thư 1 trong script SQL
-            string plainPass = "Librarian@123";
-            string seedSalt = "Salt_TT001_Key_Lib2026==";
+            // Mật khẩu và Salt của Thủ thư trong LibraryDB.sql
+            string plainPass = "Librarian@2026!";
+            string salt = "a1B2c3D4e5F6g7H8i9J0kL==";
+            string expectedHash = "DF978233A0C6131B80D26D45D9C9BFB2D81760E9DFB81599CA8D58BD71DE3D21";
 
-            string computedHash = PasswordHasher.HashPassword(plainPass, seedSalt);
+            bool isCorrect = PasswordHasher.VerifyPassword(plainPass, expectedHash, salt);
+            Assert.IsTrue(isCorrect, "PBKDF2 không xác thực khớp với hash seed của Thủ thư!");
 
-            // Act & Assert
-            bool isCorrect = PasswordHasher.VerifyPassword(plainPass, computedHash, seedSalt);
-            Assert.IsTrue(isCorrect, "Hàm VerifyPassword không khớp với tài khoản seed Thủ thư!");
+            bool isWrong = PasswordHasher.VerifyPassword("WrongPass@123", expectedHash, salt);
+            Assert.IsFalse(isWrong, "Mật khẩu sai vẫn được PBKDF2 chấp thuận!");
+        }
+
+        [TestMethod]
+        [TestCategory("Security")]
+        public void GenerateTemporaryPassword_MeetsAllComplexityRequirements()
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                string tempPass = PasswordHasher.GenerateTemporaryPassword(12);
+                var (isValid, errorMsg) = PasswordHasher.ValidatePasswordStrength(tempPass);
+
+                Assert.IsTrue(isValid, $"Mật khẩu tạm thời '{tempPass}' không đạt chuẩn: {errorMsg}");
+            }
         }
 
         #endregion
@@ -74,10 +79,8 @@ namespace Library.Tests
         [TestCategory("Security")]
         public void ValidatePasswordStrength_InvalidPasswords_ReturnsFalse(string weakPassword, string expectedErrorSubString)
         {
-            // Act
             var (isValid, errorMsg) = PasswordHasher.ValidatePasswordStrength(weakPassword);
 
-            // Assert
             Assert.IsFalse(isValid, $"Mật khẩu yếu '{weakPassword}' đáng lẽ phải bị từ chối!");
             StringAssert.Contains(errorMsg, expectedErrorSubString);
         }
@@ -89,10 +92,8 @@ namespace Library.Tests
         [TestCategory("Security")]
         public void ValidatePasswordStrength_ValidPasswords_ReturnsTrue(string strongPassword)
         {
-            // Act
             var (isValid, errorMsg) = PasswordHasher.ValidatePasswordStrength(strongPassword);
 
-            // Assert
             Assert.IsTrue(isValid, $"Mật khẩu hợp lệ '{strongPassword}' bị báo lỗi: {errorMsg}");
             Assert.AreEqual(string.Empty, errorMsg);
         }
@@ -105,15 +106,12 @@ namespace Library.Tests
         [TestCategory("ShiftManagement")]
         public void PhanCaTruc_NgayTrongQuaKhu_ReturnsFailure()
         {
-            // Arrange
             DateTime ngayQuaKhu = DateTime.Today.AddDays(-1);
             TimeSpan batDau = new TimeSpan(7, 30, 0);
             TimeSpan ketThuc = new TimeSpan(12, 0, 0);
 
-            // Act: Phân ca cho ngày hôm qua
             var (isSuccess, message) = _caTrucBLL.PhanCaTruc(1, 1, ngayQuaKhu, "Ca Sáng", batDau, ketThuc, 500000, null);
 
-            // Assert
             Assert.IsFalse(isSuccess);
             StringAssert.Contains(message, "quá khứ");
         }
@@ -122,15 +120,12 @@ namespace Library.Tests
         [TestCategory("ShiftManagement")]
         public void PhanCaTruc_GioBatDauSauGioKetThuc_ReturnsFailure()
         {
-            // Arrange
             DateTime ngayMai = DateTime.Today.AddDays(1);
             TimeSpan batDau = new TimeSpan(17, 30, 0);
-            TimeSpan ketThuc = new TimeSpan(12, 0, 0); // Giờ kết thúc trước giờ bắt đầu
+            TimeSpan ketThuc = new TimeSpan(12, 0, 0);
 
-            // Act
             var (isSuccess, message) = _caTrucBLL.PhanCaTruc(1, 1, ngayMai, "Ca Chiều", batDau, ketThuc, 300000, null);
 
-            // Assert
             Assert.IsFalse(isSuccess);
             StringAssert.Contains(message, "trước giờ kết thúc");
         }
@@ -141,15 +136,12 @@ namespace Library.Tests
         [TestCategory("ShiftManagement")]
         public void PhanCaTruc_ThieuThuThuHoacChiNhanh_ReturnsFailure(int thuThuId, int chiNhanhId, string expectedMsg)
         {
-            // Arrange
             DateTime ngayMai = DateTime.Today.AddDays(1);
             TimeSpan batDau = new TimeSpan(7, 30, 0);
             TimeSpan ketThuc = new TimeSpan(12, 0, 0);
 
-            // Act
             var (isSuccess, message) = _caTrucBLL.PhanCaTruc(thuThuId, chiNhanhId, ngayMai, "Ca Sáng", batDau, ketThuc, 0, null);
 
-            // Assert
             Assert.IsFalse(isSuccess);
             Assert.AreEqual(expectedMsg, message);
         }
@@ -159,21 +151,19 @@ namespace Library.Tests
         #region 4. TEST RÀNG BUỘC QUY CHẾ & CẤU HÌNH THAM SỐ ĐỘNG
 
         [TestMethod]
-        [DataRow(0, 14, 5000, 12, "Số sách mượn tối đa phải từ 1 đến 50 cuốn!")]     // Sách = 0
-        [DataRow(55, 14, 5000, 12, "Số sách mượn tối đa phải từ 1 đến 50 cuốn!")]    // Sách > 50
-        [DataRow(5, 0, 5000, 12, "Số ngày mượn tối đa phải từ 1 đến 180 ngày!")]     // Ngày = 0
-        [DataRow(5, 200, 5000, 12, "Số ngày mượn tối đa phải từ 1 đến 180 ngày!")]   // Ngày > 180
-        [DataRow(5, 14, -1000, 12, "Tiền phạt trả trễ mỗi ngày không được âm!")]      // Phạt âm
-        [DataRow(5, 14, 5000, 0, "Thời hạn thẻ độc giả phải từ 1 đến 60 tháng!")]     // Hạn thẻ = 0
-        [DataRow(5, 14, 5000, 72, "Thời hạn thẻ độc giả phải từ 1 đến 60 tháng!")]    // Hạn thẻ > 60
+        [DataRow(0, 14, 5000, 12, "Số sách mượn tối đa phải từ 1 đến 50 cuốn!")]
+        [DataRow(55, 14, 5000, 12, "Số sách mượn tối đa phải từ 1 đến 50 cuốn!")]
+        [DataRow(5, 0, 5000, 12, "Số ngày mượn tối đa phải từ 1 đến 180 ngày!")]
+        [DataRow(5, 200, 5000, 12, "Số ngày mượn tối đa phải từ 1 đến 180 ngày!")]
+        [DataRow(5, 14, -1000, 12, "Tiền phạt trả trễ mỗi ngày không được âm!")]
+        [DataRow(5, 14, 5000, 0, "Thời hạn thẻ độc giả phải từ 1 đến 60 tháng!")]
+        [DataRow(5, 14, 5000, 72, "Thời hạn thẻ độc giả phải từ 1 đến 60 tháng!")]
         [TestCategory("SystemConfig")]
         public void LuuQuyChe_ThamSoNgoaiPhamViChoPhep_ReturnsFailure(
-        int soSach, int soNgay, int tienPhat, int thoiHan, string expectedMsg) // 👉 Đổi kiểu decimal thành int
+            int soSach, int soNgay, int tienPhat, int thoiHan, string expectedMsg)
         {
-            // Act: Ép kiểu sang (decimal) khi truyền vào hàm BLL
             var (isSuccess, message) = _cauHinhBLL.LuuQuyChe(soSach, soNgay, (decimal)tienPhat, thoiHan);
 
-            // Assert
             Assert.IsFalse(isSuccess);
             Assert.AreEqual(expectedMsg, message);
         }

@@ -35,7 +35,7 @@ namespace Library.UI
             string email = txtEmail.Text.Trim();
             string counter = cboQuayPhuTrach.SelectedItem?.ToString() ?? "Quầy Mượn - Trả số 1";
 
-            var (isSuccess, message, _) = _nguoiDungBLL.ThemThuThu(
+            var (isSuccess, message, maThuThu, matKhauKhoiTao) = _nguoiDungBLL.ThemThuThu(
                 username,
                 fullName,
                 phone,
@@ -45,7 +45,20 @@ namespace Library.UI
 
             if (isSuccess)
             {
-                MessageBox.Show(message, "Thông báo thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Tự động sao chép mật khẩu tạm vào Clipboard
+                Clipboard.SetText(matKhauKhoiTao);
+
+                MessageBox.Show(
+                    $"{message}\n\n" +
+                    $"Mã thủ thư: {maThuThu}\n" +
+                    $"Tài khoản: {username}\n" +
+                    $"Mật khẩu tạm thời: {matKhauKhoiTao}\n\n" +
+                    $"(Mật khẩu đã được copy vào Clipboard để gửi cho nhân viên).",
+                    "Cấp Tài Khoản Thành Công",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

@@ -113,25 +113,25 @@ namespace Library.BLL
             return (false, "Cập nhật trạng thái tài khoản thất bại. Vui lòng thử lại!");
         }
 
-        // Reset mật khẩu về mặc định: Librarian@123
-        public (bool IsSuccess, string Message) ResetMatKhauMacDinh(int maNguoiDung, string matKhauMacDinh = "Librarian@123")
+        public (bool IsSuccess, string Message, string MatKhauTam) ResetMatKhauTamThoi(int maNguoiDung)
         {
             var user = _userDal.GetById(maNguoiDung);
             if (user == null)
             {
-                return (false, "Không tìm thấy thông tin tài khoản người dùng!");
+                return (false, "Không tìm thấy thông tin tài khoản người dùng!", string.Empty);
             }
 
+            string tempPassword = PasswordHasher.GenerateTemporaryPassword(10);
             string newSalt = PasswordHasher.GenerateSalt();
-            string newHash = PasswordHasher.HashPassword(matKhauMacDinh, newSalt);
+            string newHash = PasswordHasher.HashPassword(tempPassword, newSalt);
 
             bool isUpdated = _userDal.CapNhatMatKhau(maNguoiDung, newHash, newSalt);
             if (isUpdated)
             {
-                return (true, $"Đã reset mật khẩu tài khoản '{user.Ten_Dang_Nhap}' về mặc định: {matKhauMacDinh}");
+                return (true, $"Đã cấp lại mật khẩu tạm thành công cho tài khoản '{user.Ten_Dang_Nhap}'!", tempPassword);
             }
 
-            return (false, "Reset mật khẩu thất bại. Vui lòng kiểm tra lại kết nối CSDL!");
+            return (false, "Reset mật khẩu thất bại. Vui lòng kiểm tra lại kết nối CSDL!", string.Empty);
         }
 
         public (bool IsSuccess, string Message) CapNhatThongTinThuThu(ThuThuDTO thuThu)
@@ -167,38 +167,38 @@ namespace Library.BLL
         }
 
         // Xử lý tạo mới thủ thư và cấp tài khoản mặc định
-        public (bool IsSuccess, string Message, string MaThuThu) ThemThuThu(
-            string tenDangNhap,
-            string hoTen,
-            string? soDienThoai,
-            string? email,
-            string quayPhuTrach,
-            string matKhauKhoiTao = "Librarian@123")
+        public (bool IsSuccess, string Message, string MaThuThu, string MatKhauKhoiTao) ThemThuThu(
+    string tenDangNhap,
+    string hoTen,
+    string? soDienThoai,
+    string? email,
+    string quayPhuTrach)
         {
             if (string.IsNullOrWhiteSpace(tenDangNhap))
-                return (false, "Tên đăng nhập không được để trống!", string.Empty);
+                return (false, "Tên đăng nhập không được để trống!", string.Empty, string.Empty);
 
             if (tenDangNhap.Contains(' '))
-                return (false, "Tên đăng nhập không được chứa khoảng trắng!", string.Empty);
+                return (false, "Tên đăng nhập không được chứa khoảng trắng!", string.Empty, string.Empty);
 
             if (string.IsNullOrWhiteSpace(hoTen))
-                return (false, "Họ và tên thủ thư không được để trống!", string.Empty);
+                return (false, "Họ và tên thủ thư không được để trống!", string.Empty, string.Empty);
 
             if (string.IsNullOrWhiteSpace(quayPhuTrach))
-                return (false, "Vui lòng chọn quầy trực phụ trách!", string.Empty);
+                return (false, "Vui lòng chọn quầy trực phụ trách!", string.Empty, string.Empty);
 
             if (!string.IsNullOrWhiteSpace(email) && !email.Contains('@'))
-                return (false, "Địa chỉ email không đúng định dạng!", string.Empty);
+                return (false, "Địa chỉ email không đúng định dạng!", string.Empty, string.Empty);
 
             // Kiểm tra tên đăng nhập đã tồn tại trong CSDL chưa
             var existingUser = _userDal.GetByUsername(tenDangNhap.Trim());
             if (existingUser != null)
-                return (false, $"Tên đăng nhập '{tenDangNhap}' đã tồn tại, vui lòng chọn tên khác!", string.Empty);
+                return (false, $"Tên đăng nhập '{tenDangNhap}' đã tồn tại, vui lòng chọn tên khác!", string.Empty, string.Empty);
 
             // Tự động sinh mã TT0xxx mới nhất
             string maThuThu = _thuThuDal.GetNextMaThuThu();
 
-            // Sinh muối và băm SHA-256 cho mật khẩu mặc định ban đầu
+            // Sinh mật khẩu ngẫu nhiên tạm thời và băm PBKDF2
+            string matKhauKhoiTao = PasswordHasher.GenerateTemporaryPassword(10);
             string salt = PasswordHasher.GenerateSalt();
             string hash = PasswordHasher.HashPassword(matKhauKhoiTao, salt);
 
@@ -217,14 +217,15 @@ namespace Library.BLL
                 bool isAdded = _thuThuDal.ThemThuThu(thuThu, tenDangNhap.Trim(), hash, salt);
                 if (isAdded)
                 {
-                    return (true, $"Thêm mới thủ thư [{maThuThu}] thành công!\nMật khẩu khởi tạo: {matKhauKhoiTao}", maThuThu);
+                    return (true, "Thêm mới thủ thư thành công!", maThuThu, matKhauKhoiTao);
                 }
-                return (false, "Không thể lưu dữ liệu thủ thư vào hệ thống!", string.Empty);
+                return (false, "Không thể lưu dữ liệu thủ thư vào hệ thống!", string.Empty, string.Empty);
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi cơ sở dữ liệu: {ex.Message}", string.Empty);
+                return (false, $"Lỗi cơ sở dữ liệu: {ex.Message}", string.Empty, string.Empty);
             }
         }
+
     }
 }
