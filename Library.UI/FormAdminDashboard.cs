@@ -27,6 +27,7 @@ namespace Library.UI
 
             // Mặc định ban đầu chọn tab Tổng quan
             HighlightButton(btnTongQuan);
+            btnTongQuan.PerformClick();
         }
 
         // Hàm cập nhật màu sắc nút Sidebar khi được chọn
@@ -124,5 +125,10 @@ namespace Library.UI
         {
             LoadChildForm(new FormPhanCaTruc(), "PHÂN CÔNG CA LÀM VIỆC & ĐỐI SOÁT", (Button)sender);
         }
+
+        private void btnTongQuan_Click_1(object sender, EventArgs e)
+        {
+            LoadChildForm(new FormTongQuanHeThong(), "TỔNG QUAN HỆ THỐNG & ĐỐI SOÁT KPI", (Button)sender);
+        }
     }
-}
+}   
