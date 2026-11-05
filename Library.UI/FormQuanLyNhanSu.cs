@@ -181,5 +181,19 @@ namespace Library.UI
                 e.FormattingApplied = true;
             }
         }
+
+        private void btnThemThuThu_Click(object sender, EventArgs e)
+        {
+            using var formThem = new FormThemThuThu();
+            if (formThem.ShowDialog(this) == DialogResult.OK)
+            {
+                TaiDuLieu(); // Cập nhật lại DataGridView ngay khi thêm thành công
+            }
+        }
+
+        private void dgvNhanSu_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
     }
 }

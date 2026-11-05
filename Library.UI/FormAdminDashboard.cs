@@ -119,5 +119,10 @@ namespace Library.UI
                 Application.Exit();
             }
         }
+
+        private void btnCaTruc_Click(object sender, EventArgs e)
+        {
+            LoadChildForm(new FormPhanCaTruc(), "PHÂN CÔNG CA LÀM VIỆC & ĐỐI SOÁT", (Button)sender);
+        }
     }
 }

@@ -23,10 +23,11 @@
             lblSubTitle = new System.Windows.Forms.Label();
             lblTitle = new System.Windows.Forms.Label();
             pnlToolbar = new System.Windows.Forms.Panel();
-            btnLamMoi = new System.Windows.Forms.Button();
-            btnResetMatKhau = new System.Windows.Forms.Button();
-            btnKhoaMoKhoa = new System.Windows.Forms.Button();
+            btnThemThuThu = new System.Windows.Forms.Button();
             btnSuaThongTin = new System.Windows.Forms.Button();
+            btnKhoaMoKhoa = new System.Windows.Forms.Button();
+            btnResetMatKhau = new System.Windows.Forms.Button();
+            btnLamMoi = new System.Windows.Forms.Button();
             txtTimKiem = new System.Windows.Forms.TextBox();
             lblTimKiem = new System.Windows.Forms.Label();
             pnlGridContainer = new System.Windows.Forms.Panel();
@@ -81,10 +82,11 @@
             // pnlToolbar
             // 
             pnlToolbar.BackColor = System.Drawing.Color.White;
-            pnlToolbar.Controls.Add(btnLamMoi);
-            pnlToolbar.Controls.Add(btnResetMatKhau);
-            pnlToolbar.Controls.Add(btnKhoaMoKhoa);
+            pnlToolbar.Controls.Add(btnThemThuThu);
             pnlToolbar.Controls.Add(btnSuaThongTin);
+            pnlToolbar.Controls.Add(btnKhoaMoKhoa);
+            pnlToolbar.Controls.Add(btnResetMatKhau);
+            pnlToolbar.Controls.Add(btnLamMoi);
             pnlToolbar.Controls.Add(txtTimKiem);
             pnlToolbar.Controls.Add(lblTimKiem);
             pnlToolbar.Dock = System.Windows.Forms.DockStyle.Top;
@@ -94,53 +96,21 @@
             pnlToolbar.Size = new System.Drawing.Size(860, 55);
             pnlToolbar.TabIndex = 1;
             // 
-            // btnLamMoi
+            // btnThemThuThu
             // 
-            btnLamMoi.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            btnLamMoi.BackColor = System.Drawing.Color.FromArgb(241, 245, 249);
-            btnLamMoi.FlatAppearance.BorderSize = 0;
-            btnLamMoi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnLamMoi.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
-            btnLamMoi.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
-            btnLamMoi.Location = new System.Drawing.Point(755, 11);
-            btnLamMoi.Name = "btnLamMoi";
-            btnLamMoi.Size = new System.Drawing.Size(80, 32);
-            btnLamMoi.TabIndex = 5;
-            btnLamMoi.Text = "🔄 Làm mới";
-            btnLamMoi.UseVisualStyleBackColor = false;
-            btnLamMoi.Click += btnLamMoi_Click;
-            // 
-            // btnResetMatKhau
-            // 
-            btnResetMatKhau.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            btnResetMatKhau.BackColor = System.Drawing.Color.FromArgb(2, 132, 199);
-            btnResetMatKhau.FlatAppearance.BorderSize = 0;
-            btnResetMatKhau.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnResetMatKhau.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
-            btnResetMatKhau.ForeColor = System.Drawing.Color.White;
-            btnResetMatKhau.Location = new System.Drawing.Point(620, 11);
-            btnResetMatKhau.Name = "btnResetMatKhau";
-            btnResetMatKhau.Size = new System.Drawing.Size(125, 32);
-            btnResetMatKhau.TabIndex = 4;
-            btnResetMatKhau.Text = "🔑 Reset Pass";
-            btnResetMatKhau.UseVisualStyleBackColor = false;
-            btnResetMatKhau.Click += btnResetMatKhau_Click;
-            // 
-            // btnKhoaMoKhoa
-            // 
-            btnKhoaMoKhoa.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            btnKhoaMoKhoa.BackColor = System.Drawing.Color.FromArgb(225, 29, 72);
-            btnKhoaMoKhoa.FlatAppearance.BorderSize = 0;
-            btnKhoaMoKhoa.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnKhoaMoKhoa.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
-            btnKhoaMoKhoa.ForeColor = System.Drawing.Color.White;
-            btnKhoaMoKhoa.Location = new System.Drawing.Point(475, 11);
-            btnKhoaMoKhoa.Name = "btnKhoaMoKhoa";
-            btnKhoaMoKhoa.Size = new System.Drawing.Size(135, 32);
-            btnKhoaMoKhoa.TabIndex = 3;
-            btnKhoaMoKhoa.Text = "🔒 Khóa / Mở";
-            btnKhoaMoKhoa.UseVisualStyleBackColor = false;
-            btnKhoaMoKhoa.Click += btnKhoaMoKhoa_Click;
+            btnThemThuThu.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            btnThemThuThu.BackColor = System.Drawing.Color.FromArgb(16, 185, 129);
+            btnThemThuThu.FlatAppearance.BorderSize = 0;
+            btnThemThuThu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnThemThuThu.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            btnThemThuThu.ForeColor = System.Drawing.Color.White;
+            btnThemThuThu.Location = new System.Drawing.Point(240, 11);
+            btnThemThuThu.Name = "btnThemThuThu";
+            btnThemThuThu.Size = new System.Drawing.Size(100, 32);
+            btnThemThuThu.TabIndex = 2;
+            btnThemThuThu.Text = "➕ Thêm Mới";
+            btnThemThuThu.UseVisualStyleBackColor = false;
+            btnThemThuThu.Click += btnThemThuThu_Click;
             // 
             // btnSuaThongTin
             // 
@@ -150,21 +120,69 @@
             btnSuaThongTin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnSuaThongTin.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
             btnSuaThongTin.ForeColor = System.Drawing.Color.White;
-            btnSuaThongTin.Location = new System.Drawing.Point(345, 11);
+            btnSuaThongTin.Location = new System.Drawing.Point(348, 11);
             btnSuaThongTin.Name = "btnSuaThongTin";
-            btnSuaThongTin.Size = new System.Drawing.Size(120, 32);
-            btnSuaThongTin.TabIndex = 2;
+            btnSuaThongTin.Size = new System.Drawing.Size(115, 32);
+            btnSuaThongTin.TabIndex = 3;
             btnSuaThongTin.Text = "✏️ Sửa Hồ Sơ";
             btnSuaThongTin.UseVisualStyleBackColor = false;
             btnSuaThongTin.Click += btnSuaThongTin_Click;
+            // 
+            // btnKhoaMoKhoa
+            // 
+            btnKhoaMoKhoa.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            btnKhoaMoKhoa.BackColor = System.Drawing.Color.FromArgb(225, 29, 72);
+            btnKhoaMoKhoa.FlatAppearance.BorderSize = 0;
+            btnKhoaMoKhoa.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnKhoaMoKhoa.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            btnKhoaMoKhoa.ForeColor = System.Drawing.Color.White;
+            btnKhoaMoKhoa.Location = new System.Drawing.Point(471, 11);
+            btnKhoaMoKhoa.Name = "btnKhoaMoKhoa";
+            btnKhoaMoKhoa.Size = new System.Drawing.Size(135, 32);
+            btnKhoaMoKhoa.TabIndex = 4;
+            btnKhoaMoKhoa.Text = "🔒 Khóa / Mở";
+            btnKhoaMoKhoa.UseVisualStyleBackColor = false;
+            btnKhoaMoKhoa.Click += btnKhoaMoKhoa_Click;
+            // 
+            // btnResetMatKhau
+            // 
+            btnResetMatKhau.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            btnResetMatKhau.BackColor = System.Drawing.Color.FromArgb(2, 132, 199);
+            btnResetMatKhau.FlatAppearance.BorderSize = 0;
+            btnResetMatKhau.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnResetMatKhau.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            btnResetMatKhau.ForeColor = System.Drawing.Color.White;
+            btnResetMatKhau.Location = new System.Drawing.Point(614, 11);
+            btnResetMatKhau.Name = "btnResetMatKhau";
+            btnResetMatKhau.Size = new System.Drawing.Size(125, 32);
+            btnResetMatKhau.TabIndex = 5;
+            btnResetMatKhau.Text = "🔑 Reset Pass";
+            btnResetMatKhau.UseVisualStyleBackColor = false;
+            btnResetMatKhau.Click += btnResetMatKhau_Click;
+            // 
+            // btnLamMoi
+            // 
+            btnLamMoi.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            btnLamMoi.BackColor = System.Drawing.Color.FromArgb(241, 245, 249);
+            btnLamMoi.FlatAppearance.BorderSize = 0;
+            btnLamMoi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnLamMoi.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            btnLamMoi.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            btnLamMoi.Location = new System.Drawing.Point(747, 11);
+            btnLamMoi.Name = "btnLamMoi";
+            btnLamMoi.Size = new System.Drawing.Size(88, 32);
+            btnLamMoi.TabIndex = 6;
+            btnLamMoi.Text = "🔄 Làm mới";
+            btnLamMoi.UseVisualStyleBackColor = false;
+            btnLamMoi.Click += btnLamMoi_Click;
             // 
             // txtTimKiem
             // 
             txtTimKiem.Font = new System.Drawing.Font("Segoe UI", 10F);
             txtTimKiem.Location = new System.Drawing.Point(90, 15);
             txtTimKiem.Name = "txtTimKiem";
-            txtTimKiem.PlaceholderText = "Nhập tên, mã hoặc username...";
-            txtTimKiem.Size = new System.Drawing.Size(235, 25);
+            txtTimKiem.PlaceholderText = "Nhập tên, mã...";
+            txtTimKiem.Size = new System.Drawing.Size(140, 25);
             txtTimKiem.TabIndex = 1;
             txtTimKiem.TextChanged += txtTimKiem_TextChanged;
             // 
@@ -321,6 +339,7 @@
         private System.Windows.Forms.Panel pnlToolbar;
         private System.Windows.Forms.Label lblTimKiem;
         private System.Windows.Forms.TextBox txtTimKiem;
+        private System.Windows.Forms.Button btnThemThuThu;
         private System.Windows.Forms.Button btnSuaThongTin;
         private System.Windows.Forms.Button btnKhoaMoKhoa;
         private System.Windows.Forms.Button btnResetMatKhau;

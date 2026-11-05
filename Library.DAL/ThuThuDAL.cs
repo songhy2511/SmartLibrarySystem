@@ -74,14 +74,86 @@ namespace Library.DAL
                      WHERE Ma_So = @MaSo";
 
             SqlParameter[] parameters = {
-        new SqlParameter("@HoTen", thuThu.Ho_Ten),
-        new SqlParameter("@SoDienThoai", (object?)thuThu.So_Dien_Thoai ?? DBNull.Value),
-        new SqlParameter("@Email", (object?)thuThu.Email ?? DBNull.Value),
-        new SqlParameter("@QuayPhuTrach", thuThu.Quay_Phu_Trach),
-        new SqlParameter("@MaSo", thuThu.Ma_So)
-    };
+                new SqlParameter("@HoTen", thuThu.Ho_Ten),
+                new SqlParameter("@SoDienThoai", (object?)thuThu.So_Dien_Thoai ?? DBNull.Value),
+                new SqlParameter("@Email", (object?)thuThu.Email ?? DBNull.Value),
+                new SqlParameter("@QuayPhuTrach", thuThu.Quay_Phu_Trach),
+                new SqlParameter("@MaSo", thuThu.Ma_So)
+            };
 
             return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
+
+        }
+
+
+        // Tự động sinh mã thủ thư kế tiếp dạng TT001, TT002... dựa trên mã lớn nhất hiện có
+        public string GetNextMaThuThu()
+        {
+            string query = @"SELECT MAX(CAST(SUBSTRING(Ma_Thu_Thu, 3, LEN(Ma_Thu_Thu) - 2) AS INT)) 
+                     FROM Thu_Thu 
+                     WHERE Ma_Thu_Thu LIKE 'TT[0-9]%'";
+
+            object? result = DatabaseHelper.ExecuteScalar(query);
+            int nextNumber = 1;
+
+            if (result != null && result != DBNull.Value)
+            {
+                nextNumber = Convert.ToInt32(result) + 1;
+            }
+
+            return $"TT{nextNumber:D3}"; // Định dạng TT001, TT002, TT010...
+        }
+
+        // Thêm đồng thời tài khoản (Nguoi_Dung) và hồ sơ (Thu_Thu) qua SqlTransaction
+        public bool ThemThuThu(ThuThuDTO thuThu, string tenDangNhap, string matKhauMaHoa, string chuoiMuoi)
+        {
+            using var conn = DatabaseHelper.GetConnection();
+            conn.Open();
+            using var trans = conn.BeginTransaction();
+
+            try
+            {
+                // 1. Thêm tài khoản vào bảng Nguoi_Dung
+                string insertUserQuery = @"
+            INSERT INTO Nguoi_Dung (Ten_Dang_Nhap, Mat_Khau_Ma_Hoa, Chuoi_Muoi, Vai_Tro, Dang_Hoat_Dong, Ngay_Tao)
+            VALUES (@TenDangNhap, @MatKhauMaHoa, @ChuoiMuoi, 'Librarian', 1, GETDATE());
+            SELECT SCOPE_IDENTITY();";
+
+                int nguoiDungMaSo;
+                using (var cmdUser = new SqlCommand(insertUserQuery, conn, trans))
+                {
+                    cmdUser.Parameters.AddWithValue("@TenDangNhap", tenDangNhap);
+                    cmdUser.Parameters.AddWithValue("@MatKhauMaHoa", matKhauMaHoa);
+                    cmdUser.Parameters.AddWithValue("@ChuoiMuoi", chuoiMuoi);
+                    nguoiDungMaSo = Convert.ToInt32(cmdUser.ExecuteScalar());
+                }
+
+                // 2. Thêm hồ sơ vào bảng Thu_Thu
+                string insertThuThuQuery = @"
+            INSERT INTO Thu_Thu (Nguoi_Dung_Ma_So, Ma_Thu_Thu, Ho_Ten, So_Dien_Thoai, Email, Quay_Phu_Trach, Ngay_Vao_Lam)
+            VALUES (@NguoiDungMaSo, @MaThuThu, @HoTen, @SoDienThoai, @Email, @QuayPhuTrach, @NgayVaoLam);";
+
+                using (var cmdThuThu = new SqlCommand(insertThuThuQuery, conn, trans))
+                {
+                    cmdThuThu.Parameters.AddWithValue("@NguoiDungMaSo", nguoiDungMaSo);
+                    cmdThuThu.Parameters.AddWithValue("@MaThuThu", thuThu.Ma_Thu_Thu);
+                    cmdThuThu.Parameters.AddWithValue("@HoTen", thuThu.Ho_Ten);
+                    cmdThuThu.Parameters.AddWithValue("@SoDienThoai", (object?)thuThu.So_Dien_Thoai ?? DBNull.Value);
+                    cmdThuThu.Parameters.AddWithValue("@Email", (object?)thuThu.Email ?? DBNull.Value);
+                    cmdThuThu.Parameters.AddWithValue("@QuayPhuTrach", thuThu.Quay_Phu_Trach);
+                    cmdThuThu.Parameters.AddWithValue("@NgayVaoLam", thuThu.Ngay_Vao_Lam);
+                    cmdThuThu.ExecuteNonQuery();
+                }
+
+                trans.Commit();
+                thuThu.Nguoi_Dung_Ma_So = nguoiDungMaSo;
+                return true;
+            }
+            catch
+            {
+                trans.Rollback();
+                throw;
+            }
         }
     }
 }

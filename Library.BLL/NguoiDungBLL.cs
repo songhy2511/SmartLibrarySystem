@@ -159,5 +159,72 @@ namespace Library.BLL
 
             return (false, "Cập nhật dữ liệu thất bại. Vui lòng kiểm tra lại kết nối!");
         }
+
+        // Lấy mã thủ thư gợi ý tiếp theo
+        public string LayMaThuThuTiepTheo()
+        {
+            return _thuThuDal.GetNextMaThuThu();
+        }
+
+        // Xử lý tạo mới thủ thư và cấp tài khoản mặc định
+        public (bool IsSuccess, string Message, string MaThuThu) ThemThuThu(
+            string tenDangNhap,
+            string hoTen,
+            string? soDienThoai,
+            string? email,
+            string quayPhuTrach,
+            string matKhauKhoiTao = "Librarian@123")
+        {
+            if (string.IsNullOrWhiteSpace(tenDangNhap))
+                return (false, "Tên đăng nhập không được để trống!", string.Empty);
+
+            if (tenDangNhap.Contains(' '))
+                return (false, "Tên đăng nhập không được chứa khoảng trắng!", string.Empty);
+
+            if (string.IsNullOrWhiteSpace(hoTen))
+                return (false, "Họ và tên thủ thư không được để trống!", string.Empty);
+
+            if (string.IsNullOrWhiteSpace(quayPhuTrach))
+                return (false, "Vui lòng chọn quầy trực phụ trách!", string.Empty);
+
+            if (!string.IsNullOrWhiteSpace(email) && !email.Contains('@'))
+                return (false, "Địa chỉ email không đúng định dạng!", string.Empty);
+
+            // Kiểm tra tên đăng nhập đã tồn tại trong CSDL chưa
+            var existingUser = _userDal.GetByUsername(tenDangNhap.Trim());
+            if (existingUser != null)
+                return (false, $"Tên đăng nhập '{tenDangNhap}' đã tồn tại, vui lòng chọn tên khác!", string.Empty);
+
+            // Tự động sinh mã TT0xxx mới nhất
+            string maThuThu = _thuThuDal.GetNextMaThuThu();
+
+            // Sinh muối và băm SHA-256 cho mật khẩu mặc định ban đầu
+            string salt = PasswordHasher.GenerateSalt();
+            string hash = PasswordHasher.HashPassword(matKhauKhoiTao, salt);
+
+            var thuThu = new ThuThuDTO
+            {
+                Ma_Thu_Thu = maThuThu,
+                Ho_Ten = hoTen.Trim(),
+                So_Dien_Thoai = string.IsNullOrWhiteSpace(soDienThoai) ? null : soDienThoai.Trim(),
+                Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim(),
+                Quay_Phu_Trach = quayPhuTrach,
+                Ngay_Vao_Lam = DateTime.Now
+            };
+
+            try
+            {
+                bool isAdded = _thuThuDal.ThemThuThu(thuThu, tenDangNhap.Trim(), hash, salt);
+                if (isAdded)
+                {
+                    return (true, $"Thêm mới thủ thư [{maThuThu}] thành công!\nMật khẩu khởi tạo: {matKhauKhoiTao}", maThuThu);
+                }
+                return (false, "Không thể lưu dữ liệu thủ thư vào hệ thống!", string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Lỗi cơ sở dữ liệu: {ex.Message}", string.Empty);
+            }
+        }
     }
 }

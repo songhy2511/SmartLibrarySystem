@@ -140,6 +140,7 @@
             btnCaTruc.Text = "📅  Phân Ca & Đối Soát";
             btnCaTruc.TextAlign = ContentAlignment.MiddleLeft;
             btnCaTruc.UseVisualStyleBackColor = true;
+            btnCaTruc.Click += btnCaTruc_Click;
             // 
             // btnNhanSu
             // 
@@ -234,7 +235,8 @@
             lblSessionInfo.Size = new Size(430, 25);
             lblSessionInfo.TabIndex = 1;
             lblSessionInfo.Text = "Người dùng: admin | Đăng nhập lúc: --:--:--";
-            lblSessionInfo.TextAlign = ContentAlignment.MiddleRight;            // 
+            lblSessionInfo.TextAlign = ContentAlignment.MiddleRight;
+            // 
             // lblCurrentPageTitle
             // 
             lblCurrentPageTitle.AutoSize = true;
@@ -255,7 +257,8 @@
             pnlContent.Name = "pnlContent";
             pnlContent.Padding = new Padding(30);
             pnlContent.Size = new Size(874, 620);
-            pnlContent.TabIndex = 2;            // 
+            pnlContent.TabIndex = 2;
+            // 
             // lblWelcome
             // 
             lblWelcome.AutoSize = true;
