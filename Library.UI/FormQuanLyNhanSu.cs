@@ -139,7 +139,8 @@ namespace Library.UI
             if (selected == null) return;
 
             var xacNhan = MessageBox.Show(
-                $"Reset mật khẩu tài khoản '{selected.Ten_Dang_Nhap}' về mặc định: 'Librarian@123'?\nNhân viên sẽ phải dùng mật khẩu này để đăng nhập lại.",
+                $"Bạn có chắc chắn muốn cấp lại mật khẩu tạm thời cho tài khoản '{selected.Ten_Dang_Nhap}'?\n" +
+                "Mật khẩu ngẫu nhiên mới sẽ được tạo và nhân viên phải sử dụng mật khẩu này để đăng nhập lại.",
                 "Xác nhận Reset Mật khẩu",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning
@@ -147,17 +148,28 @@ namespace Library.UI
 
             if (xacNhan != DialogResult.Yes) return;
 
-            var (isSuccess, message) = _nguoiDungBLL.ResetMatKhauMacDinh(selected.Nguoi_Dung_Ma_So);
+            var (isSuccess, message, matKhauTam) = _nguoiDungBLL.ResetMatKhauTamThoi(selected.Nguoi_Dung_Ma_So);
             if (isSuccess)
             {
+                // 1. Sao chép mật khẩu tạm vào Clipboard để Admin tiện gửi cho nhân viên
+                Clipboard.SetText(matKhauTam);
+
+                // 2. GHI LOG KIỂM TOÁN AN TOÀN (Tuyệt đối KHÔNG ghi chuỗi mật khẩu vào log)
                 SystemLogger.Log(
                     LogLevel.SECURITY,
                     "Reset mật khẩu",
-                    $"Quản trị viên đã reset mật khẩu tài khoản '{selected.Ten_Dang_Nhap}' về mặc định (Librarian@123).",
+                    $"Quản trị viên đã cấp lại mật khẩu tạm thời cho tài khoản '{selected.Ten_Dang_Nhap}' (ID: {selected.Nguoi_Dung_Ma_So}).",
                     SessionContext.CurrentUser?.Ma_So
                 );
 
-                MessageBox.Show(message, "Thông báo thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(
+                    $"{message}\n\n" +
+                    $"🔑 Mật khẩu tạm thời mới: {matKhauTam}\n\n" +
+                    $"(Mật khẩu đã được sao chép tự động vào Clipboard. Hãy gửi thông tin này cho nhân viên và yêu cầu đổi mật khẩu ngay sau khi đăng nhập).",
+                    "Cấp Mật Khẩu Tạm Thời",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
             }
             else
             {
