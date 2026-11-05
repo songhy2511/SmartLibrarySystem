@@ -42,6 +42,14 @@ namespace Library.UI
 
                 if (isSuccess)
                 {
+                    // 👉 GHI NHẬN VẾT BẢO MẬT
+                    SystemLogger.Log(
+                        LogLevel.SECURITY,
+                        "Đổi mật khẩu",
+                        $"Tài khoản '{SessionContext.CurrentUser.Ten_Dang_Nhap}' đã thay đổi mật khẩu thành công.",
+                        SessionContext.CurrentUser.Ma_So
+                    );
+
                     MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.DialogResult = DialogResult.OK;
                     this.Close();

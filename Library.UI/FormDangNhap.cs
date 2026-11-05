@@ -40,29 +40,64 @@ namespace Library.UI
 
             try
             {
-                var (isSuccess, message, user) = _nguoiDungBLL.DangNhap(username, password);
+                var (isSuccess, message, user, librarian) = _nguoiDungBLL.DangNhap(username, password);
 
+                // 1. Đăng nhập thất bại (ghi log WARNING)
                 if (!isSuccess || user == null)
                 {
+                    SystemLogger.Log(
+                        LogLevel.WARNING,
+                        "Đăng nhập thất bại",
+                        $"Cảnh báo đăng nhập thất bại cho tài khoản '{username}'. Lý do: {message}"
+                    );
+
                     MessageBox.Show(message, "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     txtMatKhau.Clear();
                     txtMatKhau.Focus();
                     return;
                 }
 
-                // Lưu thông tin phiên đăng nhập
+                // 2. Đăng nhập thành công (ghi log SECURITY)
+                SystemLogger.Log(
+                    LogLevel.SECURITY,
+                    "Đăng nhập",
+                    $"Tài khoản '{user.Ten_Dang_Nhap}' đăng nhập thành công với vai trò '{user.Vai_Tro}'.",
+                    user.Ma_So
+                );
+
+                // Lưu thông tin phiên làm việc
                 SessionContext.CurrentUser = user;
+                SessionContext.CurrentLibrarian = librarian;
 
-                MessageBox.Show($"Đăng nhập thành công với vai trò: {user.Vai_Tro}!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // TODO: Chuyển hướng Form theo vai trò
-                // if (user.Vai_Tro == "Admin") new FormAdminDashboard().Show();
-                // else new FormLibrarianDesk().Show();
-                // this.Hide();
+                // 3. Điều hướng mở Form theo vai trò
+                if (user.Vai_Tro == "Admin")
+                {
+                    FormAdminDashboard adminDashboard = new FormAdminDashboard();
+                    this.Hide();
+                    adminDashboard.ShowDialog();
+                    this.Show();
+                    txtMatKhau.Clear();
+                    txtTenDangNhap.Focus();
+                }
+                else // Vai trò "Librarian" hoặc bất kỳ tài khoản thủ thư nào
+                {
+                    FormThuThuDashboard thuThuDashboard = new FormThuThuDashboard();
+                    this.Hide();
+                    thuThuDashboard.ShowDialog();
+                    this.Show();
+                    txtMatKhau.Clear();
+                    txtTenDangNhap.Focus();
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi kết nối CSDL: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                SystemLogger.Log(
+                    LogLevel.ERROR,
+                    "Lỗi hệ thống",
+                    $"Ngoại lệ khi thực hiện đăng nhập tài khoản '{username}': {ex.Message}"
+                );
+
+                MessageBox.Show($"Lỗi kết nối cơ sở dữ liệu: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -94,6 +129,11 @@ namespace Library.UI
             {
                 ThucHienDangNhap();
             }
+        }
+
+        private void pnlLoginArea_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
