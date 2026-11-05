@@ -39,7 +39,7 @@ namespace Library.DAL
             object result = DatabaseHelper.ExecuteScalar(sql, p);
             return (result == null || result == DBNull.Value) ? (int?)null : Convert.ToInt32(result);
         }
-        private string LayPhieuMuonTiepTheo()
+        public string LayPhieuMuonTiepTheo()
         {
             string sql = " SELECT MAX(Ma_Phieu_Muon) FROM Phieu_Muon";
             object result = DatabaseHelper.ExecuteScalar(sql);
@@ -224,7 +224,7 @@ namespace Library.DAL
             var parameters = new[] { new SqlParameter("@MaDocGia", maDocGia) };
             return DatabaseHelper.ExecuteNonQuery(sql, parameters) > 0;
         }
-        public bool ThemPhatTrien(PhatTienDTO phatTien)
+        public bool ThemPhatTien(PhatTienDTO phatTien)
         {
             int? maSoPhieuMuon = LayMaSoPhieuMuon(phatTien.MaPhieuMuon);
             int? maSoThuThu = LayMaSoThuThu(phatTien.MaThuThuXuLy);
