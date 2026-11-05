@@ -25,8 +25,8 @@ namespace Library.UI
         private void KhoiTaoGiaoDien()
         {
             // Thiết lập AutoComplete cho ComboBox độc giả theo quy ước
-            cboDocGia.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             cboDocGia.AutoCompleteSource = AutoCompleteSource.ListItems;
+            cboDocGia.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
 
             dtpNgayMuon.Value = DateTime.Now;
             dtpNgayHenHan.Value = DateTime.Now.AddDays(14); // Hạn mặc định 14 ngày
