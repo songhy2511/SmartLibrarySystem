@@ -177,6 +177,7 @@
             btnTongQuan.Text = "📊  Tổng Quan Hệ Thống";
             btnTongQuan.TextAlign = ContentAlignment.MiddleLeft;
             btnTongQuan.UseVisualStyleBackColor = false;
+            btnTongQuan.Click += btnTongQuan_Click_1;
             // 
             // pnlLogo
             // 
