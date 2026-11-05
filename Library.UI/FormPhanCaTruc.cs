@@ -158,14 +158,31 @@ namespace Library.UI
 
             if (isSuccess)
             {
+                // 👉 GHI LOG PHÂN CA THÀNH CÔNG (Mức INFO)
+                SystemLogger.Log(
+                    LogLevel.INFO,
+                    "Phân ca trực",
+                    $"Phân công thủ thư '{cboThuThu.Text}' trực {tenCa} ngày {ngayTruc:dd/MM/yyyy} tại {cboChiNhanh.Text} (Tiền đầu ca: {tienDauCa:N0}đ).",
+                    SessionContext.CurrentUser?.Ma_So
+                );
+
                 MessageBox.Show(message, "Thông báo thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 txtGhiChu.Clear();
                 TaiDanhSachCaTruc();
             }
             else
             {
+                // 👉 GHI LOG KHI PHÂN CA BỊ TRÙNG HOẶC THẤT BẠI (Mức WARNING)
+                SystemLogger.Log(
+                    LogLevel.WARNING,
+                    "Phân ca thất bại",
+                    $"Không thể phân ca cho '{cboThuThu.Text}' ({tenCa} ngày {ngayTruc:dd/MM/yyyy}). Lý do: {message}",
+                    SessionContext.CurrentUser?.Ma_So
+                );
+
                 MessageBox.Show(message, "Cảnh báo phân ca", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+
         }
 
         private void btnXoaCa_Click(object sender, EventArgs e)

@@ -106,6 +106,7 @@
             btnNhatKy.Text = "📋  Nhật Ký Hệ Thống";
             btnNhatKy.TextAlign = ContentAlignment.MiddleLeft;
             btnNhatKy.UseVisualStyleBackColor = true;
+            btnNhatKy.Click += btnNhatKy_Click;
             // 
             // btnQuyChe
             // 
@@ -123,6 +124,7 @@
             btnQuyChe.Text = "⚙️  Quy Chế & Tham Số";
             btnQuyChe.TextAlign = ContentAlignment.MiddleLeft;
             btnQuyChe.UseVisualStyleBackColor = true;
+            btnQuyChe.Click += btnQuyChe_Click;
             // 
             // btnCaTruc
             // 
