@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
+
 namespace Library.UI
 {
     partial class FormBanLuuThong
@@ -17,146 +18,158 @@ namespace Library.UI
 
         private void InitializeComponent()
         {
-            this.lblTieuDe = new System.Windows.Forms.Label();
-            this.cboDocGia = new System.Windows.Forms.ComboBox();
-            this.dtpNgayMuon = new System.Windows.Forms.DateTimePicker();
-            this.dtpNgayHenHan = new System.Windows.Forms.DateTimePicker();
-            this.dgvSachDangMuon = new System.Windows.Forms.DataGridView();
-            this.btnLapPhieuMuon = new System.Windows.Forms.Button();
-            this.btnXacNhanTra = new System.Windows.Forms.Button();
-            this.btnGiaHan = new System.Windows.Forms.Button();
-            this.btnLamMoi = new System.Windows.Forms.Button();
-            this.txtTimKiemSach = new System.Windows.Forms.TextBox();
-            this.btnTimKiem = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvSachDangMuon)).BeginInit();
-            this.SuspendLayout();
+            lblTieuDe = new Label();
+            cboDocGia = new ComboBox();
+            dtpNgayMuon = new DateTimePicker();
+            dtpNgayHenHan = new DateTimePicker();
+            dgvSachDangMuon = new DataGridView();
+            btnLapPhieuMuon = new Button();
+            btnXacNhanTra = new Button();
+            btnGiaHan = new Button();
+            btnLamMoi = new Button();
+            txtTimKiemSach = new TextBox();
+            btnTimKiem = new Button();
+            ((System.ComponentModel.ISupportInitialize)dgvSachDangMuon).BeginInit();
+            SuspendLayout();
             // 
             // lblTieuDe
             // 
-            this.lblTieuDe.AutoSize = true;
-            this.lblTieuDe.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
-            this.lblTieuDe.Location = new System.Drawing.Point(30, 20);
-            this.lblTieuDe.Name = "lblTieuDe";
-            this.lblTieuDe.Size = new System.Drawing.Size(202, 32);
-            this.lblTieuDe.TabIndex = 0;
-            this.lblTieuDe.Text = "BÀN LƯU THÔNG";
+            lblTieuDe.AutoSize = true;
+            lblTieuDe.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblTieuDe.Location = new Point(34, 27);
+            lblTieuDe.Name = "lblTieuDe";
+            lblTieuDe.Size = new Size(268, 41);
+            lblTieuDe.TabIndex = 0;
+            lblTieuDe.Text = "BÀN LƯU THÔNG";
             // 
             // cboDocGia
             // 
-            this.cboDocGia.FormattingEnabled = true;
-            this.cboDocGia.Location = new System.Drawing.Point(36, 110);
-            this.cboDocGia.Name = "cboDocGia";
-            this.cboDocGia.Size = new System.Drawing.Size(260, 23);
-            this.cboDocGia.TabIndex = 1;
+            cboDocGia.FormattingEnabled = true;
+            cboDocGia.Location = new Point(41, 147);
+            cboDocGia.Margin = new Padding(3, 4, 3, 4);
+            cboDocGia.Name = "cboDocGia";
+            cboDocGia.Size = new Size(297, 28);
+            cboDocGia.TabIndex = 1;
             // 
             // dtpNgayMuon
             // 
-            this.dtpNgayMuon.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpNgayMuon.Location = new System.Drawing.Point(340, 110);
-            this.dtpNgayMuon.Name = "dtpNgayMuon";
-            this.dtpNgayMuon.Size = new System.Drawing.Size(150, 23);
-            this.dtpNgayMuon.TabIndex = 2;
+            dtpNgayMuon.Format = DateTimePickerFormat.Short;
+            dtpNgayMuon.Location = new Point(389, 147);
+            dtpNgayMuon.Margin = new Padding(3, 4, 3, 4);
+            dtpNgayMuon.Name = "dtpNgayMuon";
+            dtpNgayMuon.Size = new Size(171, 27);
+            dtpNgayMuon.TabIndex = 2;
             // 
             // dtpNgayHenHan
             // 
-            this.dtpNgayHenHan.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpNgayHenHan.Location = new System.Drawing.Point(510, 110);
-            this.dtpNgayHenHan.Name = "dtpNgayHenHan";
-            this.dtpNgayHenHan.Size = new System.Drawing.Size(150, 23);
-            this.dtpNgayHenHan.TabIndex = 3;
+            dtpNgayHenHan.Format = DateTimePickerFormat.Short;
+            dtpNgayHenHan.Location = new Point(583, 147);
+            dtpNgayHenHan.Margin = new Padding(3, 4, 3, 4);
+            dtpNgayHenHan.Name = "dtpNgayHenHan";
+            dtpNgayHenHan.Size = new Size(171, 27);
+            dtpNgayHenHan.TabIndex = 3;
             // 
             // dgvSachDangMuon
             // 
-            this.dgvSachDangMuon.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvSachDangMuon.Location = new System.Drawing.Point(510, 190);
-            this.dgvSachDangMuon.Name = "dgvSachDangMuon";
-            this.dgvSachDangMuon.Size = new System.Drawing.Size(430, 250);
-            this.dgvSachDangMuon.TabIndex = 4;
+            dgvSachDangMuon.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvSachDangMuon.Location = new Point(133, 279);
+            dgvSachDangMuon.Margin = new Padding(3, 4, 3, 4);
+            dgvSachDangMuon.Name = "dgvSachDangMuon";
+            dgvSachDangMuon.RowHeadersWidth = 51;
+            dgvSachDangMuon.Size = new Size(941, 307);
+            dgvSachDangMuon.TabIndex = 4;
             // 
             // btnLapPhieuMuon
             // 
-            this.btnLapPhieuMuon.BackColor = System.Drawing.Color.DodgerBlue;
-            this.btnLapPhieuMuon.ForeColor = System.Drawing.Color.White;
-            this.btnLapPhieuMuon.Location = new System.Drawing.Point(36, 460);
-            this.btnLapPhieuMuon.Name = "btnLapPhieuMuon";
-            this.btnLapPhieuMuon.Size = new System.Drawing.Size(140, 45);
-            this.btnLapPhieuMuon.TabIndex = 5;
-            this.btnLapPhieuMuon.Text = "LẬP PHIẾU MƯỢN";
-            this.btnLapPhieuMuon.UseVisualStyleBackColor = false;
-            this.btnLapPhieuMuon.Click += new System.EventHandler(this.btnLapPhieuMuon_Click);
+            btnLapPhieuMuon.BackColor = Color.DodgerBlue;
+            btnLapPhieuMuon.ForeColor = Color.White;
+            btnLapPhieuMuon.Location = new Point(41, 613);
+            btnLapPhieuMuon.Margin = new Padding(3, 4, 3, 4);
+            btnLapPhieuMuon.Name = "btnLapPhieuMuon";
+            btnLapPhieuMuon.Size = new Size(160, 60);
+            btnLapPhieuMuon.TabIndex = 5;
+            btnLapPhieuMuon.Text = "LẬP PHIẾU MƯỢN";
+            btnLapPhieuMuon.UseVisualStyleBackColor = false;
+            btnLapPhieuMuon.Click += btnLapPhieuMuon_Click;
             // 
             // btnXacNhanTra
             // 
-            this.btnXacNhanTra.BackColor = System.Drawing.Color.ForestGreen;
-            this.btnXacNhanTra.ForeColor = System.Drawing.Color.White;
-            this.btnXacNhanTra.Location = new System.Drawing.Point(800, 460);
-            this.btnXacNhanTra.Name = "btnXacNhanTra";
-            this.btnXacNhanTra.Size = new System.Drawing.Size(140, 45);
-            this.btnXacNhanTra.TabIndex = 6;
-            this.btnXacNhanTra.Text = "XÁC NHẬN TRẢ";
-            this.btnXacNhanTra.UseVisualStyleBackColor = false;
-            this.btnXacNhanTra.Click += new System.EventHandler(this.btnXacNhanTra_Click);
+            btnXacNhanTra.BackColor = Color.ForestGreen;
+            btnXacNhanTra.ForeColor = Color.White;
+            btnXacNhanTra.Location = new Point(914, 613);
+            btnXacNhanTra.Margin = new Padding(3, 4, 3, 4);
+            btnXacNhanTra.Name = "btnXacNhanTra";
+            btnXacNhanTra.Size = new Size(160, 60);
+            btnXacNhanTra.TabIndex = 6;
+            btnXacNhanTra.Text = "XÁC NHẬN TRẢ";
+            btnXacNhanTra.UseVisualStyleBackColor = false;
+            btnXacNhanTra.Click += btnXacNhanTra_Click;
             // 
             // btnGiaHan
             // 
-            this.btnGiaHan.BackColor = System.Drawing.Color.DarkOrange;
-            this.btnGiaHan.ForeColor = System.Drawing.Color.White;
-            this.btnGiaHan.Location = new System.Drawing.Point(645, 460);
-            this.btnGiaHan.Name = "btnGiaHan";
-            this.btnGiaHan.Size = new System.Drawing.Size(140, 45);
-            this.btnGiaHan.TabIndex = 7;
-            this.btnGiaHan.Text = "GIA HẠN";
-            this.btnGiaHan.UseVisualStyleBackColor = false;
-            this.btnGiaHan.Click += new System.EventHandler(this.btnGiaHan_Click);
+            btnGiaHan.BackColor = Color.DarkOrange;
+            btnGiaHan.ForeColor = Color.White;
+            btnGiaHan.Location = new Point(737, 613);
+            btnGiaHan.Margin = new Padding(3, 4, 3, 4);
+            btnGiaHan.Name = "btnGiaHan";
+            btnGiaHan.Size = new Size(160, 60);
+            btnGiaHan.TabIndex = 7;
+            btnGiaHan.Text = "GIA HẠN";
+            btnGiaHan.UseVisualStyleBackColor = false;
+            btnGiaHan.Click += btnGiaHan_Click;
             // 
             // btnLamMoi
             // 
-            this.btnLamMoi.Location = new System.Drawing.Point(190, 460);
-            this.btnLamMoi.Name = "btnLamMoi";
-            this.btnLamMoi.Size = new System.Drawing.Size(100, 45);
-            this.btnLamMoi.TabIndex = 8;
-            this.btnLamMoi.Text = "LÀM MỚI";
-            this.btnLamMoi.UseVisualStyleBackColor = true;
+            btnLamMoi.Location = new Point(217, 613);
+            btnLamMoi.Margin = new Padding(3, 4, 3, 4);
+            btnLamMoi.Name = "btnLamMoi";
+            btnLamMoi.Size = new Size(114, 60);
+            btnLamMoi.TabIndex = 8;
+            btnLamMoi.Text = "LÀM MỚI";
+            btnLamMoi.UseVisualStyleBackColor = true;
             // 
             // txtTimKiemSach
             // 
-            this.txtTimKiemSach.Location = new System.Drawing.Point(36, 160);
-            this.txtTimKiemSach.Name = "txtTimKiemSach";
-            this.txtTimKiemSach.Size = new System.Drawing.Size(200, 23);
-            this.txtTimKiemSach.TabIndex = 9;
-            this.txtTimKiemSach.Text = "Nhập mã sách hoặc tên sách...";
+            txtTimKiemSach.Location = new Point(41, 213);
+            txtTimKiemSach.Margin = new Padding(3, 4, 3, 4);
+            txtTimKiemSach.Name = "txtTimKiemSach";
+            txtTimKiemSach.Size = new Size(228, 27);
+            txtTimKiemSach.TabIndex = 9;
+            txtTimKiemSach.Text = "Nhập mã sách hoặc tên sách...";
             // 
             // btnTimKiem
             // 
-            this.btnTimKiem.Location = new System.Drawing.Point(245, 160);
-            this.btnTimKiem.Name = "btnTimKiem";
-            this.btnTimKiem.Size = new System.Drawing.Size(75, 25);
-            this.btnTimKiem.TabIndex = 10;
-            this.btnTimKiem.Text = "Tìm kiếm";
-            this.btnTimKiem.UseVisualStyleBackColor = true;
+            btnTimKiem.Location = new Point(280, 213);
+            btnTimKiem.Margin = new Padding(3, 4, 3, 4);
+            btnTimKiem.Name = "btnTimKiem";
+            btnTimKiem.Size = new Size(86, 33);
+            btnTimKiem.TabIndex = 10;
+            btnTimKiem.Text = "Tìm kiếm";
+            btnTimKiem.UseVisualStyleBackColor = true;
             // 
             // FormBanLuuThong
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(964, 531);
-            this.Controls.Add(this.btnTimKiem);
-            this.Controls.Add(this.txtTimKiemSach);
-            this.Controls.Add(this.btnLamMoi);
-            this.Controls.Add(this.btnGiaHan);
-            this.Controls.Add(this.btnXacNhanTra);
-            this.Controls.Add(this.btnLapPhieuMuon);
-            this.Controls.Add(this.dgvSachDangMuon);
-            this.Controls.Add(this.dtpNgayHenHan);
-            this.Controls.Add(this.dtpNgayMuon);
-            this.Controls.Add(this.cboDocGia);
-            this.Controls.Add(this.lblTieuDe);
-            this.Name = "FormBanLuuThong";
-            this.Text = "Smart Library - Bàn lưu thông";
-            this.Load += new System.EventHandler(this.FormBanLuuThong_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvSachDangMuon)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1102, 708);
+            Controls.Add(btnTimKiem);
+            Controls.Add(txtTimKiemSach);
+            Controls.Add(btnLamMoi);
+            Controls.Add(btnGiaHan);
+            Controls.Add(btnXacNhanTra);
+            Controls.Add(btnLapPhieuMuon);
+            Controls.Add(dgvSachDangMuon);
+            Controls.Add(dtpNgayHenHan);
+            Controls.Add(dtpNgayMuon);
+            Controls.Add(cboDocGia);
+            Controls.Add(lblTieuDe);
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "FormBanLuuThong";
+            Text = "Smart Library - Bàn lưu thông";
+            Load += FormBanLuuThong_Load;
+            ((System.ComponentModel.ISupportInitialize)dgvSachDangMuon).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private System.Windows.Forms.Label lblTieuDe;

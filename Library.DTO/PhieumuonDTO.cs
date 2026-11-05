@@ -8,13 +8,13 @@ namespace Library.DTO
 {
     public class PhieuMuonDTO
     {
-        public string MaPhieu { get; set; }
-        public string MaDocGia { get; set; }
-        public string MaSach { get; set; }
+        public string MaPhieu { get; set; } = string.Empty;
+        public string MaDocGia { get; set; } = string.Empty;
+        public string MaSach { get; set; } = string.Empty;
         public DateTime NgayMuon { get; set; }
         public DateTime NgayHenHan { get; set; }
         public DateTime? NgayTra { get; set; }
-        public string TrangThai { get; set; } // Map với cột Trang_Thai trong CSDL
+        public string TrangThai { get; set; } = string.Empty;
         public int SoLanGiaHan { get; set; }
     }
 }

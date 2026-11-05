@@ -18,156 +18,167 @@ namespace Library.UI
 
         private void InitializeComponent()
         {
-            this.lblTieuDe = new System.Windows.Forms.Label();
-            this.txtMaBienBan = new System.Windows.Forms.TextBox();
-            this.dtpNgayLap = new System.Windows.Forms.DateTimePicker();
-            this.txtCanBoLap = new System.Windows.Forms.TextBox();
-            this.cboLoaiViPham = new System.Windows.Forms.ComboBox();
-            this.txtSoTienPhat = new System.Windows.Forms.TextBox();
-            this.dtpNgayHenNop = new System.Windows.Forms.DateTimePicker();
-            this.txtMoTa = new System.Windows.Forms.TextBox();
-            this.btnLuuBienBan = new System.Windows.Forms.Button();
-            this.btnLamMoi = new System.Windows.Forms.Button();
-            this.btnHuyBo = new System.Windows.Forms.Button();
-            this.dgvBienBanViPham = new System.Windows.Forms.DataGridView();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvBienBanViPham)).BeginInit();
-            this.SuspendLayout();
+            lblTieuDe = new Label();
+            txtMaBienBan = new TextBox();
+            dtpNgayLap = new DateTimePicker();
+            txtCanBoLap = new TextBox();
+            cboLoaiViPham = new ComboBox();
+            txtSoTienPhat = new TextBox();
+            dtpNgayHenNop = new DateTimePicker();
+            txtMoTa = new TextBox();
+            btnLuuBienBan = new Button();
+            btnLamMoi = new Button();
+            btnHuyBo = new Button();
+            dgvBienBanViPham = new DataGridView();
+            ((System.ComponentModel.ISupportInitialize)dgvBienBanViPham).BeginInit();
+            SuspendLayout();
             // 
             // lblTieuDe
             // 
-            this.lblTieuDe.AutoSize = true;
-            this.lblTieuDe.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
-            this.lblTieuDe.Location = new System.Drawing.Point(30, 20);
-            this.lblTieuDe.Name = "lblTieuDe";
-            this.lblTieuDe.Size = new System.Drawing.Size(325, 32);
-            this.lblTieuDe.TabIndex = 0;
-            this.lblTieuDe.Text = "LẬP BIÊN BẢN VI PHẠM";
+            lblTieuDe.AutoSize = true;
+            lblTieuDe.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblTieuDe.Location = new Point(34, 27);
+            lblTieuDe.Name = "lblTieuDe";
+            lblTieuDe.Size = new Size(358, 41);
+            lblTieuDe.TabIndex = 0;
+            lblTieuDe.Text = "LẬP BIÊN BẢN VI PHẠM";
             // 
             // txtMaBienBan
             // 
-            this.txtMaBienBan.Location = new System.Drawing.Point(450, 80);
-            this.txtMaBienBan.Name = "txtMaBienBan";
-            this.txtMaBienBan.Size = new System.Drawing.Size(200, 23);
-            this.txtMaBienBan.TabIndex = 1;
-            this.txtMaBienBan.Text = "BBVP00125";
+            txtMaBienBan.Location = new Point(514, 107);
+            txtMaBienBan.Margin = new Padding(3, 4, 3, 4);
+            txtMaBienBan.Name = "txtMaBienBan";
+            txtMaBienBan.Size = new Size(228, 27);
+            txtMaBienBan.TabIndex = 1;
+            txtMaBienBan.Text = "BBVP00125";
             // 
             // dtpNgayLap
             // 
-            this.dtpNgayLap.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpNgayLap.Location = new System.Drawing.Point(450, 120);
-            this.dtpNgayLap.Name = "dtpNgayLap";
-            this.dtpNgayLap.Size = new System.Drawing.Size(200, 23);
-            this.dtpNgayLap.TabIndex = 2;
+            dtpNgayLap.Format = DateTimePickerFormat.Short;
+            dtpNgayLap.Location = new Point(514, 160);
+            dtpNgayLap.Margin = new Padding(3, 4, 3, 4);
+            dtpNgayLap.Name = "dtpNgayLap";
+            dtpNgayLap.Size = new Size(228, 27);
+            dtpNgayLap.TabIndex = 2;
             // 
             // txtCanBoLap
             // 
-            this.txtCanBoLap.Location = new System.Drawing.Point(450, 160);
-            this.txtCanBoLap.Name = "txtCanBoLap";
-            this.txtCanBoLap.Size = new System.Drawing.Size(200, 23);
-            this.txtCanBoLap.TabIndex = 3;
-            this.txtCanBoLap.Text = "Nguyễn Thị Hoa";
+            txtCanBoLap.Location = new Point(514, 213);
+            txtCanBoLap.Margin = new Padding(3, 4, 3, 4);
+            txtCanBoLap.Name = "txtCanBoLap";
+            txtCanBoLap.Size = new Size(228, 27);
+            txtCanBoLap.TabIndex = 3;
+            txtCanBoLap.Text = "Nguyễn Thị Hoa";
             // 
             // cboLoaiViPham
             // 
-            this.cboLoaiViPham.FormattingEnabled = true;
-            this.cboLoaiViPham.Items.AddRange(new object[] {
-            "Mất sách",
-            "Trễ hạn",
-            "Làm hư sách"});
-            this.cboLoaiViPham.Location = new System.Drawing.Point(150, 220);
-            this.cboLoaiViPham.Name = "cboLoaiViPham";
-            this.cboLoaiViPham.Size = new System.Drawing.Size(200, 23);
-            this.cboLoaiViPham.TabIndex = 4;
-            this.cboLoaiViPham.Text = "Mất sách";
+            cboLoaiViPham.FormattingEnabled = true;
+            cboLoaiViPham.Items.AddRange(new object[] { "Mất sách", "Trễ hạn", "Làm hư sách" });
+            cboLoaiViPham.Location = new Point(171, 293);
+            cboLoaiViPham.Margin = new Padding(3, 4, 3, 4);
+            cboLoaiViPham.Name = "cboLoaiViPham";
+            cboLoaiViPham.Size = new Size(228, 28);
+            cboLoaiViPham.TabIndex = 4;
+            cboLoaiViPham.Text = "Mất sách";
             // 
             // txtSoTienPhat
             // 
-            this.txtSoTienPhat.Location = new System.Drawing.Point(750, 120);
-            this.txtSoTienPhat.Name = "txtSoTienPhat";
-            this.txtSoTienPhat.Size = new System.Drawing.Size(180, 23);
-            this.txtSoTienPhat.TabIndex = 5;
-            this.txtSoTienPhat.Text = "100000";
+            txtSoTienPhat.Location = new Point(857, 160);
+            txtSoTienPhat.Margin = new Padding(3, 4, 3, 4);
+            txtSoTienPhat.Name = "txtSoTienPhat";
+            txtSoTienPhat.Size = new Size(205, 27);
+            txtSoTienPhat.TabIndex = 5;
+            txtSoTienPhat.Text = "100000";
             // 
             // dtpNgayHenNop
             // 
-            this.dtpNgayHenNop.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpNgayHenNop.Location = new System.Drawing.Point(750, 160);
-            this.dtpNgayHenNop.Name = "dtpNgayHenNop";
-            this.dtpNgayHenNop.Size = new System.Drawing.Size(180, 23);
-            this.dtpNgayHenNop.TabIndex = 6;
+            dtpNgayHenNop.Format = DateTimePickerFormat.Short;
+            dtpNgayHenNop.Location = new Point(857, 213);
+            dtpNgayHenNop.Margin = new Padding(3, 4, 3, 4);
+            dtpNgayHenNop.Name = "dtpNgayHenNop";
+            dtpNgayHenNop.Size = new Size(205, 27);
+            dtpNgayHenNop.TabIndex = 6;
             // 
             // txtMoTa
             // 
-            this.txtMoTa.Location = new System.Drawing.Point(150, 260);
-            this.txtMoTa.Multiline = true;
-            this.txtMoTa.Name = "txtMoTa";
-            this.txtMoTa.Size = new System.Drawing.Size(400, 60);
-            this.txtMoTa.TabIndex = 7;
-            this.txtMoTa.Text = "Làm mất sách \"Lập trình C#\" sau khi mượn.";
+            txtMoTa.Location = new Point(171, 347);
+            txtMoTa.Margin = new Padding(3, 4, 3, 4);
+            txtMoTa.Multiline = true;
+            txtMoTa.Name = "txtMoTa";
+            txtMoTa.Size = new Size(457, 79);
+            txtMoTa.TabIndex = 7;
+            txtMoTa.Text = "Làm mất sách \"Lập trình C#\" sau khi mượn.";
             // 
             // btnLuuBienBan
             // 
-            this.btnLuuBienBan.BackColor = System.Drawing.Color.DodgerBlue;
-            this.btnLuuBienBan.ForeColor = System.Drawing.Color.White;
-            this.btnLuuBienBan.Location = new System.Drawing.Point(520, 335);
-            this.btnLuuBienBan.Name = "btnLuuBienBan";
-            this.btnLuuBienBan.Size = new System.Drawing.Size(140, 40);
-            this.btnLuuBienBan.TabIndex = 8;
-            this.btnLuuBienBan.Text = "LƯU BIÊN BẢN";
-            this.btnLuuBienBan.UseVisualStyleBackColor = false;
-            this.btnLuuBienBan.Click += new System.EventHandler(this.btnLuuBienBan_Click);
+            btnLuuBienBan.BackColor = Color.DodgerBlue;
+            btnLuuBienBan.ForeColor = Color.White;
+            btnLuuBienBan.Location = new Point(594, 447);
+            btnLuuBienBan.Margin = new Padding(3, 4, 3, 4);
+            btnLuuBienBan.Name = "btnLuuBienBan";
+            btnLuuBienBan.Size = new Size(160, 53);
+            btnLuuBienBan.TabIndex = 8;
+            btnLuuBienBan.Text = "LƯU BIÊN BẢN";
+            btnLuuBienBan.UseVisualStyleBackColor = false;
+            btnLuuBienBan.Click += btnLuuBienBan_Click;
             // 
             // btnLamMoi
             // 
-            this.btnLamMoi.Location = new System.Drawing.Point(675, 335);
-            this.btnLamMoi.Name = "btnLamMoi";
-            this.btnLamMoi.Size = new System.Drawing.Size(110, 40);
-            this.btnLamMoi.TabIndex = 9;
-            this.btnLamMoi.Text = "LÀM MỚI";
-            this.btnLamMoi.UseVisualStyleBackColor = true;
+            btnLamMoi.Location = new Point(771, 447);
+            btnLamMoi.Margin = new Padding(3, 4, 3, 4);
+            btnLamMoi.Name = "btnLamMoi";
+            btnLamMoi.Size = new Size(126, 53);
+            btnLamMoi.TabIndex = 9;
+            btnLamMoi.Text = "LÀM MỚI";
+            btnLamMoi.UseVisualStyleBackColor = true;
             // 
             // btnHuyBo
             // 
-            this.btnHuyBo.BackColor = System.Drawing.Color.Crimson;
-            this.btnHuyBo.ForeColor = System.Drawing.Color.White;
-            this.btnHuyBo.Location = new System.Drawing.Point(400, 335);
-            this.btnHuyBo.Name = "btnHuyBo";
-            this.btnHuyBo.Size = new System.Drawing.Size(110, 40);
-            this.btnHuyBo.TabIndex = 10;
-            this.btnHuyBo.Text = "HỦY BỎ";
-            this.btnHuyBo.UseVisualStyleBackColor = false;
-            this.btnHuyBo.Click += new System.EventHandler(this.btnHuyBo_Click);
+            btnHuyBo.BackColor = Color.Crimson;
+            btnHuyBo.ForeColor = Color.White;
+            btnHuyBo.Location = new Point(457, 447);
+            btnHuyBo.Margin = new Padding(3, 4, 3, 4);
+            btnHuyBo.Name = "btnHuyBo";
+            btnHuyBo.Size = new Size(126, 53);
+            btnHuyBo.TabIndex = 10;
+            btnHuyBo.Text = "HỦY BỎ";
+            btnHuyBo.UseVisualStyleBackColor = false;
+            btnHuyBo.Click += btnHuyBo_Click;
             // 
             // dgvBienBanViPham
             // 
-            this.dgvBienBanViPham.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvBienBanViPham.Location = new System.Drawing.Point(30, 400);
-            this.dgvBienBanViPham.Name = "dgvBienBanViPham";
-            this.dgvBienBanViPham.Size = new System.Drawing.Size(900, 180);
-            this.dgvBienBanViPham.TabIndex = 11;
+            dgvBienBanViPham.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvBienBanViPham.Location = new Point(34, 533);
+            dgvBienBanViPham.Margin = new Padding(3, 4, 3, 4);
+            dgvBienBanViPham.Name = "dgvBienBanViPham";
+            dgvBienBanViPham.RowHeadersWidth = 51;
+            dgvBienBanViPham.Size = new Size(1029, 240);
+            dgvBienBanViPham.TabIndex = 11;
             // 
             // FormLapBienBanViPham
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(964, 600);
-            this.Controls.Add(this.dgvBienBanViPham);
-            this.Controls.Add(this.btnHuyBo);
-            this.Controls.Add(this.btnLamMoi);
-            this.Controls.Add(this.btnLuuBienBan);
-            this.Controls.Add(this.txtMoTa);
-            this.Controls.Add(this.dtpNgayHenNop);
-            this.Controls.Add(this.txtSoTienPhat);
-            this.Controls.Add(this.cboLoaiViPham);
-            this.Controls.Add(this.txtCanBoLap);
-            this.Controls.Add(this.dtpNgayLap);
-            this.Controls.Add(this.txtMaBienBan);
-            this.Controls.Add(this.lblTieuDe);
-            this.Name = "FormLapBienBanViPham";
-            this.Text = "Smart Library - Lập biên bản vi phạm";
-            ((System.ComponentModel.ISupportInitialize)(this.dgvBienBanViPham)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1102, 800);
+            Controls.Add(dgvBienBanViPham);
+            Controls.Add(btnHuyBo);
+            Controls.Add(btnLamMoi);
+            Controls.Add(btnLuuBienBan);
+            Controls.Add(txtMoTa);
+            Controls.Add(dtpNgayHenNop);
+            Controls.Add(txtSoTienPhat);
+            Controls.Add(cboLoaiViPham);
+            Controls.Add(txtCanBoLap);
+            Controls.Add(dtpNgayLap);
+            Controls.Add(txtMaBienBan);
+            Controls.Add(lblTieuDe);
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "FormLapBienBanViPham";
+            Text = "Smart Library - Lập biên bản vi phạm";
+            Load += FormLapBienBanViPham_Load;
+            ((System.ComponentModel.ISupportInitialize)dgvBienBanViPham).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private System.Windows.Forms.Label lblTieuDe;

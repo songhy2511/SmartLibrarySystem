@@ -6,6 +6,7 @@ namespace Library.UI
 {
     public partial class FormThuThuDashboard : Form
     {
+        private Form? currentFormChild = null; // Thêm dấu ? để khai báo đây là kiểu nullable
         public FormThuThuDashboard()
         {
             InitializeComponent();
@@ -25,6 +26,37 @@ namespace Library.UI
             lblLibrarianInfo.Text = $"Thủ thư: {librarianName} | {desk} | Đăng nhập: {SessionContext.LoginTime:HH:mm:ss}";
         }
 
+        private void OpenChildForm(Form childForm)
+        {
+            // Nếu đang có form con hiển thị thì đóng lại để giải phóng bộ nhớ
+            if (currentFormChild != null)
+            {
+                currentFormChild.Close();
+            }
+
+            currentFormChild = childForm;
+            childForm.TopLevel = false;                  // Biến form con thành dạng control
+            childForm.FormBorderStyle = FormBorderStyle.None; // Xóa bỏ viền cửa sổ của form con
+            childForm.Dock = DockStyle.Fill;             // Phủ kín vùng panel chứa bên phải
+
+            // Thay thế 'pnlNoiDung' bằng tên Panel chứa nội dung bên phải sẵn có của bạn
+            pnlContent.Controls.Clear();
+            pnlContent.Controls.Add(childForm);
+            pnlContent.Tag = childForm;
+            childForm.BringToFront();
+            childForm.Show();
+        }
+        // Khi người dùng bấm vào mục "Bàn Lưu Thông" trên menu sẵn có
+        private void btnBanLuuThong_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new FormBanLuuThong());
+        }
+
+        // Khi người dùng bấm vào mục "Xử Lý Vi Phạm Phạt" trên menu sẵn có
+        private void btnXuLyViPham_Click(object sender, EventArgs e)
+        {
+            OpenChildForm(new FormLapBienBanViPham());
+        }
         private void btnDoiMatKhau_Click(object sender, EventArgs e)
         {
             using var form = new FormDoiMatKhau();

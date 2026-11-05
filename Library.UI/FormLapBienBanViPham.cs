@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Library.BLL;
+using Library.DAL;
+using Library.DTO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,8 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Library.DTO;
-using Library.BLL;
 
 
 namespace Library.UI
@@ -55,5 +56,29 @@ namespace Library.UI
         {
             this.Close();
         }
+
+        private void FormLapBienBanViPham_Load(object sender, EventArgs e)
+        {
+            LoadDanhSachViPham();
+        }
+
+        private void LoadDanhSachViPham()
+        {
+            try
+            {
+                // Sử dụng đúng tên cột chính xác trong bảng Phat_Tien là So_Tien_Thu
+                string query = "SELECT Ma_So AS MaBienBan, Phieu_Phat_Ma_So AS MaDocGia, N'Phạt tiền' AS LoaiViPham, " +
+                               "N'Vi phạm quy chế' AS MoTa, So_Tien_Thu AS SoTienPhat, Ngay_Thu AS NgayLap, Hinh_Thuc_Thanh_Toan AS TrangThai " +
+                               "FROM Phat_Tien";
+
+                DataTable dt = DatabaseHelper.ExecuteQuery(query);
+                dgvBienBanViPham.DataSource = dt;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải danh sách vi phạm: " + ex.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
+    
 }

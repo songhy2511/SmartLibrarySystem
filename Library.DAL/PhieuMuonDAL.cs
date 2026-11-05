@@ -2,11 +2,12 @@
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace Library.DAL
@@ -17,19 +18,20 @@ namespace Library.DAL
 
         public bool ThemPhieuMuon(PhieuMuonDTO phieuMuon)
         {
-            string query = "INSERT INTO Phieu_Muon (Ma_Phieu, Ma_Doc_Gia, Ma_Sach, Ngay_Muon, Ngay_Hen_Han, Trang_Thai, So_Lan_Gia_Han) " +
-                           "VALUES (@MaPhieu, @MaDocGia, @MaSach, @NgayMuon, @NgayHenHan, @TrangThai, @SoLanGiaHan)";
+            // Sửa lại tên cột khớp hoàn toàn với cấu trúc bảng Phieu_Muon trong CSDL
+            string query = "INSERT INTO Phieu_Muon (Ma_Phieu_Muon, Doc_Gia_Ma_So, Thu_Thu_Ma_So, Chi_Nhanh_Ma_So, Ngay_Muon, Ngay_Hen_Tra, Trang_Thai) " +
+                           "VALUES (@MaPhieu, @DocGiaMaSo, @ThuThuMaSo, @ChiNhanhMaSo, @NgayMuon, @NgayHenHan, @TrangThai)";
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
                 cmd.Parameters.AddWithValue("@MaPhieu", phieuMuon.MaPhieu);
-                cmd.Parameters.AddWithValue("@MaDocGia", phieuMuon.MaDocGia);
-                cmd.Parameters.AddWithValue("@MaSach", phieuMuon.MaSach);
+                cmd.Parameters.AddWithValue("@DocGiaMaSo", phieuMuon.MaDocGia); // ID số của độc giả (Doc_Gia_Ma_So)
+                cmd.Parameters.AddWithValue("@ThuThuMaSo", 1);                  // ID thủ thư đang đăng nhập (mặc định là 1 hoặc lấy từ session)
+                cmd.Parameters.AddWithValue("@ChiNhanhMaSo", 1);                // ID chi nhánh thư viện (mặc định là 1)
                 cmd.Parameters.AddWithValue("@NgayMuon", phieuMuon.NgayMuon);
                 cmd.Parameters.AddWithValue("@NgayHenHan", phieuMuon.NgayHenHan);
-                cmd.Parameters.AddWithValue("@TrangThai", phieuMuon.TrangThai);
-                cmd.Parameters.AddWithValue("@SoLanGiaHan", phieuMuon.SoLanGiaHan);
+                cmd.Parameters.AddWithValue("@TrangThai", "Đang mượn");
 
                 conn.Open();
                 return cmd.ExecuteNonQuery() > 0;
@@ -38,15 +40,35 @@ namespace Library.DAL
 
         public DataTable LayDanhSachDangMuon(string maDocGia)
         {
-            string query = "SELECT pm.Ma_Phieu AS MaPhieu, pm.Ma_Sach AS MaSach, s.Ten_Sach AS TenSach, " +
-                           "pm.Ngay_Muon AS NgayMuon, pm.Ngay_Hen_Han AS NgayHenHan, pm.Trang_Thai AS TrangThai " +
-                           "FROM Phieu_Muon pm JOIN Sach s ON pm.Ma_Sach = s.Ma_Sach " +
-                           "WHERE pm.Ma_Doc_Gia = @MaDocGia AND pm.Trang_Thai = N'Chưa trả'";
+            // Bỏ tạm điều kiện Trang_Thai để kiểm tra xem dữ liệu có đổ vào lưới được không
+            int docGiaId = 1;
+            if (!string.IsNullOrEmpty(maDocGia))
+            {
+                // Chuyển đổi mã độc giả (hoặc ID số) thành số nguyên để khớp với cột Doc_Gia_Ma_So trong CSDL
+                int.TryParse(maDocGia, out docGiaId);
+            }
+
+            string query = @"
+        SELECT 
+            pm.Ma_Phieu_Muon AS MaPhieu,
+            dg.Ho_Ten AS TenDocGia,
+            s.Tieu_De AS TenSach,
+            bs.Ma_Vach AS MaVach,
+            pm.Ngay_Muon AS NgayMuon,
+            pm.Ngay_Hen_Tra AS NgayHenHan,
+            pm.Trang_Thai AS TrangThai
+        FROM Phieu_Muon pm
+        INNER JOIN Doc_Gia dg ON pm.Doc_Gia_Ma_So = dg.Ma_So
+        INNER JOIN Chi_Tiet_Phieu_Muon ctpm ON pm.Ma_So = ctpm.Phieu_Muon_Ma_So
+        INNER JOIN Ban_Sao_Sach bs ON ctpm.Ban_Sao_Sach_Ma_So = bs.Ma_So
+        INNER JOIN Sach s ON bs.Sach_Ma_So = s.Ma_So
+        WHERE pm.Doc_Gia_Ma_So = @DocGiaMaSo";
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             using (SqlCommand cmd = new SqlCommand(query, conn))
             {
-                cmd.Parameters.AddWithValue("@MaDocGia", maDocGia);
+                // Truyền đúng tham số ID độc giả vào câu lệnh SQL
+                cmd.Parameters.AddWithValue("@DocGiaMaSo", docGiaId);
                 using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                 {
                     DataTable dt = new DataTable();
@@ -55,6 +77,7 @@ namespace Library.DAL
                 }
             }
         }
+        
 
         public bool CapNhatTraSach(string maPhieu, DateTime ngayTra, string trangThai)
         {
@@ -108,6 +131,24 @@ namespace Library.DAL
 
                 conn.Open();
                 return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+        public DataTable TimKiemSach(string tuKhoa)
+        {
+            string query = "SELECT Ma_Sach AS MaSach, Ten_Sach AS TenSach, The_Loai AS TheLoai, So_Luong AS SoLuong " +
+                           "FROM Sach " +
+                           "WHERE Ma_Sach LIKE @TuKhoa OR Ten_Sach LIKE @TuKhoa";
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@TuKhoa", "%" + tuKhoa + "%");
+                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                {
+                    DataTable dt = new DataTable();
+                    adapter.Fill(dt);
+                    return dt;
+                }
             }
         }
     }
