@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Library.BLL;
+using System;
 using System.Windows.Forms;
 
 namespace Library.UI
@@ -32,9 +33,26 @@ namespace Library.UI
 
         private void btnDangXuat_Click(object sender, EventArgs e)
         {
-            var dialogResult = MessageBox.Show("Bạn có muốn kết thúc ca trực và đăng xuất tài khoản?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var dialogResult = MessageBox.Show(
+                "Bạn có muốn kết thúc ca trực và đăng xuất tài khoản?",
+                "Xác nhận",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
             if (dialogResult == DialogResult.Yes)
             {
+                // 👉 GHI LOG ĐĂNG XUẤT CỦA THỦ THƯ
+                if (SessionContext.CurrentUser != null)
+                {
+                    SystemLogger.Log(
+                        LogLevel.SECURITY,
+                        "Đăng xuất",
+                        $"Thủ thư '{SessionContext.CurrentLibrarian?.Ho_Ten ?? SessionContext.CurrentUser.Ten_Dang_Nhap}' đã đăng xuất.",
+                        SessionContext.CurrentUser.Ma_So
+                    );
+                }
+
                 SessionContext.Clear();
                 this.Hide();
                 new FormDangNhap().Show();

@@ -117,6 +117,13 @@ namespace Library.UI
 
             if (isSuccess)
             {
+                SystemLogger.Log(
+                    LogLevel.SECURITY,
+                    selected.Dang_Hoat_Dong ? "Mở khóa tài khoản" : "Khóa tài khoản",
+                    $"Quản trị viên đã thay đổi trạng thái tài khoản '{selected.Ten_Dang_Nhap}' (Thủ thư: {selected.Ho_Ten}) thành: {(selected.Dang_Hoat_Dong ? "Hoạt động" : "Bị khóa")}.",
+                    currentAdminId
+                );
+
                 MessageBox.Show(message, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDuLieu();
             }
@@ -143,6 +150,13 @@ namespace Library.UI
             var (isSuccess, message) = _nguoiDungBLL.ResetMatKhauMacDinh(selected.Nguoi_Dung_Ma_So);
             if (isSuccess)
             {
+                SystemLogger.Log(
+                    LogLevel.SECURITY,
+                    "Reset mật khẩu",
+                    $"Quản trị viên đã reset mật khẩu tài khoản '{selected.Ten_Dang_Nhap}' về mặc định (Librarian@123).",
+                    SessionContext.CurrentUser?.Ma_So
+                );
+
                 MessageBox.Show(message, "Thông báo thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Library.BLL;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -104,12 +105,22 @@ namespace Library.UI
 
         private void btnDangXuat_Click(object sender, EventArgs e)
         {
-            var dialogResult = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất tài khoản quản trị?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (dialogResult == DialogResult.Yes)
+            var confirm = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (confirm == DialogResult.Yes)
             {
-                SessionContext.Clear();
-                this.Hide();
-                new FormDangNhap().Show();
+                if (SessionContext.CurrentUser != null)
+                {
+                    // 👉 GHI LOG ĐĂNG XUẤT
+                    SystemLogger.Log(
+                        LogLevel.SECURITY,
+                        "Đăng xuất",
+                        $"Tài khoản '{SessionContext.CurrentUser.Ten_Dang_Nhap}' đã đăng xuất khỏi hệ thống.",
+                        SessionContext.CurrentUser.Ma_So
+                    );
+                }
+
+                SessionContext.CurrentUser = null;
+                this.Close();
             }
         }
 
@@ -129,6 +140,16 @@ namespace Library.UI
         private void btnTongQuan_Click_1(object sender, EventArgs e)
         {
             LoadChildForm(new FormTongQuanHeThong(), "TỔNG QUAN HỆ THỐNG & ĐỐI SOÁT KPI", (Button)sender);
+        }
+
+        private void btnQuyChe_Click(object sender, EventArgs e)
+        {
+            LoadChildForm(new FormQuyCheThamSo(), "QUY CHẾ & CẤU HÌNH THAM SỐ ĐỘNG", (Button)sender);
+        }
+
+        private void btnNhatKy_Click(object sender, EventArgs e)
+        {
+            LoadChildForm(new FormNhatKyHeThong(), "NHẬT KÝ HOẠT ĐỘNG HỆ THỐNG", (Button)sender);
         }
     }
 }   
