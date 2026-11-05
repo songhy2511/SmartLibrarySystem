@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
   <Project Path="Library.BLL/Library.BLL.csproj" />
   <Project Path="Library.DAL/Library.DAL.csproj" />
   <Project Path="Library.DTO/Library.DTO.csproj" />
