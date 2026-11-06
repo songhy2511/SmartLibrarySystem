@@ -117,5 +117,56 @@ namespace Library.DAL
             SqlParameter[] pars = { new SqlParameter("@MaSach", maSach) };
             return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
         }
+
+        /// <summary>
+        /// Lấy danh sách các bản sao sách đang có sẵn trên kệ tại một chi nhánh cụ thể
+        /// </summary>
+        public DataTable LayBanSaoSanCoTaiChiNhanh(string maSach, int chiNhanhId)
+        {
+            string query = @"
+        SELECT 
+            bs.Ma_So AS BanSaoMaSo,
+            bs.Ma_Vach AS MaVach,
+            bs.Tinh_Trang AS TinhTrang
+        FROM dbo.Ban_Sao_Sach bs
+        INNER JOIN dbo.Sach s ON bs.Sach_Ma_So = s.Ma_So
+        WHERE s.Ma_Sach = @MaSach
+          AND bs.Chi_Nhanh_Ma_So = @ChiNhanhId
+          AND bs.Trang_Thai = N'Sẵn sàng'
+        ORDER BY bs.Ma_Vach ASC";
+
+            var parameters = new[]
+            {
+        new Microsoft.Data.SqlClient.SqlParameter("@MaSach", maSach),
+        new Microsoft.Data.SqlClient.SqlParameter("@ChiNhanhId", chiNhanhId)
+    };
+
+            return DatabaseHelper.ExecuteQuery(query, parameters);
+        }
+
+        /// <summary>
+        /// Thực hiện luân chuyển bản sao sách sang chi nhánh đích trong một giao dịch an toàn
+        /// </summary>
+        public bool ChuyenChiNhanhBanSao(int banSaoMaSo, int chiNhanhNguonId, int chiNhanhDichId, string ghiChu)
+        {
+            string query = @"
+        UPDATE dbo.Ban_Sao_Sach
+        SET Chi_Nhanh_Ma_So = @ChiNhanhDichId,
+            Ghi_Chu = CASE 
+                        WHEN @GhiChu <> '' THEN @GhiChu 
+                        ELSE N'Luân chuyển từ chi nhánh #' + CAST(@ChiNhanhNguonId AS NVARCHAR) 
+                      END
+        WHERE Ma_So = @BanSaoMaSo AND Trang_Thai = N'Sẵn sàng'";
+
+            var parameters = new[]
+            {
+        new Microsoft.Data.SqlClient.SqlParameter("@BanSaoMaSo", banSaoMaSo),
+        new Microsoft.Data.SqlClient.SqlParameter("@ChiNhanhNguonId", chiNhanhNguonId),
+        new Microsoft.Data.SqlClient.SqlParameter("@ChiNhanhDichId", chiNhanhDichId),
+        new Microsoft.Data.SqlClient.SqlParameter("@GhiChu", string.IsNullOrWhiteSpace(ghiChu) ? "" : ghiChu.Trim())
+    };
+
+            return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
+        }
     }
 }

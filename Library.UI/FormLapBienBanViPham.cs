@@ -94,7 +94,7 @@ namespace Library.UI
 
             try
             {
-                // Ưu tiên nạp danh sách các cuốn sách độc giả đang mượn lưu thông
+                // Truy vấn bao quát cả trạng thái 'Đang mượn' lẫn 'Quá hạn'
                 string query = @"
                     SELECT 
                         0 AS BanSaoMaSo,
@@ -117,11 +117,12 @@ namespace Library.UI
                     INNER JOIN dbo.Chi_Tiet_Phieu_Muon ct ON pm.Ma_So = ct.Phieu_Muon_Ma_So
                     INNER JOIN dbo.Ban_Sao_Sach bs ON ct.Ban_Sao_Sach_Ma_So = bs.Ma_So
                     INNER JOIN dbo.Sach s ON bs.Sach_Ma_So = s.Ma_So
-                    WHERE pm.Doc_Gia_Ma_So = @DocGiaMaSo AND pm.Trang_Thai = N'Đang mượn'";
+                    WHERE pm.Doc_Gia_Ma_So = @DocGiaMaSo 
+                      AND pm.Trang_Thai IN (N'Đang mượn', N'Quá hạn')";
 
                 DataTable dt = DatabaseHelper.ExecuteQuery(query, new[] { new Microsoft.Data.SqlClient.SqlParameter("@DocGiaMaSo", docGiaMaSo) });
 
-                // Nếu độc giả không có sách mượn, nạp bổ sung toàn bộ danh mục sách trong kho
+                // Nếu độc giả không có sách mượn, nạp danh mục trong kho
                 if (dt.Rows.Count <= 1)
                 {
                     string queryAll = @"
@@ -187,8 +188,16 @@ namespace Library.UI
             }
         }
 
+        private void nudSoNgayTre_ValueChanged(object? sender, EventArgs e)
+        {
+            if (_isInitialized && cboLoaiViPham.SelectedItem?.ToString()?.StartsWith("Quá hạn") == true)
+            {
+                CapNhatTienPhatTheoQuyChe();
+            }
+        }
+
         /// <summary>
-        /// Tự động tính toán số tiền phạt minh bạch theo tỷ lệ % giá bìa hoặc tiền phạt trễ hạn mỗi ngày
+        /// Tính toán tiền phạt minh bạch theo số ngày trễ (cho phép nhập tay/tự động) hoặc theo % giá bìa
         /// </summary>
         private void CapNhatTienPhatTheoQuyChe()
         {
@@ -198,7 +207,7 @@ namespace Library.UI
             DataRowView? drvSach = cboSachViPham.SelectedItem as DataRowView;
 
             decimal giaBia = 80000m;
-            int soNgayTre = 0;
+            int soNgayTreCSDL = 0;
             string tenSach = "Tài liệu thư viện";
 
             if (drvSach != null)
@@ -206,61 +215,67 @@ namespace Library.UI
                 if (drvSach["Gia_Bia"] != DBNull.Value)
                     giaBia = Convert.ToDecimal(drvSach["Gia_Bia"]);
                 if (drvSach["SoNgayTre"] != DBNull.Value)
-                    soNgayTre = Convert.ToInt32(drvSach["SoNgayTre"]);
+                    soNgayTreCSDL = Convert.ToInt32(drvSach["SoNgayTre"]);
                 tenSach = drvSach["TenSach"].ToString() ?? "Tài liệu thư viện";
             }
 
             if (loaiViPham.StartsWith("Quá hạn"))
             {
+                nudSoNgayTre.Enabled = true;
                 txtSoTienPhat.ReadOnly = true;
+
+                // Nếu sách được chọn có số ngày trễ thực tế từ CSDL và sender không phải sự kiện gõ ngày
+                if (soNgayTreCSDL > 0 && nudSoNgayTre.Value == 1)
+                {
+                    nudSoNgayTre.Value = soNgayTreCSDL;
+                }
+
+                int soNgayApDung = Convert.ToInt32(nudSoNgayTre.Value);
                 decimal donGiaNgay = _cauHinhBLL.LayTienPhatMoiNgay();
+                decimal tongTien = soNgayApDung * donGiaNgay;
 
-                if (soNgayTre > 0)
+                txtSoTienPhat.Text = tongTien.ToString("0");
+                txtMoTa.Text = $"Quá hạn {soNgayApDung} ngày cuốn '{tenSach}'. Tiền phạt = {soNgayApDung} ngày × {donGiaNgay:N0} đ/ngày = {tongTien:N0} VNĐ.";
+            }
+            else
+            {
+                nudSoNgayTre.Enabled = false;
+
+                if (loaiViPham.Contains("30%")) // Rách / ướt nhẹ
                 {
-                    decimal tongTien = soNgayTre * donGiaNgay;
-                    txtSoTienPhat.Text = tongTien.ToString("0");
-                    txtMoTa.Text = $"Quá hạn {soNgayTre} ngày cuốn '{tenSach}'. Tiền phạt = {soNgayTre} ngày × {donGiaNgay:N0} đ/ngày = {tongTien:N0} VNĐ.";
+                    txtSoTienPhat.ReadOnly = true;
+                    decimal tyLe = _cauHinhBLL.LayTyLePhatRach();
+                    decimal tienPhat = Math.Round(giaBia * (tyLe / 100m), 0);
+
+                    txtSoTienPhat.Text = tienPhat.ToString("0");
+                    txtMoTa.Text = $"Bồi thường rách/hỏng nhẹ cuốn '{tenSach}'. Đền bù {tyLe}% giá bìa ({giaBia:N0} đ) = {tienPhat:N0} VNĐ.";
                 }
-                else
+                else if (loaiViPham.Contains("60%")) // Hư hỏng nặng
                 {
-                    txtSoTienPhat.Text = donGiaNgay.ToString("0");
-                    txtMoTa.Text = $"Phạt vi phạm quy định mượn trả (Định mức quy chế: {donGiaNgay:N0} đ/ngày).";
+                    txtSoTienPhat.ReadOnly = true;
+                    decimal tyLe = _cauHinhBLL.LayTyLePhatHong();
+                    decimal tienPhat = Math.Round(giaBia * (tyLe / 100m), 0);
+
+                    txtSoTienPhat.Text = tienPhat.ToString("0");
+                    txtMoTa.Text = $"Bồi thường hư hỏng nặng cuốn '{tenSach}'. Đền bù {tyLe}% giá bìa ({giaBia:N0} đ) = {tienPhat:N0} VNĐ.";
                 }
-            }
-            else if (loaiViPham.Contains("30%")) // Rách / ướt nhẹ
-            {
-                txtSoTienPhat.ReadOnly = true;
-                decimal tyLe = _cauHinhBLL.LayTyLePhatRach();
-                decimal tienPhat = Math.Round(giaBia * (tyLe / 100m), 0);
+                else if (loaiViPham.Contains("100%")) // Mất sách
+                {
+                    txtSoTienPhat.ReadOnly = true;
+                    decimal tyLe = _cauHinhBLL.LayTyLePhatMat();
+                    decimal tienPhat = Math.Round(giaBia * (tyLe / 100m), 0);
 
-                txtSoTienPhat.Text = tienPhat.ToString("0");
-                txtMoTa.Text = $"Bồi thường rách/hỏng nhẹ cuốn '{tenSach}'. Đền bù {tyLe}% giá bìa ({giaBia:N0} đ) = {tienPhat:N0} VNĐ.";
-            }
-            else if (loaiViPham.Contains("60%")) // Hư hỏng nặng
-            {
-                txtSoTienPhat.ReadOnly = true;
-                decimal tyLe = _cauHinhBLL.LayTyLePhatHong();
-                decimal tienPhat = Math.Round(giaBia * (tyLe / 100m), 0);
-
-                txtSoTienPhat.Text = tienPhat.ToString("0");
-                txtMoTa.Text = $"Bồi thường hư hỏng nặng cuốn '{tenSach}'. Đền bù {tyLe}% giá bìa ({giaBia:N0} đ) = {tienPhat:N0} VNĐ.";
-            }
-            else if (loaiViPham.Contains("100%")) // Mất sách
-            {
-                txtSoTienPhat.ReadOnly = true;
-                decimal tyLe = _cauHinhBLL.LayTyLePhatMat();
-                decimal tienPhat = Math.Round(giaBia * (tyLe / 100m), 0);
-
-                txtSoTienPhat.Text = tienPhat.ToString("0");
-                txtMoTa.Text = $"Bồi thường làm mất tài liệu cuốn '{tenSach}'. Đền bù {tyLe}% giá bìa ({giaBia:N0} đ) = {tienPhat:N0} VNĐ.";
-            }
-            else // Vi phạm khác
-            {
-                txtSoTienPhat.ReadOnly = false;
-                txtSoTienPhat.Text = "50000";
-                txtMoTa.Text = "Vi phạm nội quy thư viện / làm mất thẻ bạn đọc.";
-                txtSoTienPhat.Focus();
-                txtSoTienPhat.SelectAll();
+                    txtSoTienPhat.Text = tienPhat.ToString("0");
+                    txtMoTa.Text = $"Bồi thường làm mất tài liệu cuốn '{tenSach}'. Đền bù {tyLe}% giá bìa ({giaBia:N0} đ) = {tienPhat:N0} VNĐ.";
+                }
+                else // Vi phạm khác
+                {
+                    txtSoTienPhat.ReadOnly = false;
+                    txtSoTienPhat.Text = "50000";
+                    txtMoTa.Text = "Vi phạm nội quy thư viện / làm mất thẻ bạn đọc.";
+                    txtSoTienPhat.Focus();
+                    txtSoTienPhat.SelectAll();
+                }
             }
         }
 
@@ -270,6 +285,7 @@ namespace Library.UI
             txtCanBoLap.Text = SessionContext.CurrentLibrarian?.Ho_Ten ?? "Lê Minh Tuấn";
             dtpNgayLap.Value = DateTime.Now;
             dtpNgayHenNop.Value = DateTime.Now.AddDays(7);
+            nudSoNgayTre.Value = 1;
         }
 
         private void LoadDanhSachViPham()
@@ -394,7 +410,7 @@ namespace Library.UI
                     SET So_Lan_Vi_Pham = ISNULL(So_Lan_Vi_Pham, 0) + 1 
                     WHERE Ma_So = @DocGiaMaSo;
 
-                    -- 3. Xử lý trạng thái tài sản nếu làm mất hoặc hư hỏng nặng
+                    -- 3. Cập nhật trạng thái tài sản nếu làm mất/hư hỏng nặng
                     IF @LoaiViPham LIKE N'%mất%' AND @BanSaoMaSo > 0
                     BEGIN
                         UPDATE dbo.Ban_Sao_Sach 
@@ -444,6 +460,7 @@ namespace Library.UI
 
                 MessageBox.Show("Lập biên bản vi phạm thành công!\nThông tin công nợ và số lần vi phạm đã được đồng bộ.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 txtMoTa.Clear();
+                nudSoNgayTre.Value = 1;
                 LoadDanhSachViPham();
                 NapSachTheoDocGia();
             }
@@ -487,12 +504,10 @@ namespace Library.UI
             string query = @"
                 BEGIN TRANSACTION;
                 BEGIN TRY
-                    -- 1. Cập nhật phiếu phạt thành 'Đã thu'
                     UPDATE dbo.Phieu_Phat 
                     SET Trang_Thai = N'Đã thu', Da_Thanh_Toan = 1 
                     WHERE Ma_So = @MaBienBan;
 
-                    -- 2. Tạo biên lai thu tiền phạt vào quỹ tiền mặt
                     INSERT INTO dbo.Phat_Tien 
                     (Phieu_Phat_Ma_So, Thu_Thu_Ma_So, So_Tien_Thu, Ngay_Thu, Hinh_Thuc_Thanh_Toan)
                     VALUES 

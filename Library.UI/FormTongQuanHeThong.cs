@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -12,6 +13,7 @@ namespace Library.UI
     {
         private readonly ThongKeBLL _thongKeBLL = new ThongKeBLL();
         private readonly ChiNhanhBLL _chiNhanhBLL = new ChiNhanhBLL();
+        private bool _isInitialized = false;
 
         public FormTongQuanHeThong()
         {
@@ -20,70 +22,54 @@ namespace Library.UI
 
         private void FormTongQuanHeThong_Load(object sender, EventArgs e)
         {
-            // Khóa màu tiêu đề bảng không bị đổi màu khi nhấp/chọn cột
-            KhoaMauTieuDeBang(dgvKhoSach);
-            KhoaMauTieuDeBang(dgvLuuThongTuan);
-            KhoaMauTieuDeBang(dgvDoiSoat);
-
-            TaiDuLieuThongKeTuanVaKPI();
-            NapDanhSachChiNhanhKho();
-            TaiDuLieuKhoSach();
+            TaiDuLieuTongQuan();
+            NapDanhSachChiNhanh();
+            TaiDuLieuKhoChiNhanh();
+            _isInitialized = true;
         }
 
-        private void KhoaMauTieuDeBang(DataGridView dgv)
-        {
-            dgv.EnableHeadersVisualStyles = false;
-            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(15, 23, 42);
-            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            // Cố định màu khi được chọn trùng với màu gốc
-            dgv.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(15, 23, 42);
-            dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.White;
-
-            // Tắt hiệu ứng viền chọn trên tiêu đề cột
-            foreach (DataGridViewColumn col in dgv.Columns)
-            {
-                col.SortMode = DataGridViewColumnSortMode.NotSortable;
-            }
-        }
-
-        private void TaiDuLieuThongKeTuanVaKPI()
+        #region Tab 1: Tổng Quan Chỉ Số Hệ Thống
+        private void TaiDuLieuTongQuan()
         {
             try
             {
-                // 1. Tải báo cáo mượn/trả trong tuần của các chi nhánh
-                var listLuuThong = _thongKeBLL.LayBaoCaoLuuThongTuan();
+                // 1. Nạp 4 chỉ số KPI toàn hệ thống
+                lblKPIDocGiaVal.Text = _thongKeBLL.LayTongSoDocGia().ToString("N0");
+                lblKPIDauSachVal.Text = _thongKeBLL.LayTongSoDauSach().ToString("N0");
+                lblKPIDangMuonVal.Text = _thongKeBLL.LayTongSachDangMuon().ToString("N0");
+
+                decimal tienPhatChuaThu = _thongKeBLL.LayTongTienPhatChuaThu();
+                lblKPITienPhatVal.Text = $"{tienPhatChuaThu:N0} đ";
+
+                // 2. Nạp danh sách lưu thông tuần
+                DataTable dtLuuThong = _thongKeBLL.LayLuuThongTuan();
                 dgvLuuThongTuan.AutoGenerateColumns = false;
-                dgvLuuThongTuan.DataSource = null;
-                dgvLuuThongTuan.DataSource = listLuuThong;
-
-                // Cập nhật số liệu lượt sách đang mượn
-                int tongDangLuuThong = listLuuThong.Sum(x => x.So_Sach_Dang_Muon_Hien_Tai);
-                lblLuuThongVal.Text = tongDangLuuThong.ToString();
-
-                // 2. Tải số liệu Độc giả và Tiền phạt thực tế từ CSDL (thay cho giá trị hardcode)
-                var (tongDocGia, tongTienPhat) = _thongKeBLL.LayKPIDocGiaVaTienPhat();
-                lblDocGiaVal.Text = tongDocGia.ToString();
-                lblTienPhatVal.Text = $"{tongTienPhat:N0} đ";
-
-                // 3. Tải danh sách đối soát ca trực
-                var listDoiSoat = _thongKeBLL.LayDanhSachDoiSoatCaTruc(0, DateTime.Today.AddDays(-7), DateTime.Today);
-                dgvDoiSoat.AutoGenerateColumns = false;
-                dgvDoiSoat.DataSource = null;
-                dgvDoiSoat.DataSource = listDoiSoat;
+                dgvLuuThongTuan.DataSource = dtLuuThong;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi nạp báo cáo tuần: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi tải dữ liệu tổng quan: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void NapDanhSachChiNhanhKho()
+        private void btnLamMoiTongQuan_Click(object sender, EventArgs e)
+        {
+            TaiDuLieuTongQuan();
+        }
+
+        private void dgvLuuThongTuan_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Xử lý sự kiện click trên cell lưu thông (nếu có bổ sung cột thao tác)
+        }
+        #endregion
+
+        #region Tab 2: Kho Sách Chi Nhánh & Điều Phối
+        private void NapDanhSachChiNhanh()
         {
             try
             {
                 var listCN = _chiNhanhBLL.LayDanhSachChiNhanh();
-                // Chèn thêm mục tất cả chi nhánh
-                listCN.Insert(0, new ChiNhanhDTO { Ma_So = 0, Ten_Chi_Nhanh = "-- Toàn bộ chi nhánh --" });
+                listCN.Insert(0, new ChiNhanhDTO { Ma_So = 0, Ten_Chi_Nhanh = "-- Toàn bộ hệ thống thư viện --" });
 
                 cboChiNhanhKho.DataSource = listCN;
                 cboChiNhanhKho.DisplayMember = "Ten_Chi_Nhanh";
@@ -96,7 +82,7 @@ namespace Library.UI
             }
         }
 
-        private void TaiDuLieuKhoSach()
+        private void TaiDuLieuKhoChiNhanh()
         {
             try
             {
@@ -106,58 +92,93 @@ namespace Library.UI
                     chiNhanhMaSo = id;
                 }
 
-                string tuKhoa = txtTimKiemSach.Text.Trim();
+                string tuKhoa = txtTimKiemKho.Text.Trim();
                 var listKho = _thongKeBLL.LayChiTietKhoSachChiNhanh(chiNhanhMaSo, tuKhoa);
 
-                dgvKhoSach.AutoGenerateColumns = false;
-                dgvKhoSach.DataSource = null;
-                dgvKhoSach.DataSource = listKho;
+                dgvKhoSachChiNhanh.AutoGenerateColumns = false;
+                dgvKhoSachChiNhanh.DataSource = null;
+                dgvKhoSachChiNhanh.DataSource = listKho;
 
-                // Cập nhật các thẻ tóm tắt kho
-                lblTongDauSachCNVal.Text = listKho.Count.ToString();
-                lblTongBanSaoCNVal.Text = listKho.Sum(x => x.Tong_Ban_Sao).ToString();
-                lblDangMuonCNVal.Text = listKho.Sum(x => x.Dang_Muon).ToString();
-                lblSanCoCNVal.Text = listKho.Sum(x => x.San_Co).ToString();
-
-                // Cập nhật card "SÁCH SẴN SÀNG KHO" ở Tab 1
-                lblSachSanSangVal.Text = listKho.Sum(x => x.San_Co).ToString();
+                // Cập nhật 5 thẻ KPI của chi nhánh
+                lblTongDauSachCNVal.Text = listKho.Count.ToString("N0");
+                lblTongBanSaoCNVal.Text = listKho.Sum(x => x.Tong_Ban_Sao).ToString("N0");
+                lblDangMuonCNVal.Text = listKho.Sum(x => x.Dang_Muon).ToString("N0");
+                lblSanCoCNVal.Text = listKho.Sum(x => x.San_Co).ToString("N0");
+                lblBaoTriCNVal.Text = listKho.Sum(x => x.Bao_Tri).ToString("N0");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi tải kho sách: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi tải kho sách chi nhánh: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void cboChiNhanhKho_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cboChiNhanhKho.SelectedIndex >= 0)
+            if (_isInitialized)
             {
-                TaiDuLieuKhoSach();
+                TaiDuLieuKhoChiNhanh();
             }
         }
 
-        private void txtTimKiemSach_TextChanged(object sender, EventArgs e)
+        private void txtTimKiemKho_TextChanged(object sender, EventArgs e)
         {
-            TaiDuLieuKhoSach();
+            TaiDuLieuKhoChiNhanh();
         }
 
         private void btnTaiLaiKho_Click(object sender, EventArgs e)
         {
-            txtTimKiemSach.Clear();
-            TaiDuLieuKhoSach();
+            txtTimKiemKho.Clear();
+            TaiDuLieuKhoChiNhanh();
+        }
+
+        private void btnDieuPhoiSach_Click(object sender, EventArgs e)
+        {
+            if (dgvKhoSachChiNhanh.CurrentRow?.DataBoundItem is not KhoSachChiNhanhDTO selected)
+            {
+                MessageBox.Show("Vui lòng chọn 1 đầu sách từ danh sách chi nhánh để tiến hành điều phối!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int chiNhanhHienTaiId = 0;
+            if (cboChiNhanhKho.SelectedValue != null)
+            {
+                int.TryParse(cboChiNhanhKho.SelectedValue.ToString(), out chiNhanhHienTaiId);
+            }
+
+            if (chiNhanhHienTaiId == 0)
+            {
+                MessageBox.Show("Vui lòng chọn một chi nhánh xuất cụ thể từ danh sách lọc phía trên (không chọn 'Toàn bộ hệ thống') để xác định nguồn điều chuyển!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cboChiNhanhKho.Focus();
+                return;
+            }
+
+            if (selected.San_Co <= 0)
+            {
+                MessageBox.Show($"Đầu sách '{selected.Tieu_De}' tại chi nhánh này hiện không còn bản sao nào sẵn sàng trên kệ để luân chuyển!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string tenChiNhanhHienTai = cboChiNhanhKho.Text;
+
+            // Mở popup điều phối sách đã được thiết kế
+            using var popup = new FormDieuPhoiSach(selected.Ma_Sach, selected.Tieu_De, chiNhanhHienTaiId, tenChiNhanhHienTai);
+            if (popup.ShowDialog(this) == DialogResult.OK)
+            {
+                TaiDuLieuKhoChiNhanh();
+            }
         }
 
         private void tabControlMain_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (tabControlMain.SelectedIndex == 0)
             {
-                TaiDuLieuThongKeTuanVaKPI();
+                TaiDuLieuTongQuan();
             }
             else
             {
-                TaiDuLieuKhoSach();
+                TaiDuLieuKhoChiNhanh();
             }
         }
-
+        #endregion
     }
 }

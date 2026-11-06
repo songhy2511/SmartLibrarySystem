@@ -66,6 +66,34 @@ namespace Library.BLL
             }
             return result;
         }
+
+        public DataTable LayBanSaoSanCoTaiChiNhanh(string maSach, int chiNhanhId)
+        {
+            return _dal.LayBanSaoSanCoTaiChiNhanh(maSach, chiNhanhId);
+        }
+
+        public (bool IsSuccess, string Message) DieuPhoiSach(int banSaoMaSo, string maVach, string tieuDe, int chiNhanhNguonId, int chiNhanhDichId, string ghiChu, int? adminUserId)
+        {
+            if (banSaoMaSo <= 0)
+                return (false, "Vui lòng chọn cuốn sách (mã vạch) cần điều phối!");
+
+            if (chiNhanhNguonId == chiNhanhDichId)
+                return (false, "Chi nhánh nhận sách phải khác chi nhánh hiện tại!");
+
+            bool result = _dal.ChuyenChiNhanhBanSao(banSaoMaSo, chiNhanhNguonId, chiNhanhDichId, ghiChu);
+            if (result)
+            {
+                SystemLogger.Log(
+                    LogLevel.INFO,
+                    "Điều phối sách",
+                    $"Quản trị viên đã luân chuyển cuốn '{tieuDe}' [{maVach}] từ chi nhánh ID {chiNhanhNguonId} sang chi nhánh ID {chiNhanhDichId}. Lý do: {ghiChu}",
+                    adminUserId
+                );
+                return (true, "Điều phối sách giữa các chi nhánh thành công!");
+            }
+
+            return (false, "Điều phối thất bại! Cuốn sách có thể đã đổi trạng thái hoặc không còn sẵn sàng.");
+        }
         public bool XoaSach(string maSach, int? nguoiDungMaSo, out string errorMessage)
         {
             errorMessage = string.Empty;
@@ -128,5 +156,7 @@ namespace Library.BLL
             return result;
         }
         public DataTable TimKiemSach(string keyword) => _dal.Search(keyword);
+
+
     }
 }

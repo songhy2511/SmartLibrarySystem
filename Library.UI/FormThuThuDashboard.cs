@@ -105,7 +105,7 @@ namespace Library.UI
 
         private void btnQuanLySach_Click(object sender, EventArgs e)
         {
-            HighlightActiveButton(sender as Button, "QUẢN LÝ DANH MỤC & KHO SÁCH VẬT LÝ");
+            HighlightActiveButton(sender as Button, "QUẢN LÝ KHO SÁCH CHI NHÁNH & DANH MỤC BIỂU GHI");
             OpenChildForm(new FormQuanLySach());
         }
 
