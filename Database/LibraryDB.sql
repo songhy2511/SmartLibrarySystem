@@ -171,6 +171,8 @@ CREATE TABLE [dbo].[Phieu_Muon] (
     [Chi_Nhanh_Ma_So] INT NOT NULL,
     [Ngay_Muon] DATETIME NOT NULL DEFAULT GETDATE(),
     [Ngay_Hen_Tra] DATETIME NOT NULL,
+    [Ngay_Tra] DATETIME NULL,                                     
+    [So_Lan_Gia_Han] INT NOT NULL DEFAULT 0,                     
     [Trang_Thai] NVARCHAR(50) NOT NULL DEFAULT N'Đang mượn'
         CHECK ([Trang_Thai] IN (N'Đang mượn', N'Đã hoàn thành', N'Quá hạn')),
     [Ghi_Chu] NVARCHAR(255) NULL,

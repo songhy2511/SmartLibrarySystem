@@ -57,7 +57,9 @@ namespace Library.BLL
         public bool TraSach(string maPhieu, DateTime ngayTra, DateTime ngayHenHan, out decimal tienPhat)
         {
             tienPhat = TinhTienPhatTreHan(ngayHenHan, ngayTra);
-            string trangThai = "Đã trả";
+
+            string trangThai = "Đã hoàn thành";
+
             return _phieuMuonDAL.CapNhatTraSach(maPhieu, ngayTra, trangThai);
         }
 
@@ -74,11 +76,6 @@ namespace Library.BLL
 
             DateTime ngayMoi = ngayHenHanHienTai.AddDays(7);
             return _phieuMuonDAL.GiaHanPhieu(maPhieu, ngayMoi, soLanGiaHanHienTai + 1);
-        }
-
-        public bool LapBienBanViPham(PhatTienDTO bienBan)
-        {
-            return _phieuMuonDAL.ThemBienBanViPham(bienBan);
         }
     }
 }

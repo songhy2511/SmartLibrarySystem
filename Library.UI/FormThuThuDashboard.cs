@@ -1,12 +1,14 @@
-﻿using Library.BLL;
-using System;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
+using Library.BLL;
 
 namespace Library.UI
 {
     public partial class FormThuThuDashboard : Form
     {
-        private Form? currentFormChild = null; // Thêm dấu ? để khai báo đây là kiểu nullable
+        private Form? currentFormChild = null;
+
         public FormThuThuDashboard()
         {
             InitializeComponent();
@@ -23,40 +25,56 @@ namespace Library.UI
 
             string librarianName = SessionContext.CurrentLibrarian?.Ho_Ten ?? SessionContext.CurrentUser.Ten_Dang_Nhap;
             string desk = SessionContext.CurrentLibrarian?.Quay_Phu_Trach ?? "Quầy số 1";
-            lblLibrarianInfo.Text = $"Thủ thư: {librarianName} | {desk} | Đăng nhập: {SessionContext.LoginTime:HH:mm:ss}";
+            lblLibrarianInfo.Text = $"Thủ thư: {librarianName} | {desk} | Giờ vào: {SessionContext.LoginTime:HH:mm:ss}";
+
+            // Mặc định khi vừa đăng nhập -> Mở Bàn Lưu Thông
+            btnBanLuuThong.PerformClick();
+        }
+
+        private void SetActiveMenu(Button activeButton, string pageTitle)
+        {
+            // Reset màu toàn bộ nút trên Sidebar
+            btnBanLuuThong.BackColor = Color.FromArgb(19, 78, 74);
+            btnXuLyViPham.BackColor = Color.FromArgb(19, 78, 74);
+            btnLichTruc.BackColor = Color.FromArgb(19, 78, 74);
+            btnDoiMatKhau.BackColor = Color.FromArgb(19, 78, 74);
+
+            // Đánh dấu nút được chọn
+            activeButton.BackColor = Color.FromArgb(15, 118, 110);
+            lblPageTitle.Text = pageTitle;
         }
 
         private void OpenChildForm(Form childForm)
         {
-            // Nếu đang có form con hiển thị thì đóng lại để giải phóng bộ nhớ
             if (currentFormChild != null)
             {
                 currentFormChild.Close();
             }
 
             currentFormChild = childForm;
-            childForm.TopLevel = false;                  // Biến form con thành dạng control
-            childForm.FormBorderStyle = FormBorderStyle.None; // Xóa bỏ viền cửa sổ của form con
-            childForm.Dock = DockStyle.Fill;             // Phủ kín vùng panel chứa bên phải
+            childForm.TopLevel = false;
+            childForm.FormBorderStyle = FormBorderStyle.None;
+            childForm.Dock = DockStyle.Fill;
 
-            // Thay thế 'pnlNoiDung' bằng tên Panel chứa nội dung bên phải sẵn có của bạn
             pnlContent.Controls.Clear();
             pnlContent.Controls.Add(childForm);
             pnlContent.Tag = childForm;
             childForm.BringToFront();
             childForm.Show();
         }
-        // Khi người dùng bấm vào mục "Bàn Lưu Thông" trên menu sẵn có
+
         private void btnBanLuuThong_Click(object sender, EventArgs e)
         {
+            SetActiveMenu(btnBanLuuThong, "BÀN TÁC NGHIỆP LƯU THÔNG (MƯỢN - TRẢ SÁCH)");
             OpenChildForm(new FormBanLuuThong());
         }
 
-        // Khi người dùng bấm vào mục "Xử Lý Vi Phạm Phạt" trên menu sẵn có
         private void btnXuLyViPham_Click(object sender, EventArgs e)
         {
+            SetActiveMenu(btnXuLyViPham, "QUẢN LÝ VI PHẠM & XỬ LÝ PHẠT");
             OpenChildForm(new FormLapBienBanViPham());
         }
+
         private void btnDoiMatKhau_Click(object sender, EventArgs e)
         {
             using var form = new FormDoiMatKhau();
@@ -65,16 +83,8 @@ namespace Library.UI
 
         private void btnDangXuat_Click(object sender, EventArgs e)
         {
-            var dialogResult = MessageBox.Show(
-                "Bạn có muốn kết thúc ca trực và đăng xuất tài khoản?",
-                "Xác nhận",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
-
-            if (dialogResult == DialogResult.Yes)
+            if (MessageBox.Show("Bạn có muốn kết thúc ca trực và đăng xuất tài khoản?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                // 👉 GHI LOG ĐĂNG XUẤT CỦA THỦ THƯ
                 if (SessionContext.CurrentUser != null)
                 {
                     SystemLogger.Log(
