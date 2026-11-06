@@ -56,11 +56,16 @@ namespace Library.UI
                 dgvLuuThongTuan.DataSource = null;
                 dgvLuuThongTuan.DataSource = listLuuThong;
 
-                // Cập nhật số liệu các thẻ KPI tổng quan
+                // Cập nhật số liệu lượt sách đang mượn
                 int tongDangLuuThong = listLuuThong.Sum(x => x.So_Sach_Dang_Muon_Hien_Tai);
                 lblLuuThongVal.Text = tongDangLuuThong.ToString();
 
-                // 2. Tải danh sách đối soát ca trực
+                // 2. Tải số liệu Độc giả và Tiền phạt thực tế từ CSDL (thay cho giá trị hardcode)
+                var (tongDocGia, tongTienPhat) = _thongKeBLL.LayKPIDocGiaVaTienPhat();
+                lblDocGiaVal.Text = tongDocGia.ToString();
+                lblTienPhatVal.Text = $"{tongTienPhat:N0} đ";
+
+                // 3. Tải danh sách đối soát ca trực
                 var listDoiSoat = _thongKeBLL.LayDanhSachDoiSoatCaTruc(0, DateTime.Today.AddDays(-7), DateTime.Today);
                 dgvDoiSoat.AutoGenerateColumns = false;
                 dgvDoiSoat.DataSource = null;

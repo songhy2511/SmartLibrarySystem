@@ -68,6 +68,8 @@ namespace Library.DAL
         public List<KhoSachChiNhanhDTO> LayKhoSachTheoChiNhanh(int chiNhanhMaSo, string tuKhoa)
         {
             var list = new List<KhoSachChiNhanhDTO>();
+
+            // Sử dụng LEFT JOIN để không làm mất đầu sách, đồng thời quét đúng các trạng thái hư hỏng/thanh lý
             string query = @"
         SELECT 
             s.Ma_So AS Sach_Ma_So,
@@ -78,11 +80,14 @@ namespace Library.DAL
             COUNT(bss.Ma_So) AS Tong_Ban_Sao,
             SUM(CASE WHEN bss.Trang_Thai = N'Đang cho mượn' THEN 1 ELSE 0 END) AS Dang_Muon,
             SUM(CASE WHEN bss.Trang_Thai = N'Sẵn sàng' THEN 1 ELSE 0 END) AS San_Co,
-            SUM(CASE WHEN bss.Trang_Thai = N'Bảo trì' OR bss.Tinh_Trang = N'Hỏng' THEN 1 ELSE 0 END) AS Bao_Tri
-        FROM Sach s
-        JOIN Ban_Sao_Sach bss ON s.Ma_So = bss.Sach_Ma_So
-        WHERE (@ChiNhanhMaSo = 0 OR bss.Chi_Nhanh_Ma_So = @ChiNhanhMaSo)
-          AND (@TuKhoa = '' OR s.Tieu_De LIKE '%' + @TuKhoa + '%' OR s.Ma_Sach LIKE '%' + @TuKhoa + '%' OR s.Tac_Gia LIKE '%' + @TuKhoa + '%')
+            SUM(CASE WHEN bss.Trang_Thai IN (N'Bảo trì', N'Hư hỏng', N'Mất/Thanh lý') 
+                          OR bss.Tinh_Trang LIKE N'%Hỏng%' 
+                          OR bss.Tinh_Trang LIKE N'%Rách%' THEN 1 ELSE 0 END) AS Bao_Tri
+        FROM dbo.Sach s
+        LEFT JOIN dbo.Ban_Sao_Sach bss ON s.Ma_So = bss.Sach_Ma_So 
+                                      AND (@ChiNhanhMaSo = 0 OR bss.Chi_Nhanh_Ma_So = @ChiNhanhMaSo)
+        WHERE (@TuKhoa = '' OR s.Tieu_De LIKE '%' + @TuKhoa + '%' OR s.Ma_Sach LIKE '%' + @TuKhoa + '%' OR s.Tac_Gia LIKE '%' + @TuKhoa + '%')
+          AND (@ChiNhanhMaSo = 0 OR bss.Ma_So IS NOT NULL)
         GROUP BY s.Ma_So, s.Ma_Sach, s.Tieu_De, s.The_Loai, s.Tac_Gia
         ORDER BY s.Ma_Sach ASC";
 
@@ -108,6 +113,20 @@ namespace Library.DAL
                 });
             }
             return list;
+        }
+
+        // Bổ sung hàm lấy số liệu thực tế cho các thẻ KPI trên Tab 1
+        public (int TongDocGia, decimal TongTienPhat) LayKPIDocGiaVaTienPhat()
+        {
+            string queryDocGia = "SELECT COUNT(*) FROM dbo.Doc_Gia WHERE Trang_Thai = N'Hoạt động'";
+            object? resDG = DatabaseHelper.ExecuteScalar(queryDocGia);
+            int docGia = (resDG != null && resDG != DBNull.Value) ? Convert.ToInt32(resDG) : 0;
+
+            string queryPhat = "SELECT ISNULL(SUM(So_Tien_Phat), 0) FROM dbo.Phieu_Phat WHERE Da_Thanh_Toan = 1";
+            object? resPhat = DatabaseHelper.ExecuteScalar(queryPhat);
+            decimal tienPhat = (resPhat != null && resPhat != DBNull.Value) ? Convert.ToDecimal(resPhat) : 0m;
+
+            return (docGia, tienPhat);
         }
 
         public List<DoiSoatCaTrucDTO> LayDanhSachDoiSoatCaTruc(int chiNhanhMaSo, DateTime tuNgay, DateTime denNgay)
