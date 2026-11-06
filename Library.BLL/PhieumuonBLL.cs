@@ -92,7 +92,6 @@ namespace Library.BLL
             return 0;
         }
 
-        // Fix: Update method signature and logic to match DTOs and handle nulls
         public bool TraSach(string maPhieu, string maDocGia, DateTime ngayTra, DateTime ngayHenHan, int thuThuId, out decimal tienPhat)
         {
             tienPhat = TinhTienPhatTreHan(ngayHenHan, ngayTra);
@@ -100,10 +99,18 @@ namespace Library.BLL
             if (tienPhat > 0)
             {
                 int soNgayTre = (ngayTra.Date - ngayHenHan.Date).Days;
+                int.TryParse(maDocGia, out int docGiaMaSo);
+
+                object? phieuIdObj = DatabaseHelper.ExecuteScalar(
+                    "SELECT Ma_So FROM dbo.Phieu_Muon WHERE Ma_Phieu_Muon = @Ma OR Ma_So = TRY_CAST(@Ma AS INT)",
+                    new[] { new Microsoft.Data.SqlClient.SqlParameter("@Ma", maPhieu) }
+                );
+                int phieuMuonMaSo = (phieuIdObj != null && phieuIdObj != DBNull.Value) ? Convert.ToInt32(phieuIdObj) : 0;
+
                 PhieuPhatDTO phieuPhat = new PhieuPhatDTO
                 {
-                    Doc_Gia_Ma_So = int.Parse(maDocGia),
-                    Phieu_Muon_Ma_So = int.Parse(maPhieu),
+                    Doc_Gia_Ma_So = docGiaMaSo > 0 ? docGiaMaSo : 1,
+                    Phieu_Muon_Ma_So = phieuMuonMaSo > 0 ? phieuMuonMaSo : (int?)null,
                     Thu_Thu_Ma_So = thuThuId,
                     So_Tien_Phat = tienPhat,
                     Ly_Do = $"Trả trễ hạn {soNgayTre} ngày (Hạn: {ngayHenHan:dd/MM/yyyy})",
@@ -113,9 +120,14 @@ namespace Library.BLL
                 };
 
                 _phieuPhatDAL.ThemPhieuPhat(phieuPhat);
+
+                DatabaseHelper.ExecuteNonQuery(
+                    "UPDATE dbo.Doc_Gia SET So_Lan_Vi_Pham = ISNULL(So_Lan_Vi_Pham, 0) + 1 WHERE Ma_So = @DocGiaMaSo",
+                    new[] { new Microsoft.Data.SqlClient.SqlParameter("@DocGiaMaSo", docGiaMaSo > 0 ? docGiaMaSo : 1) }
+                );
             }
 
-            return _phieuMuonDAL.XacNhanTraSach(maPhieu, ngayTra); // Assuming this DAL method exists
+            return _phieuMuonDAL.CapNhatTraSach(maPhieu, ngayTra, "Đã hoàn thành");
         }
 
         public bool GiaHanPhieu(string maPhieu, int soLanGiaHanHienTai, DateTime ngayHenHanHienTai)

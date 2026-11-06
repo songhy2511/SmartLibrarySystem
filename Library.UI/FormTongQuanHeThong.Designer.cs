@@ -263,7 +263,6 @@
             dgvLuuThongTuan.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvLuuThongTuan.Size = new Size(1082, 160);
             dgvLuuThongTuan.TabIndex = 1;
-            dgvLuuThongTuan.CellContentClick += dgvLuuThongTuan_CellContentClick;
             // 
             // colLTChiNhanh
             // 

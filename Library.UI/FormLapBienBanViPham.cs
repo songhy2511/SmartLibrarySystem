@@ -10,6 +10,7 @@ namespace Library.UI
     public partial class FormLapBienBanViPham : Form
     {
         private readonly PhieuPhatBLL _phieuPhatBLL = new PhieuPhatBLL();
+        private readonly CauHinhHeThongBLL _cauHinhBLL = new CauHinhHeThongBLL();
 
         public FormLapBienBanViPham()
         {
@@ -22,30 +23,90 @@ namespace Library.UI
             LoadDanhSachDocGia();
             KhoiTaoGiaTriMacDinh();
             LoadDanhSachViPham();
-            cboLoaiViPham.Items.Add("Trễ hạn");
-            cboLoaiViPham.Items.Add("Quá hạn mượn kéo dài");
-            cboLoaiViPham.Items.Add("Làm mất sách");
-            cboLoaiViPham.Items.Add("Làm rách / hư hỏng sách");
+
+            // Đấu nối sự kiện thay đổi lựa chọn
+            cboLoaiViPham.SelectedIndexChanged -= cboLoaiViPham_SelectedIndexChanged;
+            cboLoaiViPham.SelectedIndexChanged += cboLoaiViPham_SelectedIndexChanged;
+
+            cboDocGia.SelectedIndexChanged -= cboDocGia_SelectedIndexChanged;
+            cboDocGia.SelectedIndexChanged += cboDocGia_SelectedIndexChanged;
         }
-        private void cboLoaiViPham_SelectedIndexChanged(object sender, EventArgs e)
+
+        private void cboDocGia_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            CapNhatTienPhatTheoQuyChe();
+        }
+
+        private void cboLoaiViPham_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            CapNhatTienPhatTheoQuyChe();
+        }
+
+        /// <summary>
+        /// Tự động kiểm tra số ngày trễ hạn từ CSDL và nhân với đơn giá quy chế động
+        /// </summary>
+        private void CapNhatTienPhatTheoQuyChe()
         {
             if (cboLoaiViPham.SelectedItem == null) return;
 
-            string? loaiViPham = cboLoaiViPham.SelectedItem.ToString();
+            string loaiViPham = cboLoaiViPham.SelectedItem.ToString() ?? "";
+            string maDocGia = cboDocGia.SelectedValue?.ToString() ?? "";
 
-            if (loaiViPham == "Trễ hạn" || loaiViPham == "Quá hạn mượn kéo dài")
+            if (loaiViPham == "Quá hạn mượn kéo dài" || loaiViPham == "Trễ hạn")
             {
-                // Khóa textbox để lấy số tiền tính tự động từ BLL
                 txtSoTienPhat.ReadOnly = true;
+
+                // 1. Lấy đơn giá phạt mỗi ngày từ cấu hình hệ thống
+                decimal donGiaMoiNgay = _cauHinhBLL.LayTienPhatMoiNgay();
+
+                // 2. Tìm phiếu mượn quá hạn gần nhất của độc giả này
+                string query = @"
+                    SELECT TOP 1 
+                        pm.Ma_Phieu_Muon, 
+                        pm.Ngay_Hen_Tra, 
+                        ISNULL(s.Tieu_De, N'Tài liệu thư viện') AS TenSach,
+                        DATEDIFF(DAY, pm.Ngay_Hen_Tra, GETDATE()) AS SoNgayTre
+                    FROM dbo.Phieu_Muon pm
+                    INNER JOIN dbo.Doc_Gia dg ON pm.Doc_Gia_Ma_So = dg.Ma_So
+                    LEFT JOIN dbo.Chi_Tiet_Phieu_Muon ct ON pm.Ma_So = ct.Phieu_Muon_Ma_So
+                    LEFT JOIN dbo.Ban_Sao_Sach bs ON ct.Ban_Sao_Sach_Ma_So = bs.Ma_So
+                    LEFT JOIN dbo.Sach s ON bs.Sach_Ma_So = s.Ma_So
+                    WHERE (dg.Ma_Doc_Gia = @MaDG OR dg.Ma_So = TRY_CAST(@MaDG AS INT))
+                      AND pm.Trang_Thai = N'Đang mượn'
+                      AND pm.Ngay_Hen_Tra < CAST(GETDATE() AS DATE)
+                    ORDER BY pm.Ngay_Hen_Tra ASC";
+
+                DataTable dt = DatabaseHelper.ExecuteQuery(query, new[] {
+                    new Microsoft.Data.SqlClient.SqlParameter("@MaDG", maDocGia)
+                });
+
+                if (dt.Rows.Count > 0)
+                {
+                    int soNgayTre = Convert.ToInt32(dt.Rows[0]["SoNgayTre"]);
+                    string tenSach = dt.Rows[0]["TenSach"].ToString() ?? "";
+                    string maPhieu = dt.Rows[0]["Ma_Phieu_Muon"].ToString() ?? "";
+
+                    decimal tongTienPhat = soNgayTre * donGiaMoiNgay;
+                    txtSoTienPhat.Text = tongTienPhat.ToString("0");
+                    txtMoTa.Text = $"Quá hạn {soNgayTre} ngày cuốn '{tenSach}' (Mã phiếu: {maPhieu}). Đơn giá phạt: {donGiaMoiNgay:N0} VNĐ/ngày.";
+                }
+                else
+                {
+                    // Nếu độc giả chưa có phiếu quá hạn thực tế trên hệ thống
+                    txtSoTienPhat.Text = donGiaMoiNgay.ToString("0");
+                    txtMoTa.Text = $"Phạt vi phạm quy định mượn trả (Định mức: {donGiaMoiNgay:N0} VNĐ/ngày).";
+                }
             }
-            else if (loaiViPham == "Làm mất sách" || loaiViPham == "Làm rách / hư hỏng sách")
+            else // "Làm mất sách" hoặc "Làm rách / hư hỏng sách"
             {
-                // Mở khóa để thủ thư nhập giá trị bồi thường theo biên bản
                 txtSoTienPhat.ReadOnly = false;
-                txtSoTienPhat.Clear();
+                txtSoTienPhat.Text = "50000"; // Mức bồi thường gợi ý cơ bản
+                txtMoTa.Text = $"Bồi thường tài liệu do {loaiViPham.ToLower()}.";
                 txtSoTienPhat.Focus();
+                txtSoTienPhat.SelectAll();
             }
         }
+
         private void DinhDangDataGridView()
         {
             dgvBienBanViPham.BackgroundColor = Color.White;
@@ -60,13 +121,11 @@ namespace Library.UI
             dgvBienBanViPham.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvBienBanViPham.RowTemplate.Height = 35;
 
-            // Header bảng
             dgvBienBanViPham.ColumnHeadersHeight = 40;
             dgvBienBanViPham.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(19, 78, 74);
             dgvBienBanViPham.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             dgvBienBanViPham.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Semibold", 9.5f);
 
-            // Dòng dữ liệu
             dgvBienBanViPham.DefaultCellStyle.Font = new Font("Segoe UI", 9f);
             dgvBienBanViPham.DefaultCellStyle.SelectionBackColor = Color.FromArgb(204, 251, 241);
             dgvBienBanViPham.DefaultCellStyle.SelectionForeColor = Color.Black;
@@ -99,10 +158,9 @@ namespace Library.UI
             if (cboLoaiViPham.Items.Count > 0)
                 cboLoaiViPham.SelectedIndex = 0;
 
-            txtSoTienPhat.Text = "50000";
-            txtMoTa.Clear();
             dtpNgayLap.Value = DateTime.Now;
             dtpNgayHenNop.Value = DateTime.Now.AddDays(7);
+            CapNhatTienPhatTheoQuyChe();
         }
 
         private void LoadDanhSachViPham()
@@ -156,7 +214,7 @@ namespace Library.UI
             string maDocGia = cboDocGia.SelectedValue.ToString() ?? "";
             string loaiViPham = cboLoaiViPham.SelectedItem?.ToString() ?? "Vi phạm khác";
             string chiTiet = txtMoTa.Text.Trim();
-            string lyDoTongHop = string.IsNullOrWhiteSpace(chiTiet) ? loaiViPham : $"{loaiViPham} - {chiTiet}";
+            string lyDoTongHop = string.IsNullOrWhiteSpace(chiTiet) ? loaiViPham : $"{chiTiet}";
 
             int thuThuId = SessionContext.CurrentLibrarian?.Ma_So ?? 1;
 
@@ -166,8 +224,8 @@ namespace Library.UI
             {
                 MessageBox.Show(message, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 txtMoTa.Clear();
-                txtSoTienPhat.Text = "50000";
                 LoadDanhSachViPham();
+                KhoiTaoGiaTriMacDinh();
             }
             else
             {

@@ -72,9 +72,7 @@ namespace Library.BLL
         }
         public string LayGiaTri(string tenCauHinh)
         {
-            // Logic gọi xuống DAL để lấy giá trị từ bảng Cau_Hinh_He_Thong
-            // Tạm thời nếu chưa có DAL, bạn có thể return ""; để hết lỗi.
-            return "";
+            return _dal.LayGiaTri(tenCauHinh, "");
         }
     }
 }   

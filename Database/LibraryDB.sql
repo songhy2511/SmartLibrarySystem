@@ -444,7 +444,3 @@ VALUES
 (3, DATEADD(MINUTE, -15, GETDATE()), 'WARNING', N'Cảnh báo quá hạn', N'Hệ thống phát hiện phiếu mượn BR0003 của độc giả Lê Hoàng Phúc quá hạn 6 ngày.', '127.0.0.1'),
 (1, DATEADD(MINUTE, -5, GETDATE()), 'INFO', N'Đồng bộ kho', N'Kiểm tra và nạp bổ sung danh mục 18 đầu sách và bản sao vào hệ thống.', '127.0.0.1');
 GO
-<<<<<<< HEAD
-
-=======
->>>>>>> b113b6205be9eda87e3a222478d273bf94014b7c
