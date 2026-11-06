@@ -138,5 +138,16 @@ namespace Library.BLL
             DateTime ngayMoi = ngayHenHanHienTai.AddDays(7);
             return _phieuMuonDAL.GiaHanPhieu(maPhieu, ngayMoi, soLanGiaHanHienTai + 1);
         }
+
+        public DataTable LayDanhSachDangMuonNangCao(int docGiaMaSo = 0, bool chiQuaHan = false, string tuKhoa = "")
+        {
+            return _phieuMuonDAL.LayDanhSachDangMuonNangCao(docGiaMaSo, chiQuaHan, tuKhoa);
+        }
+
+        public bool CapNhatSoDienThoaiDocGia(int docGiaMaSo, string soDienThoai)
+        {
+            if (docGiaMaSo <= 0 || string.IsNullOrWhiteSpace(soDienThoai)) return false;
+            return _phieuMuonDAL.CapNhatSoDienThoaiDocGia(docGiaMaSo, soDienThoai);
+        }
     }
 }

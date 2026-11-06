@@ -26,17 +26,20 @@
             pnlCard = new System.Windows.Forms.Panel();
             btnKhoiPhuc = new System.Windows.Forms.Button();
             btnLuuQuyChe = new System.Windows.Forms.Button();
+            nudTyLeMat = new System.Windows.Forms.NumericUpDown();
+            lblTyLeMat = new System.Windows.Forms.Label();
+            nudTyLeHong = new System.Windows.Forms.NumericUpDown();
+            lblTyLeHong = new System.Windows.Forms.Label();
+            nudTyLeRach = new System.Windows.Forms.NumericUpDown();
+            lblTyLeRach = new System.Windows.Forms.Label();
+            lblDenBuSection = new System.Windows.Forms.Label();
             nudThoiHanThe = new System.Windows.Forms.NumericUpDown();
-            lblThoiHanTheDesc = new System.Windows.Forms.Label();
             lblThoiHanThe = new System.Windows.Forms.Label();
             nudTienPhat = new System.Windows.Forms.NumericUpDown();
-            lblTienPhatDesc = new System.Windows.Forms.Label();
             lblTienPhat = new System.Windows.Forms.Label();
             nudSoNgayMuon = new System.Windows.Forms.NumericUpDown();
-            lblSoNgayMuonDesc = new System.Windows.Forms.Label();
             lblSoNgayMuon = new System.Windows.Forms.Label();
             nudSoSachMuon = new System.Windows.Forms.NumericUpDown();
-            lblSoSachMuonDesc = new System.Windows.Forms.Label();
             lblSoSachMuon = new System.Windows.Forms.Label();
             lblFormSection = new System.Windows.Forms.Label();
             pnlGrid = new System.Windows.Forms.Panel();
@@ -49,6 +52,9 @@
             pnlHeader.SuspendLayout();
             pnlMain.SuspendLayout();
             pnlCard.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)nudTyLeMat).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudTyLeHong).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudTyLeRach).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudThoiHanThe).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudTienPhat).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudSoNgayMuon).BeginInit();
@@ -65,7 +71,7 @@
             pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
             pnlHeader.Location = new System.Drawing.Point(0, 0);
             pnlHeader.Name = "pnlHeader";
-            pnlHeader.Padding = new System.Windows.Forms.Padding(25, 15, 25, 15);
+            pnlHeader.Padding = new System.Windows.Forms.Padding(25, 12, 25, 12);
             pnlHeader.Size = new System.Drawing.Size(1000, 65);
             pnlHeader.TabIndex = 0;
             // 
@@ -74,18 +80,18 @@
             lblSubTitle.AutoSize = true;
             lblSubTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
             lblSubTitle.ForeColor = System.Drawing.Color.FromArgb(100, 116, 139);
-            lblSubTitle.Location = new System.Drawing.Point(25, 38);
+            lblSubTitle.Location = new System.Drawing.Point(25, 36);
             lblSubTitle.Name = "lblSubTitle";
             lblSubTitle.Size = new System.Drawing.Size(535, 15);
             lblSubTitle.TabIndex = 1;
-            lblSubTitle.Text = "Cấu hình hạn mức lưu thông mượn trả, biểu phí phạt vi phạm và hiệu lực thẻ độc giả toàn hệ thống";
+            lblSubTitle.Text = "Cấu hình hạn mức lưu thông mượn trả, biểu phí phạt vi phạm và tỷ lệ đền bù hư hao tài sản";
             // 
             // lblTitle
             // 
             lblTitle.AutoSize = true;
             lblTitle.Font = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Bold);
             lblTitle.ForeColor = System.Drawing.Color.FromArgb(15, 23, 42);
-            lblTitle.Location = new System.Drawing.Point(23, 12);
+            lblTitle.Location = new System.Drawing.Point(23, 10);
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new System.Drawing.Size(326, 25);
             lblTitle.TabIndex = 0;
@@ -98,7 +104,7 @@
             pnlMain.Dock = System.Windows.Forms.DockStyle.Fill;
             pnlMain.Location = new System.Drawing.Point(0, 65);
             pnlMain.Name = "pnlMain";
-            pnlMain.Padding = new System.Windows.Forms.Padding(25);
+            pnlMain.Padding = new System.Windows.Forms.Padding(20);
             pnlMain.Size = new System.Drawing.Size(1000, 555);
             pnlMain.TabIndex = 1;
             // 
@@ -107,24 +113,27 @@
             pnlCard.BackColor = System.Drawing.Color.White;
             pnlCard.Controls.Add(btnKhoiPhuc);
             pnlCard.Controls.Add(btnLuuQuyChe);
+            pnlCard.Controls.Add(nudTyLeMat);
+            pnlCard.Controls.Add(lblTyLeMat);
+            pnlCard.Controls.Add(nudTyLeHong);
+            pnlCard.Controls.Add(lblTyLeHong);
+            pnlCard.Controls.Add(nudTyLeRach);
+            pnlCard.Controls.Add(lblTyLeRach);
+            pnlCard.Controls.Add(lblDenBuSection);
             pnlCard.Controls.Add(nudThoiHanThe);
-            pnlCard.Controls.Add(lblThoiHanTheDesc);
             pnlCard.Controls.Add(lblThoiHanThe);
             pnlCard.Controls.Add(nudTienPhat);
-            pnlCard.Controls.Add(lblTienPhatDesc);
             pnlCard.Controls.Add(lblTienPhat);
             pnlCard.Controls.Add(nudSoNgayMuon);
-            pnlCard.Controls.Add(lblSoNgayMuonDesc);
             pnlCard.Controls.Add(lblSoNgayMuon);
             pnlCard.Controls.Add(nudSoSachMuon);
-            pnlCard.Controls.Add(lblSoSachMuonDesc);
             pnlCard.Controls.Add(lblSoSachMuon);
             pnlCard.Controls.Add(lblFormSection);
             pnlCard.Dock = System.Windows.Forms.DockStyle.Left;
-            pnlCard.Location = new System.Drawing.Point(25, 25);
+            pnlCard.Location = new System.Drawing.Point(20, 20);
             pnlCard.Name = "pnlCard";
-            pnlCard.Padding = new System.Windows.Forms.Padding(20);
-            pnlCard.Size = new System.Drawing.Size(420, 505);
+            pnlCard.Padding = new System.Windows.Forms.Padding(18);
+            pnlCard.Size = new System.Drawing.Size(430, 515);
             pnlCard.TabIndex = 0;
             // 
             // btnKhoiPhuc
@@ -132,12 +141,12 @@
             btnKhoiPhuc.BackColor = System.Drawing.Color.FromArgb(241, 245, 249);
             btnKhoiPhuc.FlatAppearance.BorderSize = 0;
             btnKhoiPhuc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnKhoiPhuc.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
+            btnKhoiPhuc.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
             btnKhoiPhuc.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
-            btnKhoiPhuc.Location = new System.Drawing.Point(20, 445);
+            btnKhoiPhuc.Location = new System.Drawing.Point(20, 465);
             btnKhoiPhuc.Name = "btnKhoiPhuc";
-            btnKhoiPhuc.Size = new System.Drawing.Size(380, 36);
-            btnKhoiPhuc.TabIndex = 14;
+            btnKhoiPhuc.Size = new System.Drawing.Size(390, 32);
+            btnKhoiPhuc.TabIndex = 17;
             btnKhoiPhuc.Text = "🔄 Nạp Lại Giá Trị Gốc";
             btnKhoiPhuc.UseVisualStyleBackColor = false;
             btnKhoiPhuc.Click += btnKhoiPhuc_Click;
@@ -149,144 +158,174 @@
             btnLuuQuyChe.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnLuuQuyChe.Font = new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold);
             btnLuuQuyChe.ForeColor = System.Drawing.Color.White;
-            btnLuuQuyChe.Location = new System.Drawing.Point(20, 395);
+            btnLuuQuyChe.Location = new System.Drawing.Point(20, 420);
             btnLuuQuyChe.Name = "btnLuuQuyChe";
-            btnLuuQuyChe.Size = new System.Drawing.Size(380, 42);
-            btnLuuQuyChe.TabIndex = 13;
-            btnLuuQuyChe.Text = "💾 LƯU THIẾT LẬP QUY CHẾ";
+            btnLuuQuyChe.Size = new System.Drawing.Size(390, 38);
+            btnLuuQuyChe.TabIndex = 16;
+            btnLuuQuyChe.Text = "💾 LƯU TOÀN DIỆN QUY CHẾ";
             btnLuuQuyChe.UseVisualStyleBackColor = false;
             btnLuuQuyChe.Click += btnLuuQuyChe_Click;
             // 
+            // nudTyLeMat
+            // 
+            nudTyLeMat.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
+            nudTyLeMat.Location = new System.Drawing.Point(286, 375);
+            nudTyLeMat.Maximum = new decimal(new int[] { 500, 0, 0, 0 });
+            nudTyLeMat.Name = "nudTyLeMat";
+            nudTyLeMat.Size = new System.Drawing.Size(124, 24);
+            nudTyLeMat.TabIndex = 15;
+            nudTyLeMat.Value = new decimal(new int[] { 100, 0, 0, 0 });
+            // 
+            // lblTyLeMat
+            // 
+            lblTyLeMat.AutoSize = true;
+            lblTyLeMat.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            lblTyLeMat.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            lblTyLeMat.Location = new System.Drawing.Point(286, 355);
+            lblTyLeMat.Name = "lblTyLeMat";
+            lblTyLeMat.Size = new System.Drawing.Size(81, 15);
+            lblTyLeMat.TabIndex = 14;
+            lblTyLeMat.Text = "Mất sách (%):";
+            // 
+            // nudTyLeHong
+            // 
+            nudTyLeHong.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
+            nudTyLeHong.Location = new System.Drawing.Point(153, 375);
+            nudTyLeHong.Maximum = new decimal(new int[] { 200, 0, 0, 0 });
+            nudTyLeHong.Name = "nudTyLeHong";
+            nudTyLeHong.Size = new System.Drawing.Size(124, 24);
+            nudTyLeHong.TabIndex = 13;
+            nudTyLeHong.Value = new decimal(new int[] { 60, 0, 0, 0 });
+            // 
+            // lblTyLeHong
+            // 
+            lblTyLeHong.AutoSize = true;
+            lblTyLeHong.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            lblTyLeHong.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            lblTyLeHong.Location = new System.Drawing.Point(153, 355);
+            lblTyLeHong.Name = "lblTyLeHong";
+            lblTyLeHong.Size = new System.Drawing.Size(89, 15);
+            lblTyLeHong.TabIndex = 12;
+            lblTyLeHong.Text = "Hỏng nặng (%):";
+            // 
+            // nudTyLeRach
+            // 
+            nudTyLeRach.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
+            nudTyLeRach.Location = new System.Drawing.Point(20, 375);
+            nudTyLeRach.Maximum = new decimal(new int[] { 200, 0, 0, 0 });
+            nudTyLeRach.Name = "nudTyLeRach";
+            nudTyLeRach.Size = new System.Drawing.Size(124, 24);
+            nudTyLeRach.TabIndex = 11;
+            nudTyLeRach.Value = new decimal(new int[] { 30, 0, 0, 0 });
+            // 
+            // lblTyLeRach
+            // 
+            lblTyLeRach.AutoSize = true;
+            lblTyLeRach.Font = new System.Drawing.Font("Segoe UI", 8.5F);
+            lblTyLeRach.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            lblTyLeRach.Location = new System.Drawing.Point(20, 355);
+            lblTyLeRach.Name = "lblTyLeRach";
+            lblTyLeRach.Size = new System.Drawing.Size(84, 15);
+            lblTyLeRach.TabIndex = 10;
+            lblTyLeRach.Text = "Rách / Ướt (%):";
+            // 
+            // lblDenBuSection
+            // 
+            lblDenBuSection.AutoSize = true;
+            lblDenBuSection.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            lblDenBuSection.ForeColor = System.Drawing.Color.FromArgb(180, 83, 9);
+            lblDenBuSection.Location = new System.Drawing.Point(20, 332);
+            lblDenBuSection.Name = "lblDenBuSection";
+            lblDenBuSection.Size = new System.Drawing.Size(306, 15);
+            lblDenBuSection.TabIndex = 9;
+            lblDenBuSection.Text = "5. TỶ LỆ ĐỀN BÙ TÀI LIỆU HƯ HỎNG / MẤT (% GIÁ BÌA):";
+            // 
             // nudThoiHanThe
             // 
-            nudThoiHanThe.Font = new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold);
-            nudThoiHanThe.Location = new System.Drawing.Point(20, 345);
+            nudThoiHanThe.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
+            nudThoiHanThe.Location = new System.Drawing.Point(20, 288);
             nudThoiHanThe.Maximum = new decimal(new int[] { 60, 0, 0, 0 });
             nudThoiHanThe.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             nudThoiHanThe.Name = "nudThoiHanThe";
-            nudThoiHanThe.Size = new System.Drawing.Size(380, 25);
-            nudThoiHanThe.TabIndex = 12;
+            nudThoiHanThe.Size = new System.Drawing.Size(390, 24);
+            nudThoiHanThe.TabIndex = 8;
             nudThoiHanThe.Value = new decimal(new int[] { 12, 0, 0, 0 });
-            // 
-            // lblThoiHanTheDesc
-            // 
-            lblThoiHanTheDesc.AutoSize = true;
-            lblThoiHanTheDesc.Font = new System.Drawing.Font("Segoe UI", 8.25F);
-            lblThoiHanTheDesc.ForeColor = System.Drawing.Color.FromArgb(148, 163, 184);
-            lblThoiHanTheDesc.Location = new System.Drawing.Point(20, 327);
-            lblThoiHanTheDesc.Name = "lblThoiHanTheDesc";
-            lblThoiHanTheDesc.Size = new System.Drawing.Size(262, 13);
-            lblThoiHanTheDesc.TabIndex = 11;
-            lblThoiHanTheDesc.Text = "Hiệu lực sử dụng tính từ ngày cấp thẻ cho độc giả";
             // 
             // lblThoiHanThe
             // 
             lblThoiHanThe.AutoSize = true;
-            lblThoiHanThe.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
-            lblThoiHanThe.ForeColor = System.Drawing.Color.FromArgb(30, 41, 59);
-            lblThoiHanThe.Location = new System.Drawing.Point(20, 308);
+            lblThoiHanThe.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            lblThoiHanThe.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            lblThoiHanThe.Location = new System.Drawing.Point(20, 268);
             lblThoiHanThe.Name = "lblThoiHanThe";
-            lblThoiHanThe.Size = new System.Drawing.Size(200, 17);
-            lblThoiHanThe.TabIndex = 10;
+            lblThoiHanThe.Size = new System.Drawing.Size(183, 15);
+            lblThoiHanThe.TabIndex = 7;
             lblThoiHanThe.Text = "4. Thời hạn thẻ độc giả (tháng):";
             // 
             // nudTienPhat
             // 
-            nudTienPhat.Font = new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold);
+            nudTienPhat.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
             nudTienPhat.Increment = new decimal(new int[] { 1000, 0, 0, 0 });
-            nudTienPhat.Location = new System.Drawing.Point(20, 260);
+            nudTienPhat.Location = new System.Drawing.Point(20, 225);
             nudTienPhat.Maximum = new decimal(new int[] { 500000, 0, 0, 0 });
             nudTienPhat.Name = "nudTienPhat";
-            nudTienPhat.Size = new System.Drawing.Size(380, 25);
-            nudTienPhat.TabIndex = 9;
+            nudTienPhat.Size = new System.Drawing.Size(390, 24);
+            nudTienPhat.TabIndex = 6;
             nudTienPhat.ThousandsSeparator = true;
-            nudTienPhat.Value = new decimal(new int[] { 5000, 0, 0, 0 });
-            // 
-            // lblTienPhatDesc
-            // 
-            lblTienPhatDesc.AutoSize = true;
-            lblTienPhatDesc.Font = new System.Drawing.Font("Segoe UI", 8.25F);
-            lblTienPhatDesc.ForeColor = System.Drawing.Color.FromArgb(148, 163, 184);
-            lblTienPhatDesc.Location = new System.Drawing.Point(20, 242);
-            lblTienPhatDesc.Name = "lblTienPhatDesc";
-            lblTienPhatDesc.Size = new System.Drawing.Size(248, 13);
-            lblTienPhatDesc.TabIndex = 8;
-            lblTienPhatDesc.Text = "Số tiền phạt lũy kế cho mỗi ngày quá hạn/cuốn";
+            nudTienPhat.Value = new decimal(new int[] { 3000, 0, 0, 0 });
             // 
             // lblTienPhat
             // 
             lblTienPhat.AutoSize = true;
-            lblTienPhat.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
-            lblTienPhat.ForeColor = System.Drawing.Color.FromArgb(30, 41, 59);
-            lblTienPhat.Location = new System.Drawing.Point(20, 223);
+            lblTienPhat.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            lblTienPhat.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            lblTienPhat.Location = new System.Drawing.Point(20, 205);
             lblTienPhat.Name = "lblTienPhat";
-            lblTienPhat.Size = new System.Drawing.Size(229, 17);
-            lblTienPhat.TabIndex = 7;
+            lblTienPhat.Size = new System.Drawing.Size(209, 15);
+            lblTienPhat.TabIndex = 5;
             lblTienPhat.Text = "3. Tiền phạt trễ hạn (VNĐ/ngày/cuốn):";
             // 
             // nudSoNgayMuon
             // 
-            nudSoNgayMuon.Font = new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold);
-            nudSoNgayMuon.Location = new System.Drawing.Point(20, 175);
+            nudSoNgayMuon.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
+            nudSoNgayMuon.Location = new System.Drawing.Point(20, 162);
             nudSoNgayMuon.Maximum = new decimal(new int[] { 180, 0, 0, 0 });
             nudSoNgayMuon.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             nudSoNgayMuon.Name = "nudSoNgayMuon";
-            nudSoNgayMuon.Size = new System.Drawing.Size(380, 25);
-            nudSoNgayMuon.TabIndex = 6;
+            nudSoNgayMuon.Size = new System.Drawing.Size(390, 24);
+            nudSoNgayMuon.TabIndex = 4;
             nudSoNgayMuon.Value = new decimal(new int[] { 14, 0, 0, 0 });
-            // 
-            // lblSoNgayMuonDesc
-            // 
-            lblSoNgayMuonDesc.AutoSize = true;
-            lblSoNgayMuonDesc.Font = new System.Drawing.Font("Segoe UI", 8.25F);
-            lblSoNgayMuonDesc.ForeColor = System.Drawing.Color.FromArgb(148, 163, 184);
-            lblSoNgayMuonDesc.Location = new System.Drawing.Point(20, 157);
-            lblSoNgayMuonDesc.Name = "lblSoNgayMuonDesc";
-            lblSoNgayMuonDesc.Size = new System.Drawing.Size(268, 13);
-            lblSoNgayMuonDesc.TabIndex = 5;
-            lblSoNgayMuonDesc.Text = "Hạn trả sách mặc định khi tạo mới một phiếu mượn";
             // 
             // lblSoNgayMuon
             // 
             lblSoNgayMuon.AutoSize = true;
-            lblSoNgayMuon.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
-            lblSoNgayMuon.ForeColor = System.Drawing.Color.FromArgb(30, 41, 59);
-            lblSoNgayMuon.Location = new System.Drawing.Point(20, 138);
+            lblSoNgayMuon.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            lblSoNgayMuon.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            lblSoNgayMuon.Location = new System.Drawing.Point(20, 142);
             lblSoNgayMuon.Name = "lblSoNgayMuon";
-            lblSoNgayMuon.Size = new System.Drawing.Size(201, 17);
-            lblSoNgayMuon.TabIndex = 4;
+            lblSoNgayMuon.Size = new System.Drawing.Size(180, 15);
+            lblSoNgayMuon.TabIndex = 3;
             lblSoNgayMuon.Text = "2. Số ngày mượn tối đa (ngày):";
             // 
             // nudSoSachMuon
             // 
-            nudSoSachMuon.Font = new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold);
-            nudSoSachMuon.Location = new System.Drawing.Point(20, 90);
+            nudSoSachMuon.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
+            nudSoSachMuon.Location = new System.Drawing.Point(20, 100);
             nudSoSachMuon.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
             nudSoSachMuon.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             nudSoSachMuon.Name = "nudSoSachMuon";
-            nudSoSachMuon.Size = new System.Drawing.Size(380, 25);
-            nudSoSachMuon.TabIndex = 3;
+            nudSoSachMuon.Size = new System.Drawing.Size(390, 24);
+            nudSoSachMuon.TabIndex = 2;
             nudSoSachMuon.Value = new decimal(new int[] { 5, 0, 0, 0 });
-            // 
-            // lblSoSachMuonDesc
-            // 
-            lblSoSachMuonDesc.AutoSize = true;
-            lblSoSachMuonDesc.Font = new System.Drawing.Font("Segoe UI", 8.25F);
-            lblSoSachMuonDesc.ForeColor = System.Drawing.Color.FromArgb(148, 163, 184);
-            lblSoSachMuonDesc.Location = new System.Drawing.Point(20, 72);
-            lblSoSachMuonDesc.Name = "lblSoSachMuonDesc";
-            lblSoSachMuonDesc.Size = new System.Drawing.Size(277, 13);
-            lblSoSachMuonDesc.TabIndex = 2;
-            lblSoSachMuonDesc.Text = "Số sách tối đa 1 bạn đọc được mượn cùng một thời điểm";
             // 
             // lblSoSachMuon
             // 
             lblSoSachMuon.AutoSize = true;
-            lblSoSachMuon.Font = new System.Drawing.Font("Segoe UI Semibold", 9.5F, System.Drawing.FontStyle.Bold);
-            lblSoSachMuon.ForeColor = System.Drawing.Color.FromArgb(30, 41, 59);
-            lblSoSachMuon.Location = new System.Drawing.Point(20, 53);
+            lblSoSachMuon.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold);
+            lblSoSachMuon.ForeColor = System.Drawing.Color.FromArgb(51, 65, 85);
+            lblSoSachMuon.Location = new System.Drawing.Point(20, 80);
             lblSoSachMuon.Name = "lblSoSachMuon";
-            lblSoSachMuon.Size = new System.Drawing.Size(206, 17);
+            lblSoSachMuon.Size = new System.Drawing.Size(185, 15);
             lblSoSachMuon.TabIndex = 1;
             lblSoSachMuon.Text = "1. Số sách mượn tối đa (cuốn):";
             // 
@@ -295,11 +334,11 @@
             lblFormSection.AutoSize = true;
             lblFormSection.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
             lblFormSection.ForeColor = System.Drawing.Color.FromArgb(15, 23, 42);
-            lblFormSection.Location = new System.Drawing.Point(18, 16);
+            lblFormSection.Location = new System.Drawing.Point(18, 15);
             lblFormSection.Name = "lblFormSection";
-            lblFormSection.Size = new System.Drawing.Size(225, 20);
+            lblFormSection.Size = new System.Drawing.Size(268, 20);
             lblFormSection.TabIndex = 0;
-            lblFormSection.Text = "THIẾT LẬP THAM SỐ CƠ BẢN";
+            lblFormSection.Text = "THIẾT LẬP THAM SỐ TOÀN HỆ THỐNG";
             // 
             // pnlGrid
             // 
@@ -307,10 +346,10 @@
             pnlGrid.BackColor = System.Drawing.Color.White;
             pnlGrid.Controls.Add(dgvThamSo);
             pnlGrid.Controls.Add(lblGridTitle);
-            pnlGrid.Location = new System.Drawing.Point(465, 25);
+            pnlGrid.Location = new System.Drawing.Point(465, 20);
             pnlGrid.Name = "pnlGrid";
-            pnlGrid.Padding = new System.Windows.Forms.Padding(20);
-            pnlGrid.Size = new System.Drawing.Size(510, 505);
+            pnlGrid.Padding = new System.Windows.Forms.Padding(18);
+            pnlGrid.Size = new System.Drawing.Size(515, 515);
             pnlGrid.TabIndex = 1;
             // 
             // dgvThamSo
@@ -347,20 +386,20 @@
             dgvThamSo.DefaultCellStyle = dataGridViewCellStyle2;
             dgvThamSo.EnableHeadersVisualStyles = false;
             dgvThamSo.GridColor = System.Drawing.Color.FromArgb(241, 245, 249);
-            dgvThamSo.Location = new System.Drawing.Point(20, 50);
+            dgvThamSo.Location = new System.Drawing.Point(18, 48);
             dgvThamSo.MultiSelect = false;
             dgvThamSo.Name = "dgvThamSo";
             dgvThamSo.ReadOnly = true;
             dgvThamSo.RowHeadersVisible = false;
-            dgvThamSo.RowTemplate.Height = 36;
+            dgvThamSo.RowTemplate.Height = 35;
             dgvThamSo.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            dgvThamSo.Size = new System.Drawing.Size(470, 435);
+            dgvThamSo.Size = new System.Drawing.Size(479, 449);
             dgvThamSo.TabIndex = 1;
             // 
             // colMaSo
             // 
             colMaSo.DataPropertyName = "Ma_So";
-            colMaSo.FillWeight = 30F;
+            colMaSo.FillWeight = 28F;
             colMaSo.HeaderText = "#";
             colMaSo.Name = "colMaSo";
             colMaSo.ReadOnly = true;
@@ -376,7 +415,7 @@
             // colGiaTri
             // 
             colGiaTri.DataPropertyName = "Gia_Tri";
-            colGiaTri.FillWeight = 55F;
+            colGiaTri.FillWeight = 50F;
             colGiaTri.HeaderText = "Giá Trị";
             colGiaTri.Name = "colGiaTri";
             colGiaTri.ReadOnly = true;
@@ -384,7 +423,7 @@
             // colMoTa
             // 
             colMoTa.DataPropertyName = "Mo_Ta";
-            colMoTa.FillWeight = 130F;
+            colMoTa.FillWeight = 140F;
             colMoTa.HeaderText = "Ý Nghĩa Quy Chế";
             colMoTa.Name = "colMoTa";
             colMoTa.ReadOnly = true;
@@ -394,7 +433,7 @@
             lblGridTitle.AutoSize = true;
             lblGridTitle.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
             lblGridTitle.ForeColor = System.Drawing.Color.FromArgb(15, 23, 42);
-            lblGridTitle.Location = new System.Drawing.Point(16, 16);
+            lblGridTitle.Location = new System.Drawing.Point(15, 15);
             lblGridTitle.Name = "lblGridTitle";
             lblGridTitle.Size = new System.Drawing.Size(269, 20);
             lblGridTitle.TabIndex = 0;
@@ -417,6 +456,9 @@
             pnlMain.ResumeLayout(false);
             pnlCard.ResumeLayout(false);
             pnlCard.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)nudTyLeMat).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudTyLeHong).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudTyLeRach).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudThoiHanThe).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudTienPhat).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudSoNgayMuon).EndInit();
@@ -436,17 +478,20 @@
         private System.Windows.Forms.Panel pnlCard;
         private System.Windows.Forms.Label lblFormSection;
         private System.Windows.Forms.Label lblSoSachMuon;
-        private System.Windows.Forms.Label lblSoSachMuonDesc;
         private System.Windows.Forms.NumericUpDown nudSoSachMuon;
         private System.Windows.Forms.Label lblSoNgayMuon;
-        private System.Windows.Forms.Label lblSoNgayMuonDesc;
         private System.Windows.Forms.NumericUpDown nudSoNgayMuon;
         private System.Windows.Forms.Label lblTienPhat;
-        private System.Windows.Forms.Label lblTienPhatDesc;
         private System.Windows.Forms.NumericUpDown nudTienPhat;
         private System.Windows.Forms.Label lblThoiHanThe;
-        private System.Windows.Forms.Label lblThoiHanTheDesc;
         private System.Windows.Forms.NumericUpDown nudThoiHanThe;
+        private System.Windows.Forms.Label lblDenBuSection;
+        private System.Windows.Forms.Label lblTyLeRach;
+        private System.Windows.Forms.NumericUpDown nudTyLeRach;
+        private System.Windows.Forms.Label lblTyLeHong;
+        private System.Windows.Forms.NumericUpDown nudTyLeHong;
+        private System.Windows.Forms.Label lblTyLeMat;
+        private System.Windows.Forms.NumericUpDown nudTyLeMat;
         private System.Windows.Forms.Button btnLuuQuyChe;
         private System.Windows.Forms.Button btnKhoiPhuc;
         private System.Windows.Forms.Panel pnlGrid;

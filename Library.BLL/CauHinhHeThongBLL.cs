@@ -60,6 +60,23 @@ namespace Library.BLL
         {
             return decimal.TryParse(_dal.LayGiaTri(KEY_TY_LE_PHAT_MAT, "100"), out decimal val) ? val : 100m;
         }
+        public (bool IsSuccess, string Message) LuuQuyChe(
+    int soSachMuon,
+    int soNgayMuon,
+    decimal tienPhat,
+    int thoiHanThe)
+        {
+            // Gọi chuyển tiếp sang LuuQuyCheToanDien với các tỷ lệ đền bù hiện có trong CSDL
+            return LuuQuyCheToanDien(
+                soSachMuon,
+                soNgayMuon,
+                tienPhat,
+                thoiHanThe,
+                LayTyLePhatRach(),
+                LayTyLePhatHong(),
+                LayTyLePhatMat()
+            );
+        }
 
         public (bool IsSuccess, string Message) LuuQuyCheToanDien(
             int soSachMuon,

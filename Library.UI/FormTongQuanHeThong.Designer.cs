@@ -262,9 +262,7 @@
             dgvLuuThongTuan.RowTemplate.Height = 34;
             dgvLuuThongTuan.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvLuuThongTuan.Size = new Size(1082, 160);
-            dgvLuuThongTuan.TabIndex = 1;
-            dgvLuuThongTuan.CellContentClick += dgvLuuThongTuan_CellContentClick;
-            // 
+            dgvLuuThongTuan.TabIndex = 1;            // 
             // colLTChiNhanh
             // 
             colLTChiNhanh.DataPropertyName = "Ten_Chi_Nhanh";
