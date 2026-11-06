@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks; // Bắt buộc phải có thư viện này để dùng Task và async/await
 using Library.DAL;
 using Library.DTO;
 
@@ -21,12 +22,6 @@ namespace Library.BLL
             return _thongKeDAL.LayThongKeMuonTraTuanCacChiNhanh(dauTuan, cuoiTuan);
         }
 
-        // Lấy danh sách tồn kho sách của chi nhánh được chọn
-        public List<KhoSachChiNhanhDTO> LayChiTietKhoSachChiNhanh(int chiNhanhMaSo, string tuKhoa = "")
-        {
-            return _thongKeDAL.LayKhoSachTheoChiNhanh(chiNhanhMaSo, tuKhoa);
-        }
-
         public List<DoiSoatCaTrucDTO> LayDanhSachDoiSoatCaTruc(int chiNhanhMaSo, DateTime tuNgay, DateTime denNgay)
         {
             if (tuNgay > denNgay)
@@ -40,7 +35,6 @@ namespace Library.BLL
             return _thongKeDAL.LayKPIDocGiaVaTienPhat();
         }
 
-        // 👉 5 hàm chuyển tiếp phục vụ Tab 1 FormTongQuanHeThong
         public int LayTongSoDocGia()
         {
             return _thongKeDAL.LayTongSoDocGia();
@@ -61,9 +55,18 @@ namespace Library.BLL
             return _thongKeDAL.LayTongTienPhatChuaThu();
         }
 
-        public DataTable LayLuuThongTuan()
+        // =========================================================
+        // CÁC HÀM BẤT ĐỒNG BỘ (ASYNC/AWAIT) CHỐNG ĐƠ GIAO DIỆN
+        // =========================================================
+
+        public async Task<List<KhoSachChiNhanhDTO>> LayChiTietKhoSachChiNhanhAsync(int chiNhanhMaSo, string tuKhoa = "")
         {
-            return _thongKeDAL.LayLuuThongTuan();
+            return await _thongKeDAL.LayKhoSachTheoChiNhanhAsync(chiNhanhMaSo, tuKhoa);
+        }
+
+        public async Task<DataTable> LayLuuThongTuanAsync()
+        {
+            return await _thongKeDAL.LayLuuThongTuanAsync();
         }
     }
 }

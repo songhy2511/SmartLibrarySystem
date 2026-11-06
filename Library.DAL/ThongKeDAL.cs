@@ -65,37 +65,31 @@ namespace Library.DAL
             return list;
         }
 
-        public List<KhoSachChiNhanhDTO> LayKhoSachTheoChiNhanh(int chiNhanhMaSo, string tuKhoa)
+        public async Task<List<KhoSachChiNhanhDTO>> LayKhoSachTheoChiNhanhAsync(int chiNhanhMaSo, string tuKhoa)
         {
             var list = new List<KhoSachChiNhanhDTO>();
-
             string query = @"
-                SELECT 
-                    s.Ma_So AS Sach_Ma_So,
-                    s.Ma_Sach,
-                    s.Tieu_De,
-                    ISNULL(s.The_Loai, N'Chưa phân loại') AS The_Loai,
-                    s.Tac_Gia,
-                    COUNT(bss.Ma_So) AS Tong_Ban_Sao,
-                    SUM(CASE WHEN bss.Trang_Thai = N'Đang cho mượn' THEN 1 ELSE 0 END) AS Dang_Muon,
-                    SUM(CASE WHEN bss.Trang_Thai = N'Sẵn sàng' THEN 1 ELSE 0 END) AS San_Co,
-                    SUM(CASE WHEN bss.Trang_Thai IN (N'Bảo trì', N'Hư hỏng', N'Mất/Thanh lý') 
-                                  OR bss.Tinh_Trang LIKE N'%Hỏng%' 
-                                  OR bss.Tinh_Trang LIKE N'%Rách%' THEN 1 ELSE 0 END) AS Bao_Tri
-                FROM dbo.Sach s
-                LEFT JOIN dbo.Ban_Sao_Sach bss ON s.Ma_So = bss.Sach_Ma_So 
-                                              AND (@ChiNhanhMaSo = 0 OR bss.Chi_Nhanh_Ma_So = @ChiNhanhMaSo)
-                WHERE (@TuKhoa = '' OR s.Tieu_De LIKE '%' + @TuKhoa + '%' OR s.Ma_Sach LIKE '%' + @TuKhoa + '%' OR s.Tac_Gia LIKE '%' + @TuKhoa + '%')
-                  AND (@ChiNhanhMaSo = 0 OR bss.Ma_So IS NOT NULL)
-                GROUP BY s.Ma_So, s.Ma_Sach, s.Tieu_De, s.The_Loai, s.Tac_Gia
-                ORDER BY s.Ma_Sach ASC";
+        SELECT 
+            s.Ma_So AS Sach_Ma_So, s.Ma_Sach, s.Tieu_De, ISNULL(s.The_Loai, N'Chưa phân loại') AS The_Loai, s.Tac_Gia,
+            COUNT(bss.Ma_So) AS Tong_Ban_Sao,
+            SUM(CASE WHEN bss.Trang_Thai = N'Đang cho mượn' THEN 1 ELSE 0 END) AS Dang_Muon,
+            SUM(CASE WHEN bss.Trang_Thai = N'Sẵn sàng' THEN 1 ELSE 0 END) AS San_Co,
+            SUM(CASE WHEN bss.Trang_Thai IN (N'Bảo trì', N'Hư hỏng', N'Mất/Thanh lý') 
+                          OR bss.Tinh_Trang LIKE N'%Hỏng%' 
+                          OR bss.Tinh_Trang LIKE N'%Rách%' THEN 1 ELSE 0 END) AS Bao_Tri
+        FROM dbo.Sach s
+        LEFT JOIN dbo.Ban_Sao_Sach bss ON s.Ma_So = bss.Sach_Ma_So AND (@ChiNhanhMaSo = 0 OR bss.Chi_Nhanh_Ma_So = @ChiNhanhMaSo)
+        WHERE (@TuKhoa = '' OR s.Tieu_De LIKE '%' + @TuKhoa + '%' OR s.Ma_Sach LIKE '%' + @TuKhoa + '%' OR s.Tac_Gia LIKE '%' + @TuKhoa + '%')
+          AND (@ChiNhanhMaSo = 0 OR bss.Ma_So IS NOT NULL)
+        GROUP BY s.Ma_So, s.Ma_Sach, s.Tieu_De, s.The_Loai, s.Tac_Gia
+        ORDER BY s.Ma_Sach ASC";
 
             SqlParameter[] parameters = {
-                new SqlParameter("@ChiNhanhMaSo", chiNhanhMaSo),
-                new SqlParameter("@TuKhoa", string.IsNullOrWhiteSpace(tuKhoa) ? "" : tuKhoa.Trim())
-            };
+        new SqlParameter("@ChiNhanhMaSo", chiNhanhMaSo),
+        new SqlParameter("@TuKhoa", string.IsNullOrWhiteSpace(tuKhoa) ? "" : tuKhoa.Trim())
+    };
 
-            DataTable dt = DatabaseHelper.ExecuteQuery(query, parameters);
+            DataTable dt = await DatabaseHelper.ExecuteQueryAsync(query, parameters);
             foreach (DataRow row in dt.Rows)
             {
                 list.Add(new KhoSachChiNhanhDTO
@@ -112,6 +106,22 @@ namespace Library.DAL
                 });
             }
             return list;
+        }
+
+        public async Task<DataTable> LayLuuThongTuanAsync()
+        {
+            string query = @"
+        SELECT TOP 50
+            pm.Ma_Phieu_Muon, dg.Ho_Ten AS Ho_Ten_Doc_Gia, ISNULL(s.Tieu_De, N'Tài liệu lưu hành') AS Tieu_De_Sach,
+            pm.Ngay_Muon, pm.Ngay_Hen_Tra, pm.Trang_Thai
+        FROM dbo.Phieu_Muon pm
+        INNER JOIN dbo.Doc_Gia dg ON pm.Doc_Gia_Ma_So = dg.Ma_So
+        LEFT JOIN dbo.Chi_Tiet_Phieu_Muon ct ON pm.Ma_So = ct.Phieu_Muon_Ma_So
+        LEFT JOIN dbo.Ban_Sao_Sach bs ON ct.Ban_Sao_Sach_Ma_So = bs.Ma_So
+        LEFT JOIN dbo.Sach s ON bs.Sach_Ma_So = s.Ma_So
+        ORDER BY pm.Ngay_Muon DESC";
+
+            return await DatabaseHelper.ExecuteQueryAsync(query);
         }
 
         public (int TongDocGia, decimal TongTienPhat) LayKPIDocGiaVaTienPhat()
@@ -158,26 +168,6 @@ namespace Library.DAL
             string query = "SELECT ISNULL(SUM(So_Tien_Phat), 0) FROM dbo.Phieu_Phat WHERE Trang_Thai = N'Chưa thu' OR Da_Thanh_Toan = 0";
             object? res = DatabaseHelper.ExecuteScalar(query);
             return (res != null && res != DBNull.Value) ? Convert.ToDecimal(res) : 0m;
-        }
-
-        public DataTable LayLuuThongTuan()
-        {
-            string query = @"
-                SELECT TOP 50
-                    pm.Ma_Phieu_Muon,
-                    dg.Ho_Ten AS Ho_Ten_Doc_Gia,
-                    ISNULL(s.Tieu_De, N'Tài liệu lưu hành') AS Tieu_De_Sach,
-                    pm.Ngay_Muon,
-                    pm.Ngay_Hen_Tra,
-                    pm.Trang_Thai
-                FROM dbo.Phieu_Muon pm
-                INNER JOIN dbo.Doc_Gia dg ON pm.Doc_Gia_Ma_So = dg.Ma_So
-                LEFT JOIN dbo.Chi_Tiet_Phieu_Muon ct ON pm.Ma_So = ct.Phieu_Muon_Ma_So
-                LEFT JOIN dbo.Ban_Sao_Sach bs ON ct.Ban_Sao_Sach_Ma_So = bs.Ma_So
-                LEFT JOIN dbo.Sach s ON bs.Sach_Ma_So = s.Ma_So
-                ORDER BY pm.Ngay_Muon DESC";
-
-            return DatabaseHelper.ExecuteQuery(query);
         }
 
         public List<DoiSoatCaTrucDTO> LayDanhSachDoiSoatCaTruc(int chiNhanhMaSo, DateTime tuNgay, DateTime denNgay)

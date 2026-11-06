@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Library.BLL;
 using Library.DAL;
@@ -22,11 +23,15 @@ namespace Library.UI
             InitializeComponent();
         }
 
-        private void FormQuanLySach_Load(object sender, EventArgs e)
+        private async void FormQuanLySach_Load(object sender, EventArgs e)
         {
+            // Bật DoubleBuffered chống nháy màn hình (nếu bạn đã tạo Extension ở bước trước)
+            // dgvSach.EnableDoubleBuffered(true);
+            // dgvKhoChiNhanh.EnableDoubleBuffered(true);
+
             NapDanhSachChiNhanh();
-            TaiDuLieuKhoChiNhanh();
-            LoadData();
+            await TaiDuLieuKhoChiNhanhAsync();
+            await LoadDataAsync();
             _isInitialized = true;
         }
 
@@ -75,56 +80,48 @@ namespace Library.UI
             return 1;
         }
 
-        private void TaiDuLieuKhoChiNhanh()
+        private async Task TaiDuLieuKhoChiNhanhAsync()
         {
             try
             {
                 int chiNhanhMaSo = 0;
                 if (cboChiNhanhKho.SelectedValue != null && int.TryParse(cboChiNhanhKho.SelectedValue.ToString(), out int id))
-                {
                     chiNhanhMaSo = id;
-                }
 
                 string tuKhoa = txtTimKiemKho.Text.Trim();
-                var listKho = _thongKeBLL.LayChiTietKhoSachChiNhanh(chiNhanhMaSo, tuKhoa);
+
+                // Gọi hàm bất đồng bộ, UI vẫn mượt trong lúc truy vấn CSDL
+                var listKho = await _thongKeBLL.LayChiTietKhoSachChiNhanhAsync(chiNhanhMaSo, tuKhoa);
 
                 dgvKhoChiNhanh.AutoGenerateColumns = false;
-                dgvKhoChiNhanh.DataSource = null;
                 dgvKhoChiNhanh.DataSource = listKho;
 
-                // Cập nhật 5 thẻ KPI kho chi nhánh
                 lblTongDauSachCNVal.Text = listKho.Count.ToString();
                 lblTongBanSaoCNVal.Text = listKho.Sum(x => x.Tong_Ban_Sao).ToString();
                 lblDangMuonCNVal.Text = listKho.Sum(x => x.Dang_Muon).ToString();
                 lblSanCoCNVal.Text = listKho.Sum(x => x.San_Co).ToString();
                 lblBaoTriCNVal.Text = listKho.Sum(x => x.Bao_Tri).ToString();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi tải kho sách chi nhánh: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            catch { }
         }
 
-        private void cboChiNhanhKho_SelectedIndexChanged(object sender, EventArgs e)
+        private async void cboChiNhanhKho_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_isInitialized)
-            {
-                TaiDuLieuKhoChiNhanh();
-            }
+            if (_isInitialized) await TaiDuLieuKhoChiNhanhAsync();
         }
 
-        private void txtTimKiemKho_TextChanged(object sender, EventArgs e)
+        private async void txtTimKiemKho_TextChanged(object sender, EventArgs e)
         {
-            TaiDuLieuKhoChiNhanh();
+            if (_isInitialized) await TaiDuLieuKhoChiNhanhAsync();
         }
 
-        private void btnTaiLaiKho_Click(object sender, EventArgs e)
+        private async void btnTaiLaiKho_Click(object sender, EventArgs e)
         {
             txtTimKiemKho.Clear();
-            TaiDuLieuKhoChiNhanh();
+            await TaiDuLieuKhoChiNhanhAsync();
         }
 
-        private void btnThanhLyCuon_Click(object sender, EventArgs e)
+        private async void btnThanhLyCuon_Click(object sender, EventArgs e)
         {
             if (dgvKhoChiNhanh.CurrentRow?.DataBoundItem is not KhoSachChiNhanhDTO selected)
             {
@@ -148,11 +145,12 @@ namespace Library.UI
             if (confirm != DialogResult.Yes) return;
 
             int? currentUserId = SessionContext.CurrentUser?.Ma_So;
+
             if (_sachBLL.DeXuatThanhLyCuonSach(selected.Ma_Sach, selected.Tieu_De, selected.San_Co, currentUserId, out string err))
             {
                 MessageBox.Show("Thanh lý cuốn sách thành công! Đã cập nhật tồn kho chi nhánh.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                TaiDuLieuKhoChiNhanh();
-                LoadData();
+                await LoadDataAsync();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
             else
             {
@@ -161,27 +159,24 @@ namespace Library.UI
         }
 
         #region Nghiệp vụ Danh mục Biểu ghi (Tab 2)
-        private void LoadData()
+        private async Task LoadDataAsync()
         {
             try
             {
                 if (dgvSach != null)
                 {
-                    dgvSach.DataSource = _sachBLL.TimKiemSach(txtTimKiem?.Text.Trim() ?? string.Empty);
+                    dgvSach.DataSource = await _sachBLL.TimKiemSachAsync(txtTimKiem?.Text.Trim() ?? string.Empty);
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Lỗi load biểu ghi: " + ex.Message);
-            }
+            catch { }
         }
 
-        private void btnTimKiem_Click(object? sender, EventArgs e)
+        private async void btnTimKiem_Click(object? sender, EventArgs e)
         {
-            LoadData();
+            await LoadDataAsync();
         }
 
-        private void btnThemSach_Click(object? sender, EventArgs e)
+        private async void btnThemSach_Click(object? sender, EventArgs e)
         {
             var sach = new SachDTO
             {
@@ -197,8 +192,8 @@ namespace Library.UI
             if (_sachBLL.ThemSachMoi(sach, currentUserId, out string err))
             {
                 MessageBox.Show("Thêm sách mới thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadData();
-                TaiDuLieuKhoChiNhanh();
+                await LoadDataAsync();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
             else
             {
@@ -206,7 +201,7 @@ namespace Library.UI
             }
         }
 
-        private void btnCapNhatKho_Click(object? sender, EventArgs e)
+        private async void btnCapNhatKho_Click(object? sender, EventArgs e)
         {
             if (dgvSach?.CurrentRow?.DataBoundItem is DataRowView drv)
             {
@@ -226,8 +221,8 @@ namespace Library.UI
                 if (_sachBLL.CapNhatKhoSach(sach, currentUserId, out string err))
                 {
                     MessageBox.Show("Cập nhật thông tin kho thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    LoadData();
-                    TaiDuLieuKhoChiNhanh();
+                    await LoadDataAsync();
+                    await TaiDuLieuKhoChiNhanhAsync();
                 }
                 else
                 {
@@ -236,7 +231,7 @@ namespace Library.UI
             }
         }
 
-        private void btnXoaSach_Click(object? sender, EventArgs e)
+        private async void btnXoaSach_Click(object? sender, EventArgs e)
         {
             if (dgvSach?.CurrentRow?.DataBoundItem is DataRowView drv)
             {
@@ -250,8 +245,8 @@ namespace Library.UI
                     if (_sachBLL.XoaSach(maSach, currentUserId, out string err))
                     {
                         MessageBox.Show("Xóa đầu sách thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadData();
-                        TaiDuLieuKhoChiNhanh();
+                        await LoadDataAsync();
+                        await TaiDuLieuKhoChiNhanhAsync();
                     }
                     else
                     {
@@ -265,7 +260,7 @@ namespace Library.UI
             }
         }
 
-        private void btnDeXuatThanhLy_Click(object? sender, EventArgs e)
+        private async void btnDeXuatThanhLy_Click(object? sender, EventArgs e)
         {
             if (dgvSach?.CurrentRow?.DataBoundItem is not DataRowView drv)
             {
@@ -291,8 +286,8 @@ namespace Library.UI
             if (_sachBLL.DeXuatThanhLyCuonSach(maSach, tieuDe, khaDung, currentUserId, out string err))
             {
                 MessageBox.Show("Thanh lý thành công 1 cuốn sách! Số lượng tồn kho đã được cập nhật.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadData();
-                TaiDuLieuKhoChiNhanh();
+                await LoadDataAsync();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
             else
             {
@@ -312,15 +307,15 @@ namespace Library.UI
             }
         }
 
-        private void tabControlMain_SelectedIndexChanged(object sender, EventArgs e)
+        private async void tabControlMain_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (tabControlMain.SelectedIndex == 0)
             {
-                TaiDuLieuKhoChiNhanh();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
             else
             {
-                LoadData();
+                await LoadDataAsync();
             }
         }
         #endregion

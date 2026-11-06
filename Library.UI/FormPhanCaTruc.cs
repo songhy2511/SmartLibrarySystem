@@ -32,6 +32,7 @@ namespace Library.UI
             TaiDanhSachChiNhanh();
             TaiDanhSachThuThu();
             TaiDanhSachCaTruc();
+            dgvCaTruc.EnableDoubleBuffered(true);
         }
 
         private void TaiDanhSachChiNhanh()

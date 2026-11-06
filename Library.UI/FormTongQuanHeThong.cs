@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Library.BLL;
 using Library.DTO;
@@ -20,46 +21,42 @@ namespace Library.UI
             InitializeComponent();
         }
 
-        private void FormTongQuanHeThong_Load(object sender, EventArgs e)
+        private async void FormTongQuanHeThong_Load(object sender, EventArgs e)
         {
-            TaiDuLieuTongQuan();
+            await TaiDuLieuTongQuanAsync();
             NapDanhSachChiNhanh();
-            TaiDuLieuKhoChiNhanh();
+            await TaiDuLieuKhoChiNhanhAsync();
+
+            dgvLuuThongTuan.EnableDoubleBuffered(true);
+            dgvKhoSachChiNhanh.EnableDoubleBuffered(true);
+
             _isInitialized = true;
         }
 
         #region Tab 1: Tổng Quan Chỉ Số Hệ Thống
-        private void TaiDuLieuTongQuan()
+        private async Task TaiDuLieuTongQuanAsync()
         {
             try
             {
-                // 1. Nạp 4 chỉ số KPI toàn hệ thống
                 lblKPIDocGiaVal.Text = _thongKeBLL.LayTongSoDocGia().ToString("N0");
                 lblKPIDauSachVal.Text = _thongKeBLL.LayTongSoDauSach().ToString("N0");
                 lblKPIDangMuonVal.Text = _thongKeBLL.LayTongSachDangMuon().ToString("N0");
+                lblKPITienPhatVal.Text = $"{_thongKeBLL.LayTongTienPhatChuaThu():N0} đ";
 
-                decimal tienPhatChuaThu = _thongKeBLL.LayTongTienPhatChuaThu();
-                lblKPITienPhatVal.Text = $"{tienPhatChuaThu:N0} đ";
-
-                // 2. Nạp danh sách lưu thông tuần
-                DataTable dtLuuThong = _thongKeBLL.LayLuuThongTuan();
+                DataTable dtLuuThong = await _thongKeBLL.LayLuuThongTuanAsync();
                 dgvLuuThongTuan.AutoGenerateColumns = false;
                 dgvLuuThongTuan.DataSource = dtLuuThong;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi tải dữ liệu tổng quan: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            catch { }
         }
 
-        private void btnLamMoiTongQuan_Click(object sender, EventArgs e)
+        private async void btnLamMoiTongQuan_Click(object sender, EventArgs e)
         {
-            TaiDuLieuTongQuan();
+            await TaiDuLieuTongQuanAsync();
         }
 
         private void dgvLuuThongTuan_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Xử lý sự kiện click trên cell lưu thông (nếu có bổ sung cột thao tác)
         }
         #endregion
 
@@ -82,56 +79,52 @@ namespace Library.UI
             }
         }
 
-        private void TaiDuLieuKhoChiNhanh()
+        private async Task TaiDuLieuKhoChiNhanhAsync()
         {
             try
             {
-                int chiNhanhMaSo = 0;
-                if (cboChiNhanhKho.SelectedValue != null && int.TryParse(cboChiNhanhKho.SelectedValue.ToString(), out int id))
-                {
-                    chiNhanhMaSo = id;
-                }
-
+                int chiNhanhMaSo = cboChiNhanhKho.SelectedValue != null ? Convert.ToInt32(cboChiNhanhKho.SelectedValue) : 0;
                 string tuKhoa = txtTimKiemKho.Text.Trim();
-                var listKho = _thongKeBLL.LayChiTietKhoSachChiNhanh(chiNhanhMaSo, tuKhoa);
+
+                var listKho = await _thongKeBLL.LayChiTietKhoSachChiNhanhAsync(chiNhanhMaSo, tuKhoa);
 
                 dgvKhoSachChiNhanh.AutoGenerateColumns = false;
-                dgvKhoSachChiNhanh.DataSource = null;
                 dgvKhoSachChiNhanh.DataSource = listKho;
 
-                // Cập nhật 5 thẻ KPI của chi nhánh
+                // 👉 Đã khôi phục code tính toán KPI
                 lblTongDauSachCNVal.Text = listKho.Count.ToString("N0");
                 lblTongBanSaoCNVal.Text = listKho.Sum(x => x.Tong_Ban_Sao).ToString("N0");
                 lblDangMuonCNVal.Text = listKho.Sum(x => x.Dang_Muon).ToString("N0");
                 lblSanCoCNVal.Text = listKho.Sum(x => x.San_Co).ToString("N0");
                 lblBaoTriCNVal.Text = listKho.Sum(x => x.Bao_Tri).ToString("N0");
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi tải kho sách chi nhánh: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            catch { }
         }
 
-        private void cboChiNhanhKho_SelectedIndexChanged(object sender, EventArgs e)
+        private async void cboChiNhanhKho_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (_isInitialized)
             {
-                TaiDuLieuKhoChiNhanh();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
         }
 
-        private void txtTimKiemKho_TextChanged(object sender, EventArgs e)
+        private async void txtTimKiemKho_TextChanged(object sender, EventArgs e)
         {
-            TaiDuLieuKhoChiNhanh();
+            // 👉 Đã bổ sung chặn lỗi khi Form khởi tạo
+            if (_isInitialized)
+            {
+                await TaiDuLieuKhoChiNhanhAsync();
+            }
         }
 
-        private void btnTaiLaiKho_Click(object sender, EventArgs e)
+        private async void btnTaiLaiKho_Click(object sender, EventArgs e)
         {
             txtTimKiemKho.Clear();
-            TaiDuLieuKhoChiNhanh();
+            await TaiDuLieuKhoChiNhanhAsync();
         }
 
-        private void btnDieuPhoiSach_Click(object sender, EventArgs e)
+        private async void btnDieuPhoiSach_Click(object sender, EventArgs e)
         {
             if (dgvKhoSachChiNhanh.CurrentRow?.DataBoundItem is not KhoSachChiNhanhDTO selected)
             {
@@ -160,23 +153,22 @@ namespace Library.UI
 
             string tenChiNhanhHienTai = cboChiNhanhKho.Text;
 
-            // Mở popup điều phối sách đã được thiết kế
             using var popup = new FormDieuPhoiSach(selected.Ma_Sach, selected.Tieu_De, chiNhanhHienTaiId, tenChiNhanhHienTai);
             if (popup.ShowDialog(this) == DialogResult.OK)
             {
-                TaiDuLieuKhoChiNhanh();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
         }
 
-        private void tabControlMain_SelectedIndexChanged(object sender, EventArgs e)
+        private async void tabControlMain_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (tabControlMain.SelectedIndex == 0)
             {
-                TaiDuLieuTongQuan();
+                await TaiDuLieuTongQuanAsync();
             }
             else
             {
-                TaiDuLieuKhoChiNhanh();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
         }
         #endregion

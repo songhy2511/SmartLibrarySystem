@@ -50,6 +50,7 @@ namespace Library.UI
             dgvBienBanViPham.DefaultCellStyle.Font = new Font("Segoe UI", 9f);
             dgvBienBanViPham.DefaultCellStyle.SelectionBackColor = Color.FromArgb(204, 251, 241);
             dgvBienBanViPham.DefaultCellStyle.SelectionForeColor = Color.Black;
+            dgvBienBanViPham.EnableDoubleBuffered(true);
         }
 
         private void KhoiTaoLoaiViPham()
@@ -362,9 +363,25 @@ namespace Library.UI
                 e.FormattingApplied = true;
             }
         }
+        private int KiemTraVaLayMaThuThu()
+        {
+            if (SessionContext.CurrentLibrarian == null)
+            {
+                MessageBox.Show("Phiên làm việc của bạn đã hết hạn. Vui lòng đăng nhập lại hệ thống!", "Lỗi xác thực", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return 0;
+            }
+            return SessionContext.CurrentLibrarian.Ma_So;
+        }
 
         private void btnLuuBienBan_Click(object sender, EventArgs e)
         {
+            // Ràng buộc 1: Bắt lỗi fallback cứng khi mất Session (Hủy nguy cơ gán nhầm cho Thủ thư 1)
+            if (SessionContext.CurrentLibrarian == null)
+            {
+                MessageBox.Show("Phiên làm việc đã hết hạn hoặc xảy ra lỗi. Vui lòng đăng nhập lại!", "Lỗi xác thực", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (cboDocGia.SelectedValue == null)
             {
                 MessageBox.Show("Vui lòng chọn độc giả vi phạm!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -383,7 +400,8 @@ namespace Library.UI
             string chiTiet = txtMoTa.Text.Trim();
             string lyDo = string.IsNullOrWhiteSpace(chiTiet) ? loaiViPham : chiTiet;
 
-            int thuThuId = SessionContext.CurrentLibrarian?.Ma_So ?? 1;
+            int thuThuId = KiemTraVaLayMaThuThu();
+            if (thuThuId == 0) return;
             int chiNhanhId = 1;
 
             int phieuMuonMaSo = 0;
@@ -396,61 +414,13 @@ namespace Library.UI
                     banSaoMaSo = Convert.ToInt32(drv["BanSaoMaSo"]);
             }
 
-            string query = @"
-                BEGIN TRANSACTION;
-                BEGIN TRY
-                    -- 1. Tạo bản ghi phiếu phạt
-                    INSERT INTO dbo.Phieu_Phat 
-                    (Phieu_Muon_Ma_So, Doc_Gia_Ma_So, Thu_Thu_Ma_So, Chi_Nhanh_Ma_So, So_Tien_Phat, Ly_Do, Ngay_Lap, Trang_Thai, Da_Thanh_Toan)
-                    VALUES 
-                    (@PhieuMuonMaSo, @DocGiaMaSo, @ThuThuMaSo, @ChiNhanhMaSo, @SoTienPhat, @LyDo, @NgayLap, N'Chưa thu', 0);
+            var phieuPhatBLL = new PhieuPhatBLL();
+            var (isSuccess, message) = phieuPhatBLL.LapBienBanToanDien(
+                phieuMuonMaSo > 0 ? phieuMuonMaSo : null,
+                docGiaMaSo, thuThuId, chiNhanhId, soTien, lyDo, loaiViPham, banSaoMaSo);
 
-                    -- 2. Tăng số lần vi phạm của độc giả
-                    UPDATE dbo.Doc_Gia 
-                    SET So_Lan_Vi_Pham = ISNULL(So_Lan_Vi_Pham, 0) + 1 
-                    WHERE Ma_So = @DocGiaMaSo;
-
-                    -- 3. Cập nhật trạng thái tài sản nếu làm mất/hư hỏng nặng
-                    IF @LoaiViPham LIKE N'%mất%' AND @BanSaoMaSo > 0
-                    BEGIN
-                        UPDATE dbo.Ban_Sao_Sach 
-                        SET Trang_Thai = N'Mất/Thanh lý', Tinh_Trang = N'Đã mất', Ghi_Chu = N'Bạn đọc làm mất, đã lập biên bản bồi thường'
-                        WHERE Ma_So = @BanSaoMaSo;
-
-                        UPDATE dbo.Sach 
-                        SET Tong_So_Luong = CASE WHEN Tong_So_Luong > 0 THEN Tong_So_Luong - 1 ELSE 0 END 
-                        WHERE Ma_So = (SELECT Sach_Ma_So FROM dbo.Ban_Sao_Sach WHERE Ma_So = @BanSaoMaSo);
-                    END
-                    ELSE IF @LoaiViPham LIKE N'%hỏng nặng%' AND @BanSaoMaSo > 0
-                    BEGIN
-                        UPDATE dbo.Ban_Sao_Sach 
-                        SET Trang_Thai = N'Hư hỏng', Tinh_Trang = N'Hư hỏng nặng', Ghi_Chu = N'Bị hỏng nặng, đã lập biên bản đền bù 60%'
-                        WHERE Ma_So = @BanSaoMaSo;
-                    END
-
-                    COMMIT TRANSACTION;
-                END TRY
-                BEGIN CATCH
-                    ROLLBACK TRANSACTION;
-                    THROW;
-                END CATCH";
-
-            var parameters = new[] {
-                new Microsoft.Data.SqlClient.SqlParameter("@PhieuMuonMaSo", phieuMuonMaSo > 0 ? (object)phieuMuonMaSo : DBNull.Value),
-                new Microsoft.Data.SqlClient.SqlParameter("@DocGiaMaSo", docGiaMaSo),
-                new Microsoft.Data.SqlClient.SqlParameter("@ThuThuMaSo", thuThuId),
-                new Microsoft.Data.SqlClient.SqlParameter("@ChiNhanhMaSo", chiNhanhId),
-                new Microsoft.Data.SqlClient.SqlParameter("@SoTienPhat", soTien),
-                new Microsoft.Data.SqlClient.SqlParameter("@LyDo", lyDo),
-                new Microsoft.Data.SqlClient.SqlParameter("@NgayLap", DateTime.Now),
-                new Microsoft.Data.SqlClient.SqlParameter("@LoaiViPham", loaiViPham),
-                new Microsoft.Data.SqlClient.SqlParameter("@BanSaoMaSo", banSaoMaSo)
-            };
-
-            try
+            if (isSuccess)
             {
-                DatabaseHelper.ExecuteNonQuery(query, parameters);
-
                 SystemLogger.Log(
                     LogLevel.WARNING,
                     "Lập biên bản vi phạm",
@@ -458,20 +428,24 @@ namespace Library.UI
                     SessionContext.CurrentUser?.Ma_So
                 );
 
-                MessageBox.Show("Lập biên bản vi phạm thành công!\nThông tin công nợ và số lần vi phạm đã được đồng bộ.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(message, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 txtMoTa.Clear();
                 nudSoNgayTre.Value = 1;
                 LoadDanhSachViPham();
                 NapSachTheoDocGia();
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Lỗi khi lưu biên bản: " + ex.Message, "Lỗi thực thi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(message, "Lỗi thực thi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void btnThuTienPhat_Click(object sender, EventArgs e)
         {
+            // Sử dụng hàm helper để kiểm tra phiên đăng nhập thống nhất
+            int thuThuId = KiemTraVaLayMaThuThu();
+            if (thuThuId == 0) return; // Ngăn chặn việc ghi nhận nhầm hoặc lỗi NullReferenceException
+
             if (dgvBienBanViPham.SelectedRows.Count == 0)
             {
                 MessageBox.Show("Vui lòng chọn một biên bản vi phạm từ danh sách cần thu tiền!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -484,7 +458,7 @@ namespace Library.UI
             string tenDocGia = row.Cells["colTenDocGia"].Value?.ToString() ?? "Độc giả";
             decimal soTien = Convert.ToDecimal(row.Cells["colSoTienPhat"].Value);
 
-            if (trangThai == "Đã thu")
+            if (trangThai == "🟢 Đã thu" || trangThai == "Đã thu")
             {
                 MessageBox.Show("Biên bản này đã được thu tiền và lưu vào ngân quỹ trước đó rồi!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -499,37 +473,12 @@ namespace Library.UI
 
             if (confirm != DialogResult.Yes) return;
 
-            int thuThuId = SessionContext.CurrentLibrarian?.Ma_So ?? 1;
+            // Thực hiện giao dịch thu tiền phạt với thuThuId đã qua kiểm tra
+            var phieuPhatBLL = new PhieuPhatBLL();
+            var (isSuccess, message) = phieuPhatBLL.ThuTienPhatGiaoDich(maBienBan, thuThuId, soTien);
 
-            string query = @"
-                BEGIN TRANSACTION;
-                BEGIN TRY
-                    UPDATE dbo.Phieu_Phat 
-                    SET Trang_Thai = N'Đã thu', Da_Thanh_Toan = 1 
-                    WHERE Ma_So = @MaBienBan;
-
-                    INSERT INTO dbo.Phat_Tien 
-                    (Phieu_Phat_Ma_So, Thu_Thu_Ma_So, So_Tien_Thu, Ngay_Thu, Hinh_Thuc_Thanh_Toan)
-                    VALUES 
-                    (@MaBienBan, @ThuThuMaSo, @SoTien, GETDATE(), N'Tiền mặt');
-
-                    COMMIT TRANSACTION;
-                END TRY
-                BEGIN CATCH
-                    ROLLBACK TRANSACTION;
-                    THROW;
-                END CATCH";
-
-            var pars = new[] {
-                new Microsoft.Data.SqlClient.SqlParameter("@MaBienBan", maBienBan),
-                new Microsoft.Data.SqlClient.SqlParameter("@ThuThuMaSo", thuThuId),
-                new Microsoft.Data.SqlClient.SqlParameter("@SoTien", soTien)
-            };
-
-            try
+            if (isSuccess)
             {
-                DatabaseHelper.ExecuteNonQuery(query, pars);
-
                 SystemLogger.Log(
                     LogLevel.INFO,
                     "Thu tiền phạt",
@@ -537,12 +486,12 @@ namespace Library.UI
                     SessionContext.CurrentUser?.Ma_So
                 );
 
-                MessageBox.Show("Thu tiền phạt thành công! Đã ghi nhận dòng tiền đối soát ca trực.", "Hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(message, "Hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadDanhSachViPham();
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Lỗi khi thu tiền phạt: " + ex.Message, "Lỗi thực thi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(message, "Lỗi thực thi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

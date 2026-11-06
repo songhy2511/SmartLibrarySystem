@@ -24,6 +24,7 @@ namespace Library.UI
 
             NapBoLoc();
             TaiDanhSachNhatKy();
+            dgvNhatKy.EnableDoubleBuffered(true);
         }
 
         private void NapBoLoc()
