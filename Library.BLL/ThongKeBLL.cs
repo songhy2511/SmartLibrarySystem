@@ -34,5 +34,10 @@ namespace Library.BLL
 
             return _thongKeDAL.LayDanhSachDoiSoatCaTruc(chiNhanhMaSo, tuNgay, denNgay);
         }
+
+        public (int TongDocGia, decimal TongTienPhat) LayKPIDocGiaVaTienPhat()
+        {
+            return _thongKeDAL.LayKPIDocGiaVaTienPhat();
+        }
     }
 }

@@ -21,9 +21,10 @@ namespace Library.UI
         {
             DinhDangDataGridView();
             LoadDanhSachDocGia();
+            CaiDatAutoCompleteTimKiemSach();
 
             dtpNgayMuon.Value = DateTime.Now;
-            dtpNgayHenHan.Value = DateTime.Now.AddDays(14);
+            dtpNgayHenHan.Value = DateTime.Now.AddDays(_phieuMuonBLL.LaySoNgayMuonToiDa());
 
             _isInitialized = true;
 
@@ -57,11 +58,42 @@ namespace Library.UI
             dgvSachDangMuon.DefaultCellStyle.SelectionForeColor = Color.Black;
         }
 
+        private void CaiDatAutoCompleteTimKiemSach()
+        {
+            try
+            {
+                DataTable dt = _phieuMuonBLL.LayDanhSachGoiYSach();
+                var collection = new AutoCompleteStringCollection();
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    string maSach = row["Ma_Sach"].ToString() ?? "";
+                    string tieuDe = row["Tieu_De"].ToString() ?? "";
+                    int khaDung = row["So_Luong_Kha_Dung"] != DBNull.Value ? Convert.ToInt32(row["So_Luong_Kha_Dung"]) : 0;
+
+                    // Cho phép thủ thư gõ tên sách, mã sách hoặc gợi ý kèm số lượng
+                    collection.Add($"{tieuDe} (Còn {khaDung})");
+                    collection.Add(tieuDe);
+                    collection.Add(maSach);
+                    collection.Add($"{maSach} - {tieuDe}");
+                }
+
+                txtMaSach.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+                txtMaSach.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                txtMaSach.AutoCompleteCustomSource = collection;
+                txtMaSach.PlaceholderText = "Nhập mã sách, mã vạch hoặc tên sách...";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Lỗi AutoComplete: " + ex.Message);
+            }
+        }
+
         private void LoadDanhSachDocGia()
         {
             try
             {
-                string query = "SELECT Ma_So AS MaDocGia, Ma_Doc_Gia AS MaThe, Ho_Ten AS TenDocGia FROM dbo.Doc_Gia";
+                string query = "SELECT Ma_So AS MaDocGia, Ma_Doc_Gia AS MaThe, Ho_Ten AS TenDocGia FROM dbo.Doc_Gia WHERE Trang_Thai = N'Hoạt động'";
                 DataTable dt = DatabaseHelper.ExecuteQuery(query);
 
                 dt.Columns.Add("HienThi", typeof(string), "MaThe + ' - ' + TenDocGia");
@@ -95,21 +127,21 @@ namespace Library.UI
                 DataTable dt = _phieuMuonBLL.LayDanhSachDangMuon(maDocGia);
                 dgvSachDangMuon.DataSource = dt;
 
-                if (dgvSachDangMuon.Columns["MaPhieu"] != null) { dgvSachDangMuon.Columns["MaPhieu"].HeaderText = "Mã Phiếu"; dgvSachDangMuon.Columns["MaPhieu"].Width = 95; }
-                if (dgvSachDangMuon.Columns["TenDocGia"] != null) { dgvSachDangMuon.Columns["TenDocGia"].HeaderText = "Tên Độc Giả"; dgvSachDangMuon.Columns["TenDocGia"].Width = 150; }
+                if (dgvSachDangMuon.Columns["MaPhieu"] != null) { dgvSachDangMuon.Columns["MaPhieu"].HeaderText = "Mã Phiếu"; dgvSachDangMuon.Columns["MaPhieu"].Width = 110; }
+                if (dgvSachDangMuon.Columns["TenDocGia"] != null) { dgvSachDangMuon.Columns["TenDocGia"].HeaderText = "Tên Độc Giả"; dgvSachDangMuon.Columns["TenDocGia"].Width = 140; }
                 if (dgvSachDangMuon.Columns["TenSach"] != null) { dgvSachDangMuon.Columns["TenSach"].HeaderText = "Tên Sách"; }
                 if (dgvSachDangMuon.Columns["MaVach"] != null) { dgvSachDangMuon.Columns["MaVach"].HeaderText = "Mã Vạch"; dgvSachDangMuon.Columns["MaVach"].Width = 110; }
                 if (dgvSachDangMuon.Columns["NgayMuon"] != null)
                 {
                     dgvSachDangMuon.Columns["NgayMuon"].HeaderText = "Ngày Mượn";
                     dgvSachDangMuon.Columns["NgayMuon"].DefaultCellStyle.Format = "dd/MM/yyyy";
-                    dgvSachDangMuon.Columns["NgayMuon"].Width = 100;
+                    dgvSachDangMuon.Columns["NgayMuon"].Width = 95;
                 }
                 if (dgvSachDangMuon.Columns["NgayHenHan"] != null)
                 {
                     dgvSachDangMuon.Columns["NgayHenHan"].HeaderText = "Ngày Hẹn Trả";
                     dgvSachDangMuon.Columns["NgayHenHan"].DefaultCellStyle.Format = "dd/MM/yyyy";
-                    dgvSachDangMuon.Columns["NgayHenHan"].Width = 105;
+                    dgvSachDangMuon.Columns["NgayHenHan"].Width = 100;
                 }
                 if (dgvSachDangMuon.Columns["SoLanGiaHan"] != null)
                 {
@@ -117,7 +149,7 @@ namespace Library.UI
                     dgvSachDangMuon.Columns["SoLanGiaHan"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                     dgvSachDangMuon.Columns["SoLanGiaHan"].Width = 75;
                 }
-                if (dgvSachDangMuon.Columns["TrangThai"] != null) { dgvSachDangMuon.Columns["TrangThai"].HeaderText = "Trạng Thái"; dgvSachDangMuon.Columns["TrangThai"].Width = 110; }
+                if (dgvSachDangMuon.Columns["TrangThai"] != null) { dgvSachDangMuon.Columns["TrangThai"].HeaderText = "Trạng Thái"; dgvSachDangMuon.Columns["TrangThai"].Width = 100; }
             }
             catch (Exception ex)
             {
@@ -135,10 +167,10 @@ namespace Library.UI
                     return;
                 }
 
-                string maSach = txtMaSach.Text.Trim();
-                if (string.IsNullOrEmpty(maSach))
+                string inputSach = txtMaSach.Text.Trim();
+                if (string.IsNullOrEmpty(inputSach))
                 {
-                    MessageBox.Show("Vui lòng nhập mã sách hoặc quét mã vạch cần cho mượn!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Vui lòng nhập tên sách, mã sách hoặc quét mã vạch cần cho mượn!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     txtMaSach.Focus();
                     return;
                 }
@@ -146,12 +178,16 @@ namespace Library.UI
                 string maDocGia = cboDocGia.SelectedValue.ToString() ?? "1";
                 DateTime ngayMuon = dtpNgayMuon.Value;
 
-                string maPhieu = _phieuMuonBLL.LapPhieuMuon(maDocGia, maSach, ngayMuon);
+                int thuThuMaSo = SessionContext.CurrentLibrarian?.Ma_So ?? 1;
+                int chiNhanhMaSo = 1;
+
+                string maPhieu = _phieuMuonBLL.LapPhieuMuon(maDocGia, inputSach, ngayMuon, thuThuMaSo, chiNhanhMaSo);
                 if (!string.IsNullOrEmpty(maPhieu))
                 {
-                    MessageBox.Show($"Lập phiếu mượn thành công!\nMã phiếu mượn: {maPhieu}", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"Cấp mượn thành công!\nMã phiếu mượn: {maPhieu}", "Thông báo thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     txtMaSach.Clear();
                     LoadDanhSachDangMuon(maDocGia);
+                    CaiDatAutoCompleteTimKiemSach(); // Cập nhật lại số lượng trong danh sách gợi ý
                 }
             }
             catch (Exception ex)
@@ -219,12 +255,13 @@ namespace Library.UI
                 if (_phieuMuonBLL.TraSach(maPhieu, ngayTra, ngayHenHan, out decimal tienPhat))
                 {
                     string thongBao = tienPhat > 0
-                        ? $"Trả sách thành công!\n⚠️ Sách trả trễ hạn, phát sinh tiền phạt: {tienPhat:N0} VNĐ"
+                        ? $"Trả sách hoàn tất!\n⚠️ Sách trả trễ hạn, phát sinh tiền phạt: {tienPhat:N0} VNĐ"
                         : "Xác nhận trả sách đúng hạn thành công!";
 
                     MessageBox.Show(thongBao, "Thông báo hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     string currentDocGia = cboDocGia.SelectedValue?.ToString() ?? "1";
                     LoadDanhSachDangMuon(currentDocGia);
+                    CaiDatAutoCompleteTimKiemSach(); // Cập nhật lại số lượng khả dụng
                 }
             }
             catch (Exception ex)
@@ -237,12 +274,13 @@ namespace Library.UI
         {
             txtMaSach.Clear();
             dtpNgayMuon.Value = DateTime.Now;
-            dtpNgayHenHan.Value = DateTime.Now.AddDays(14);
+            dtpNgayHenHan.Value = DateTime.Now.AddDays(_phieuMuonBLL.LaySoNgayMuonToiDa());
 
             if (cboDocGia.SelectedValue != null)
             {
                 LoadDanhSachDangMuon(cboDocGia.SelectedValue.ToString() ?? "");
             }
+            CaiDatAutoCompleteTimKiemSach();
         }
     }
 }

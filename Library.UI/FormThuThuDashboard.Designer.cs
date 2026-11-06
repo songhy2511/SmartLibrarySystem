@@ -1,4 +1,7 @@
-﻿namespace Library.UI
+﻿using System.Drawing;
+using System.Windows.Forms;
+
+namespace Library.UI
 {
     partial class FormThuThuDashboard
     {
@@ -17,21 +20,23 @@
 
         private void InitializeComponent()
         {
-            pnlSidebar = new System.Windows.Forms.Panel();
-            btnDangXuat = new System.Windows.Forms.Button();
-            btnBaoCaoThongKe = new System.Windows.Forms.Button();
-            btnDoiMatKhau = new System.Windows.Forms.Button();
-            btnLichTruc = new System.Windows.Forms.Button();
-            btnXuLyViPham = new System.Windows.Forms.Button();
-            btnBanLuuThong = new System.Windows.Forms.Button();
-            pnlLogo = new System.Windows.Forms.Panel();
-            lblLibrarianRole = new System.Windows.Forms.Label();
-            lblAppTitle = new System.Windows.Forms.Label();
-            pnlHeader = new System.Windows.Forms.Panel();
-            lblLibrarianInfo = new System.Windows.Forms.Label();
-            lblPageTitle = new System.Windows.Forms.Label();
-            pnlContent = new System.Windows.Forms.Panel();
-            lblWelcome = new System.Windows.Forms.Label();
+            pnlSidebar = new Panel();
+            btnDangXuat = new Button();
+            btnBaoCaoThongKe = new Button();
+            btnDoiMatKhau = new Button();
+            btnLichTruc = new Button();
+            btnXuLyViPham = new Button();
+            btnBanLuuThong = new Button();
+            btnQuanLySach = new Button();
+            btnQuanLyDocGia = new Button();
+            pnlLogo = new Panel();
+            lblLibrarianRole = new Label();
+            lblAppTitle = new Label();
+            pnlHeader = new Panel();
+            lblLibrarianInfo = new Label();
+            lblPageTitle = new Label();
+            pnlContent = new Panel();
+            lblWelcome = new Label();
             pnlSidebar.SuspendLayout();
             pnlLogo.SuspendLayout();
             pnlHeader.SuspendLayout();
@@ -47,12 +52,13 @@
             pnlSidebar.Controls.Add(btnLichTruc);
             pnlSidebar.Controls.Add(btnXuLyViPham);
             pnlSidebar.Controls.Add(btnBanLuuThong);
+            pnlSidebar.Controls.Add(btnQuanLySach);
+            pnlSidebar.Controls.Add(btnQuanLyDocGia);
             pnlSidebar.Controls.Add(pnlLogo);
             pnlSidebar.Dock = DockStyle.Left;
             pnlSidebar.Location = new Point(0, 0);
-            pnlSidebar.Margin = new Padding(3, 4, 3, 4);
             pnlSidebar.Name = "pnlSidebar";
-            pnlSidebar.Size = new Size(263, 737);
+            pnlSidebar.Size = new Size(240, 720);
             pnlSidebar.TabIndex = 0;
             // 
             // btnDangXuat
@@ -61,14 +67,15 @@
             btnDangXuat.Cursor = Cursors.Hand;
             btnDangXuat.Dock = DockStyle.Bottom;
             btnDangXuat.FlatAppearance.BorderSize = 0;
+            btnDangXuat.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 38, 38);
+            btnDangXuat.FlatAppearance.MouseDownBackColor = Color.FromArgb(153, 27, 27);
             btnDangXuat.FlatStyle = FlatStyle.Flat;
             btnDangXuat.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
             btnDangXuat.ForeColor = Color.White;
-            btnDangXuat.Location = new Point(0, 677);
-            btnDangXuat.Margin = new Padding(3, 4, 3, 4);
+            btnDangXuat.Location = new Point(0, 665);
             btnDangXuat.Name = "btnDangXuat";
-            btnDangXuat.Size = new Size(263, 60);
-            btnDangXuat.TabIndex = 6;
+            btnDangXuat.Size = new Size(240, 55);
+            btnDangXuat.TabIndex = 7;
             btnDangXuat.Text = "🚪 Đăng Xuất";
             btnDangXuat.UseVisualStyleBackColor = false;
             btnDangXuat.Click += btnDangXuat_Click;
@@ -81,12 +88,12 @@
             btnBaoCaoThongKe.FlatStyle = FlatStyle.Flat;
             btnBaoCaoThongKe.Font = new Font("Segoe UI", 10F);
             btnBaoCaoThongKe.ForeColor = Color.FromArgb(204, 251, 241);
-            btnBaoCaoThongKe.Location = new Point(0, 353);
-            btnBaoCaoThongKe.Margin = new Padding(3, 4, 3, 4);
+            btnBaoCaoThongKe.ImageAlign = ContentAlignment.MiddleLeft;
+            btnBaoCaoThongKe.Location = new Point(0, 405);
             btnBaoCaoThongKe.Name = "btnBaoCaoThongKe";
-            btnBaoCaoThongKe.Padding = new Padding(23, 0, 0, 0);
-            btnBaoCaoThongKe.Size = new Size(263, 60);
-            btnBaoCaoThongKe.TabIndex = 5;
+            btnBaoCaoThongKe.Padding = new Padding(20, 0, 0, 0);
+            btnBaoCaoThongKe.Size = new Size(240, 50);
+            btnBaoCaoThongKe.TabIndex = 6;
             btnBaoCaoThongKe.Text = "📊  Báo Cáo & Thống Kê";
             btnBaoCaoThongKe.TextAlign = ContentAlignment.MiddleLeft;
             btnBaoCaoThongKe.UseVisualStyleBackColor = true;
@@ -100,12 +107,12 @@
             btnDoiMatKhau.FlatStyle = FlatStyle.Flat;
             btnDoiMatKhau.Font = new Font("Segoe UI", 10F);
             btnDoiMatKhau.ForeColor = Color.FromArgb(204, 251, 241);
-            btnDoiMatKhau.Location = new Point(0, 293);
-            btnDoiMatKhau.Margin = new Padding(3, 4, 3, 4);
+            btnDoiMatKhau.ImageAlign = ContentAlignment.MiddleLeft;
+            btnDoiMatKhau.Location = new Point(0, 355);
             btnDoiMatKhau.Name = "btnDoiMatKhau";
-            btnDoiMatKhau.Padding = new Padding(23, 0, 0, 0);
-            btnDoiMatKhau.Size = new Size(263, 60);
-            btnDoiMatKhau.TabIndex = 4;
+            btnDoiMatKhau.Padding = new Padding(20, 0, 0, 0);
+            btnDoiMatKhau.Size = new Size(240, 50);
+            btnDoiMatKhau.TabIndex = 5;
             btnDoiMatKhau.Text = "🔑  Đổi Mật Khẩu";
             btnDoiMatKhau.TextAlign = ContentAlignment.MiddleLeft;
             btnDoiMatKhau.UseVisualStyleBackColor = true;
@@ -119,12 +126,12 @@
             btnLichTruc.FlatStyle = FlatStyle.Flat;
             btnLichTruc.Font = new Font("Segoe UI", 10F);
             btnLichTruc.ForeColor = Color.FromArgb(204, 251, 241);
-            btnLichTruc.Location = new Point(0, 233);
-            btnLichTruc.Margin = new Padding(3, 4, 3, 4);
+            btnLichTruc.ImageAlign = ContentAlignment.MiddleLeft;
+            btnLichTruc.Location = new Point(0, 305);
             btnLichTruc.Name = "btnLichTruc";
-            btnLichTruc.Padding = new Padding(23, 0, 0, 0);
-            btnLichTruc.Size = new Size(263, 60);
-            btnLichTruc.TabIndex = 3;
+            btnLichTruc.Padding = new Padding(20, 0, 0, 0);
+            btnLichTruc.Size = new Size(240, 50);
+            btnLichTruc.TabIndex = 4;
             btnLichTruc.Text = "📅  Lịch Trực Của Tôi";
             btnLichTruc.TextAlign = ContentAlignment.MiddleLeft;
             btnLichTruc.UseVisualStyleBackColor = true;
@@ -138,36 +145,73 @@
             btnXuLyViPham.FlatStyle = FlatStyle.Flat;
             btnXuLyViPham.Font = new Font("Segoe UI", 10F);
             btnXuLyViPham.ForeColor = Color.FromArgb(204, 251, 241);
-            btnXuLyViPham.Location = new Point(0, 173);
-            btnXuLyViPham.Margin = new Padding(3, 4, 3, 4);
+            btnXuLyViPham.ImageAlign = ContentAlignment.MiddleLeft;
+            btnXuLyViPham.Location = new Point(0, 255);
             btnXuLyViPham.Name = "btnXuLyViPham";
-            btnXuLyViPham.Padding = new Padding(23, 0, 0, 0);
-            btnXuLyViPham.Size = new Size(263, 60);
-            btnXuLyViPham.TabIndex = 2;
-            btnXuLyViPham.Text = "⚠️  Xử Lý Vi Phạm & Phạt";
+            btnXuLyViPham.Padding = new Padding(20, 0, 0, 0);
+            btnXuLyViPham.Size = new Size(240, 50);
+            btnXuLyViPham.TabIndex = 3;
+            btnXuLyViPham.Text = "⚠️  Xử Lý Vi Phạt";
             btnXuLyViPham.TextAlign = ContentAlignment.MiddleLeft;
             btnXuLyViPham.UseVisualStyleBackColor = true;
             btnXuLyViPham.Click += btnXuLyViPham_Click;
             // 
             // btnBanLuuThong
             // 
-            btnBanLuuThong.BackColor = Color.FromArgb(15, 118, 110);
             btnBanLuuThong.Cursor = Cursors.Hand;
             btnBanLuuThong.Dock = DockStyle.Top;
             btnBanLuuThong.FlatAppearance.BorderSize = 0;
             btnBanLuuThong.FlatStyle = FlatStyle.Flat;
-            btnBanLuuThong.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
-            btnBanLuuThong.ForeColor = Color.White;
-            btnBanLuuThong.Location = new Point(0, 113);
-            btnBanLuuThong.Margin = new Padding(3, 4, 3, 4);
+            btnBanLuuThong.Font = new Font("Segoe UI", 10F);
+            btnBanLuuThong.ForeColor = Color.FromArgb(204, 251, 241);
+            btnBanLuuThong.ImageAlign = ContentAlignment.MiddleLeft;
+            btnBanLuuThong.Location = new Point(0, 205);
             btnBanLuuThong.Name = "btnBanLuuThong";
-            btnBanLuuThong.Padding = new Padding(23, 0, 0, 0);
-            btnBanLuuThong.Size = new Size(263, 60);
-            btnBanLuuThong.TabIndex = 1;
+            btnBanLuuThong.Padding = new Padding(20, 0, 0, 0);
+            btnBanLuuThong.Size = new Size(240, 50);
+            btnBanLuuThong.TabIndex = 2;
             btnBanLuuThong.Text = "🔄  Bàn Lưu Thông (Mượn/Trả)";
             btnBanLuuThong.TextAlign = ContentAlignment.MiddleLeft;
-            btnBanLuuThong.UseVisualStyleBackColor = false;
+            btnBanLuuThong.UseVisualStyleBackColor = true;
             btnBanLuuThong.Click += btnBanLuuThong_Click;
+            // 
+            // btnQuanLySach
+            // 
+            btnQuanLySach.Cursor = Cursors.Hand;
+            btnQuanLySach.Dock = DockStyle.Top;
+            btnQuanLySach.FlatAppearance.BorderSize = 0;
+            btnQuanLySach.FlatStyle = FlatStyle.Flat;
+            btnQuanLySach.Font = new Font("Segoe UI", 10F);
+            btnQuanLySach.ForeColor = Color.FromArgb(204, 251, 241);
+            btnQuanLySach.ImageAlign = ContentAlignment.MiddleLeft;
+            btnQuanLySach.Location = new Point(0, 155);
+            btnQuanLySach.Name = "btnQuanLySach";
+            btnQuanLySach.Padding = new Padding(20, 0, 0, 0);
+            btnQuanLySach.Size = new Size(240, 50);
+            btnQuanLySach.TabIndex = 1;
+            btnQuanLySach.Text = "📚  Quản Lý Kho Sách";
+            btnQuanLySach.TextAlign = ContentAlignment.MiddleLeft;
+            btnQuanLySach.UseVisualStyleBackColor = true;
+            btnQuanLySach.Click += btnQuanLySach_Click;
+            // 
+            // btnQuanLyDocGia
+            // 
+            btnQuanLyDocGia.Cursor = Cursors.Hand;
+            btnQuanLyDocGia.Dock = DockStyle.Top;
+            btnQuanLyDocGia.FlatAppearance.BorderSize = 0;
+            btnQuanLyDocGia.FlatStyle = FlatStyle.Flat;
+            btnQuanLyDocGia.Font = new Font("Segoe UI", 10F);
+            btnQuanLyDocGia.ForeColor = Color.FromArgb(204, 251, 241);
+            btnQuanLyDocGia.ImageAlign = ContentAlignment.MiddleLeft;
+            btnQuanLyDocGia.Location = new Point(0, 105);
+            btnQuanLyDocGia.Name = "btnQuanLyDocGia";
+            btnQuanLyDocGia.Padding = new Padding(20, 0, 0, 0);
+            btnQuanLyDocGia.Size = new Size(240, 50);
+            btnQuanLyDocGia.TabIndex = 0;
+            btnQuanLyDocGia.Text = "🪪  Quản Lý Độc Giả";
+            btnQuanLyDocGia.TextAlign = ContentAlignment.MiddleLeft;
+            btnQuanLyDocGia.UseVisualStyleBackColor = true;
+            btnQuanLyDocGia.Click += btnQuanLyDocGia_Click;
             // 
             // pnlLogo
             // 
@@ -176,9 +220,8 @@
             pnlLogo.Controls.Add(lblAppTitle);
             pnlLogo.Dock = DockStyle.Top;
             pnlLogo.Location = new Point(0, 0);
-            pnlLogo.Margin = new Padding(3, 4, 3, 4);
             pnlLogo.Name = "pnlLogo";
-            pnlLogo.Size = new Size(263, 113);
+            pnlLogo.Size = new Size(240, 105);
             pnlLogo.TabIndex = 0;
             // 
             // lblLibrarianRole
@@ -187,10 +230,10 @@
             lblLibrarianRole.BackColor = Color.FromArgb(13, 148, 136);
             lblLibrarianRole.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
             lblLibrarianRole.ForeColor = Color.White;
-            lblLibrarianRole.Location = new Point(23, 67);
+            lblLibrarianRole.Location = new Point(20, 65);
             lblLibrarianRole.Name = "lblLibrarianRole";
-            lblLibrarianRole.Padding = new Padding(7, 3, 7, 3);
-            lblLibrarianRole.Size = new Size(111, 23);
+            lblLibrarianRole.Padding = new Padding(6, 2, 6, 2);
+            lblLibrarianRole.Size = new Size(111, 21);
             lblLibrarianRole.TabIndex = 1;
             lblLibrarianRole.Text = "QUẦY THỦ THƯ";
             // 
@@ -199,7 +242,7 @@
             lblAppTitle.AutoSize = true;
             lblAppTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblAppTitle.ForeColor = Color.White;
-            lblAppTitle.Location = new Point(23, 27);
+            lblAppTitle.Location = new Point(20, 24);
             lblAppTitle.Name = "lblAppTitle";
             lblAppTitle.Size = new Size(168, 28);
             lblAppTitle.TabIndex = 0;
@@ -211,10 +254,9 @@
             pnlHeader.Controls.Add(lblLibrarianInfo);
             pnlHeader.Controls.Add(lblPageTitle);
             pnlHeader.Dock = DockStyle.Top;
-            pnlHeader.Location = new Point(263, 0);
-            pnlHeader.Margin = new Padding(3, 4, 3, 4);
+            pnlHeader.Location = new Point(240, 0);
             pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(859, 80);
+            pnlHeader.Size = new Size(914, 65);
             pnlHeader.TabIndex = 1;
             // 
             // lblLibrarianInfo
@@ -222,9 +264,9 @@
             lblLibrarianInfo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblLibrarianInfo.Font = new Font("Segoe UI", 9.5F);
             lblLibrarianInfo.ForeColor = Color.FromArgb(71, 85, 105);
-            lblLibrarianInfo.Location = new Point(294, 27);
+            lblLibrarianInfo.Location = new Point(410, 20);
             lblLibrarianInfo.Name = "lblLibrarianInfo";
-            lblLibrarianInfo.Size = new Size(537, 33);
+            lblLibrarianInfo.Size = new Size(490, 25);
             lblLibrarianInfo.TabIndex = 1;
             lblLibrarianInfo.Text = "Thủ thư: -- | Quầy: --";
             lblLibrarianInfo.TextAlign = ContentAlignment.MiddleRight;
@@ -234,7 +276,7 @@
             lblPageTitle.AutoSize = true;
             lblPageTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblPageTitle.ForeColor = Color.FromArgb(19, 78, 74);
-            lblPageTitle.Location = new Point(29, 24);
+            lblPageTitle.Location = new Point(25, 18);
             lblPageTitle.Name = "lblPageTitle";
             lblPageTitle.Size = new Size(331, 30);
             lblPageTitle.TabIndex = 0;
@@ -245,11 +287,10 @@
             pnlContent.BackColor = Color.FromArgb(248, 250, 252);
             pnlContent.Controls.Add(lblWelcome);
             pnlContent.Dock = DockStyle.Fill;
-            pnlContent.Location = new Point(263, 80);
-            pnlContent.Margin = new Padding(3, 4, 3, 4);
+            pnlContent.Location = new Point(240, 65);
             pnlContent.Name = "pnlContent";
-            pnlContent.Padding = new Padding(34, 40, 34, 40);
-            pnlContent.Size = new Size(859, 657);
+            pnlContent.Padding = new Padding(30);
+            pnlContent.Size = new Size(914, 655);
             pnlContent.TabIndex = 2;
             // 
             // lblWelcome
@@ -257,7 +298,7 @@
             lblWelcome.AutoSize = true;
             lblWelcome.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblWelcome.ForeColor = Color.FromArgb(100, 116, 139);
-            lblWelcome.Location = new Point(34, 40);
+            lblWelcome.Location = new Point(30, 30);
             lblWelcome.Name = "lblWelcome";
             lblWelcome.Size = new Size(689, 28);
             lblWelcome.TabIndex = 0;
@@ -267,12 +308,11 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1122, 737);
+            ClientSize = new Size(1154, 720);
             Controls.Add(pnlContent);
             Controls.Add(pnlHeader);
             Controls.Add(pnlSidebar);
-            Margin = new Padding(3, 4, 3, 4);
-            MinimumSize = new Size(1140, 784);
+            MinimumSize = new Size(1050, 650);
             Name = "FormThuThuDashboard";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Smart Library System - Bàn Phục Vụ Bạn Đọc";
@@ -290,20 +330,22 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel pnlSidebar;
-        private System.Windows.Forms.Panel pnlLogo;
-        private System.Windows.Forms.Label lblAppTitle;
-        private System.Windows.Forms.Label lblLibrarianRole;
-        private System.Windows.Forms.Button btnBanLuuThong;
-        private System.Windows.Forms.Button btnXuLyViPham;
-        private System.Windows.Forms.Button btnLichTruc;
-        private System.Windows.Forms.Button btnDoiMatKhau;
-        private System.Windows.Forms.Button btnBaoCaoThongKe;
-        private System.Windows.Forms.Button btnDangXuat;
-        private System.Windows.Forms.Panel pnlHeader;
-        private System.Windows.Forms.Label lblPageTitle;
-        private System.Windows.Forms.Label lblLibrarianInfo;
-        private System.Windows.Forms.Panel pnlContent;
-        private System.Windows.Forms.Label lblWelcome;
+        private Panel pnlSidebar;
+        private Panel pnlLogo;
+        private Label lblAppTitle;
+        private Label lblLibrarianRole;
+        private Button btnQuanLyDocGia;
+        private Button btnQuanLySach;
+        private Button btnBanLuuThong;
+        private Button btnXuLyViPham;
+        private Button btnLichTruc;
+        private Button btnDoiMatKhau;
+        private Button btnBaoCaoThongKe;
+        private Button btnDangXuat;
+        private Panel pnlHeader;
+        private Label lblPageTitle;
+        private Label lblLibrarianInfo;
+        private Panel pnlContent;
+        private Label lblWelcome;
     }
 }
