@@ -159,9 +159,5 @@ namespace Library.UI
             }
         }
 
-        private void dgvLuuThongTuan_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
     }
 }
