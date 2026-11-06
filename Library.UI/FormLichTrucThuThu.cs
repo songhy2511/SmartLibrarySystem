@@ -24,6 +24,7 @@ namespace Library.UI
             cboCheDoXem.SelectedIndex = 0; // Mặc định xem theo Tuần
             CapNhatKhoangThoiGian();
             TaiLichTruc();
+            dgvLichTruc.EnableDoubleBuffered(true);
         }
 
         private void CapNhatKhoangThoiGian()

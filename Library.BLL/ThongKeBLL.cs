@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks; // Bắt buộc phải có thư viện này để dùng Task và async/await
 using Library.DAL;
 using Library.DTO;
 
@@ -13,18 +15,11 @@ namespace Library.BLL
         public List<ThongKeLuuThongChiNhanhDTO> LayBaoCaoLuuThongTuan(DateTime? ngayBatDau = null)
         {
             DateTime refDate = ngayBatDau ?? DateTime.Today;
-            // Xác định ngày Thứ 2 đầu tuần và Chủ nhật cuối tuần
             int diff = (7 + (refDate.DayOfWeek - DayOfWeek.Monday)) % 7;
             DateTime dauTuan = refDate.AddDays(-1 * diff).Date;
             DateTime cuoiTuan = dauTuan.AddDays(6).Date;
 
             return _thongKeDAL.LayThongKeMuonTraTuanCacChiNhanh(dauTuan, cuoiTuan);
-        }
-
-        // Lấy danh sách tồn kho sách của chi nhánh được chọn
-        public List<KhoSachChiNhanhDTO> LayChiTietKhoSachChiNhanh(int chiNhanhMaSo, string tuKhoa = "")
-        {
-            return _thongKeDAL.LayKhoSachTheoChiNhanh(chiNhanhMaSo, tuKhoa);
         }
 
         public List<DoiSoatCaTrucDTO> LayDanhSachDoiSoatCaTruc(int chiNhanhMaSo, DateTime tuNgay, DateTime denNgay)
@@ -38,6 +33,40 @@ namespace Library.BLL
         public (int TongDocGia, decimal TongTienPhat) LayKPIDocGiaVaTienPhat()
         {
             return _thongKeDAL.LayKPIDocGiaVaTienPhat();
+        }
+
+        public int LayTongSoDocGia()
+        {
+            return _thongKeDAL.LayTongSoDocGia();
+        }
+
+        public int LayTongSoDauSach()
+        {
+            return _thongKeDAL.LayTongSoDauSach();
+        }
+
+        public int LayTongSachDangMuon()
+        {
+            return _thongKeDAL.LayTongSachDangMuon();
+        }
+
+        public decimal LayTongTienPhatChuaThu()
+        {
+            return _thongKeDAL.LayTongTienPhatChuaThu();
+        }
+
+        // =========================================================
+        // CÁC HÀM BẤT ĐỒNG BỘ (ASYNC/AWAIT) CHỐNG ĐƠ GIAO DIỆN
+        // =========================================================
+
+        public async Task<List<KhoSachChiNhanhDTO>> LayChiTietKhoSachChiNhanhAsync(int chiNhanhMaSo, string tuKhoa = "")
+        {
+            return await _thongKeDAL.LayKhoSachTheoChiNhanhAsync(chiNhanhMaSo, tuKhoa);
+        }
+
+        public async Task<DataTable> LayLuuThongTuanAsync()
+        {
+            return await _thongKeDAL.LayLuuThongTuanAsync();
         }
     }
 }

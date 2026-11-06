@@ -17,19 +17,25 @@ namespace Library.UI
         private void FormQuyCheThamSo_Load(object sender, EventArgs e)
         {
             TaiDuLieu();
+            dgvThamSo.EnableDoubleBuffered(true);
         }
 
         private void TaiDuLieu()
         {
             try
             {
-                // Nạp giá trị hiện tại vào các control
+                // 1. Nạp 4 tham số cơ bản vào controls
                 nudSoSachMuon.Value = _bll.LaySoSachMuonToiDa();
                 nudSoNgayMuon.Value = _bll.LaySoNgayMuonToiDa();
                 nudTienPhat.Value = _bll.LayTienPhatMoiNgay();
                 nudThoiHanThe.Value = _bll.LayThoiHanTheThang();
 
-                // Nạp dữ liệu đồng bộ vào bảng
+                // 2. Nạp 3 tỷ lệ đền bù tài liệu (%)
+                nudTyLeRach.Value = _bll.LayTyLePhatRach();
+                nudTyLeHong.Value = _bll.LayTyLePhatHong();
+                nudTyLeMat.Value = _bll.LayTyLePhatMat();
+
+                // 3. Nạp danh sách đầy đủ 7 tham số vào bảng đồng bộ
                 var list = _bll.LayDanhSachCauHinh();
                 dgvThamSo.AutoGenerateColumns = false;
                 dgvThamSo.DataSource = null;
@@ -47,9 +53,13 @@ namespace Library.UI
             int soNgay = Convert.ToInt32(nudSoNgayMuon.Value);
             decimal tienPhat = nudTienPhat.Value;
             int thoiHanThe = Convert.ToInt32(nudThoiHanThe.Value);
+            decimal tyLeRach = nudTyLeRach.Value;
+            decimal tyLeHong = nudTyLeHong.Value;
+            decimal tyLeMat = nudTyLeMat.Value;
 
             var confirm = MessageBox.Show(
-                "Bạn có chắc chắn muốn thay đổi các tham số quy chế này?\nCác quy định mới sẽ áp dụng trực tiếp cho tất cả lượt mượn trả tiếp theo.",
+                "Bạn có chắc chắn muốn thay đổi toàn bộ các tham số quy chế và tỷ lệ đền bù này?\n" +
+                "Các thiết lập mới sẽ được áp dụng trực tiếp cho tất cả các nghiệp vụ lưu thông và xử phạt vi phạm.",
                 "Xác nhận thay đổi quy chế",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
@@ -59,14 +69,24 @@ namespace Library.UI
 
             try
             {
-                var (isSuccess, message) = _bll.LuuQuyChe(soSach, soNgay, tienPhat, thoiHanThe);
+                var (isSuccess, message) = _bll.LuuQuyCheToanDien(
+                    soSach,
+                    soNgay,
+                    tienPhat,
+                    thoiHanThe,
+                    tyLeRach,
+                    tyLeHong,
+                    tyLeMat
+                );
+
                 if (isSuccess)
                 {
-                    // 👉 GHI LOG CẬP NHẬT QUY CHẾ (Mức WARNING vì ảnh hưởng toàn hệ thống)
+                    // 👉 Ghi log kiểm toán cập nhật quy chế toàn diện
                     SystemLogger.Log(
                         LogLevel.WARNING,
                         "Cập nhật quy chế",
-                        $"Điều chỉnh tham số: Tối đa {soSach} cuốn, Hạn {soNgay} ngày, Phạt {tienPhat:N0}đ/ngày, Hiệu lực thẻ {thoiHanThe} tháng.",
+                        $"Điều chỉnh tham số: Tối đa {soSach} cuốn, Hạn {soNgay} ngày, Phạt {tienPhat:N0}đ/ngày, " +
+                        $"Hiệu lực thẻ {thoiHanThe} tháng, Đền bù Rách {tyLeRach}%, Hỏng {tyLeHong}%, Mất {tyLeMat}%.",
                         SessionContext.CurrentUser?.Ma_So
                     );
 
@@ -75,7 +95,6 @@ namespace Library.UI
                 }
                 else
                 {
-                    // 👉 GHI LOG KHI THIẾT LẬP THẤT BẠI
                     SystemLogger.Log(
                         LogLevel.WARNING,
                         "Cập nhật quy chế thất bại",
@@ -88,7 +107,6 @@ namespace Library.UI
             }
             catch (Exception ex)
             {
-                // 👉 GHI LOG NẾU PHÁT SINH LỖI CSDL
                 SystemLogger.Log(
                     LogLevel.ERROR,
                     "Lỗi quy chế",

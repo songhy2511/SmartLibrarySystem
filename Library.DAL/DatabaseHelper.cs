@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using Microsoft.Data.SqlClient;
+using System.Threading.Tasks;
 
 namespace Library.DAL
 {
@@ -51,6 +52,31 @@ namespace Library.DAL
             }
             conn.Open();
             return cmd.ExecuteScalar();
+        }
+
+        /// <summary>
+        /// Thực thi câu lệnh SELECT bất đồng bộ, trả về Task<DataTable> giúp không khóa luồng giao diện.
+        /// </summary>
+        public static async Task<DataTable> ExecuteQueryAsync(string query, SqlParameter[]? parameters = null)
+        {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    if (parameters != null)
+                    {
+                        cmd.Parameters.AddRange(parameters);
+                    }
+
+                    await conn.OpenAsync();
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        DataTable dt = new DataTable();
+                        dt.Load(reader);
+                        return dt;
+                    }
+                }
+            }
         }
     }
 }

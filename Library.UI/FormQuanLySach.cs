@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Library.BLL;
+using Library.DAL;
 using Library.DTO;
 
 namespace Library.UI
@@ -15,54 +14,169 @@ namespace Library.UI
     public partial class FormQuanLySach : Form
     {
         private readonly SachBLL _sachBLL = new SachBLL();
+        private readonly ThongKeBLL _thongKeBLL = new ThongKeBLL();
+        private readonly ChiNhanhBLL _chiNhanhBLL = new ChiNhanhBLL();
+        private bool _isInitialized = false;
 
         public FormQuanLySach()
         {
             InitializeComponent();
-            this.BackColor = UITheme.ContentBg;
-            LoadData();
         }
 
-        private void LoadData()
+        private async void FormQuanLySach_Load(object sender, EventArgs e)
         {
-            if (dgvSach != null)
+            // Bật DoubleBuffered chống nháy màn hình (nếu bạn đã tạo Extension ở bước trước)
+            // dgvSach.EnableDoubleBuffered(true);
+            // dgvKhoChiNhanh.EnableDoubleBuffered(true);
+
+            NapDanhSachChiNhanh();
+            await TaiDuLieuKhoChiNhanhAsync();
+            await LoadDataAsync();
+            _isInitialized = true;
+        }
+
+        private void NapDanhSachChiNhanh()
+        {
+            try
             {
-                dgvSach.DataSource = _sachBLL.TimKiemSach(txtTimKiem?.Text.Trim() ?? string.Empty);
+                var listCN = _chiNhanhBLL.LayDanhSachChiNhanh();
+                listCN.Insert(0, new ChiNhanhDTO { Ma_So = 0, Ten_Chi_Nhanh = "-- Toàn bộ hệ thống thư viện --" });
+
+                cboChiNhanhKho.DataSource = listCN;
+                cboChiNhanhKho.DisplayMember = "Ten_Chi_Nhanh";
+                cboChiNhanhKho.ValueMember = "Ma_So";
+
+                // Tự động nhận diện chi nhánh mà thủ thư đang trực ca hôm nay
+                int myBranchId = LayChiNhanhTrucHomNay();
+                if (myBranchId > 0 && listCN.Any(x => x.Ma_So == myBranchId))
+                {
+                    cboChiNhanhKho.SelectedValue = myBranchId;
+                }
+                else
+                {
+                    // Mặc định chọn chi nhánh 1 nếu chưa phân ca
+                    cboChiNhanhKho.SelectedValue = 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tải danh mục chi nhánh: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void btnTimKiem_Click(object? sender, EventArgs e)
+        private int LayChiNhanhTrucHomNay()
         {
-            LoadData();
-        }
-        private void btnXoaSach_Click(object? sender, EventArgs e)
-        {
-            if (dgvSach?.CurrentRow?.DataBoundItem is DataRowView drv)
+            try
             {
-                string maSach = drv["Ma_Sach"].ToString() ?? string.Empty;
-                string tieuDe = drv["Tieu_De"].ToString() ?? string.Empty;
-
-                if (MessageBox.Show($"Bạn có chắc chắn muốn xóa đầu sách '{tieuDe}' (Mã: {maSach}) khỏi kho?",
-                    "Xác nhận xóa sách", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                int thuThuMaSo = SessionContext.CurrentLibrarian?.Ma_So ?? 1;
+                string query = "SELECT TOP 1 Chi_Nhanh_Ma_So FROM dbo.Ca_Truc WHERE Thu_Thu_Ma_So = @TTId AND CAST(Ngay_Truc AS DATE) = CAST(GETDATE() AS DATE)";
+                object? res = DatabaseHelper.ExecuteScalar(query, new[] { new Microsoft.Data.SqlClient.SqlParameter("@TTId", thuThuMaSo) });
+                if (res != null && res != DBNull.Value)
                 {
-                    int? currentUserId = SessionContext.CurrentUser?.Ma_So;
-                    if (_sachBLL.XoaSach(maSach, currentUserId, out string err))
-                    {
-                        MessageBox.Show("Xóa đầu sách thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadData();
-                    }
-                    else
-                    {
-                        MessageBox.Show(err, "Không thể xóa sách", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    return Convert.ToInt32(res);
                 }
+            }
+            catch { }
+            return 1;
+        }
+
+        private async Task TaiDuLieuKhoChiNhanhAsync()
+        {
+            try
+            {
+                int chiNhanhMaSo = 0;
+                if (cboChiNhanhKho.SelectedValue != null && int.TryParse(cboChiNhanhKho.SelectedValue.ToString(), out int id))
+                    chiNhanhMaSo = id;
+
+                string tuKhoa = txtTimKiemKho.Text.Trim();
+
+                // Gọi hàm bất đồng bộ, UI vẫn mượt trong lúc truy vấn CSDL
+                var listKho = await _thongKeBLL.LayChiTietKhoSachChiNhanhAsync(chiNhanhMaSo, tuKhoa);
+
+                dgvKhoChiNhanh.AutoGenerateColumns = false;
+                dgvKhoChiNhanh.DataSource = listKho;
+
+                lblTongDauSachCNVal.Text = listKho.Count.ToString();
+                lblTongBanSaoCNVal.Text = listKho.Sum(x => x.Tong_Ban_Sao).ToString();
+                lblDangMuonCNVal.Text = listKho.Sum(x => x.Dang_Muon).ToString();
+                lblSanCoCNVal.Text = listKho.Sum(x => x.San_Co).ToString();
+                lblBaoTriCNVal.Text = listKho.Sum(x => x.Bao_Tri).ToString();
+            }
+            catch { }
+        }
+
+        private async void cboChiNhanhKho_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_isInitialized) await TaiDuLieuKhoChiNhanhAsync();
+        }
+
+        private async void txtTimKiemKho_TextChanged(object sender, EventArgs e)
+        {
+            if (_isInitialized) await TaiDuLieuKhoChiNhanhAsync();
+        }
+
+        private async void btnTaiLaiKho_Click(object sender, EventArgs e)
+        {
+            txtTimKiemKho.Clear();
+            await TaiDuLieuKhoChiNhanhAsync();
+        }
+
+        private async void btnThanhLyCuon_Click(object sender, EventArgs e)
+        {
+            if (dgvKhoChiNhanh.CurrentRow?.DataBoundItem is not KhoSachChiNhanhDTO selected)
+            {
+                MessageBox.Show("Vui lòng chọn 1 đầu sách từ danh sách chi nhánh để thanh lý cuốn hỏng!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (selected.San_Co <= 0)
+            {
+                MessageBox.Show($"Đầu sách '{selected.Tieu_De}' hiện không còn cuốn nào khả dụng trên kệ để thanh lý!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                $"Xác nhận lập biên bản loại bỏ 1 cuốn sách bị rách nát / hư hỏng nặng thuộc đầu sách:\n\n'{selected.Tieu_De}' ({selected.Ma_Sach})?\n\n(Thao tác sẽ giảm 1 tổng số lượng và 1 số lượng sẵn sàng trên kệ)",
+                "Xác nhận thanh lý bản sao",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (confirm != DialogResult.Yes) return;
+
+            int? currentUserId = SessionContext.CurrentUser?.Ma_So;
+
+            if (_sachBLL.DeXuatThanhLyCuonSach(selected.Ma_Sach, selected.Tieu_De, selected.San_Co, currentUserId, out string err))
+            {
+                MessageBox.Show("Thanh lý cuốn sách thành công! Đã cập nhật tồn kho chi nhánh.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await LoadDataAsync();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
             else
             {
-                MessageBox.Show("Vui lòng chọn 1 đầu sách trong bảng để xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(err, "Không thể thanh lý", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-        private void btnThemSach_Click(object? sender, EventArgs e)
+
+        #region Nghiệp vụ Danh mục Biểu ghi (Tab 2)
+        private async Task LoadDataAsync()
+        {
+            try
+            {
+                if (dgvSach != null)
+                {
+                    dgvSach.DataSource = await _sachBLL.TimKiemSachAsync(txtTimKiem?.Text.Trim() ?? string.Empty);
+                }
+            }
+            catch { }
+        }
+
+        private async void btnTimKiem_Click(object? sender, EventArgs e)
+        {
+            await LoadDataAsync();
+        }
+
+        private async void btnThemSach_Click(object? sender, EventArgs e)
         {
             var sach = new SachDTO
             {
@@ -78,7 +192,8 @@ namespace Library.UI
             if (_sachBLL.ThemSachMoi(sach, currentUserId, out string err))
             {
                 MessageBox.Show("Thêm sách mới thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadData();
+                await LoadDataAsync();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
             else
             {
@@ -86,7 +201,7 @@ namespace Library.UI
             }
         }
 
-        private void btnCapNhatKho_Click(object? sender, EventArgs e)
+        private async void btnCapNhatKho_Click(object? sender, EventArgs e)
         {
             if (dgvSach?.CurrentRow?.DataBoundItem is DataRowView drv)
             {
@@ -106,7 +221,8 @@ namespace Library.UI
                 if (_sachBLL.CapNhatKhoSach(sach, currentUserId, out string err))
                 {
                     MessageBox.Show("Cập nhật thông tin kho thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    LoadData();
+                    await LoadDataAsync();
+                    await TaiDuLieuKhoChiNhanhAsync();
                 }
                 else
                 {
@@ -115,7 +231,36 @@ namespace Library.UI
             }
         }
 
-        private void btnDeXuatThanhLy_Click(object? sender, EventArgs e)
+        private async void btnXoaSach_Click(object? sender, EventArgs e)
+        {
+            if (dgvSach?.CurrentRow?.DataBoundItem is DataRowView drv)
+            {
+                string maSach = drv["Ma_Sach"].ToString() ?? string.Empty;
+                string tieuDe = drv["Tieu_De"].ToString() ?? string.Empty;
+
+                if (MessageBox.Show($"Bạn có chắc chắn muốn xóa đầu sách '{tieuDe}' (Mã: {maSach}) khỏi kho?",
+                    "Xác nhận xóa sách", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                {
+                    int? currentUserId = SessionContext.CurrentUser?.Ma_So;
+                    if (_sachBLL.XoaSach(maSach, currentUserId, out string err))
+                    {
+                        MessageBox.Show("Xóa đầu sách thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        await LoadDataAsync();
+                        await TaiDuLieuKhoChiNhanhAsync();
+                    }
+                    else
+                    {
+                        MessageBox.Show(err, "Không thể xóa sách", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng chọn 1 đầu sách trong bảng để xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private async void btnDeXuatThanhLy_Click(object? sender, EventArgs e)
         {
             if (dgvSach?.CurrentRow?.DataBoundItem is not DataRowView drv)
             {
@@ -141,7 +286,8 @@ namespace Library.UI
             if (_sachBLL.DeXuatThanhLyCuonSach(maSach, tieuDe, khaDung, currentUserId, out string err))
             {
                 MessageBox.Show("Thanh lý thành công 1 cuốn sách! Số lượng tồn kho đã được cập nhật.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadData();
+                await LoadDataAsync();
+                await TaiDuLieuKhoChiNhanhAsync();
             }
             else
             {
@@ -160,5 +306,18 @@ namespace Library.UI
                 if (nudTongSoLuong != null) nudTongSoLuong.Value = Convert.ToDecimal(drv["Tong_So_Luong"]);
             }
         }
+
+        private async void tabControlMain_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControlMain.SelectedIndex == 0)
+            {
+                await TaiDuLieuKhoChiNhanhAsync();
+            }
+            else
+            {
+                await LoadDataAsync();
+            }
+        }
+        #endregion
     }
 }

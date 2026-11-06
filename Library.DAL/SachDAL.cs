@@ -75,17 +75,25 @@ namespace Library.DAL
             return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
         }
 
-        public DataTable Search(string keyword)
+        public async Task<DataTable> TimKiemSachAsync(string tuKhoa)
         {
-            // Loại bỏ hoàn toàn cột Gia_Bia gây lỗi
             string query = @"
-                SELECT Ma_Sach, Tieu_De, Tac_Gia, The_Loai, Nam_Xuat_Ban, Vi_Tri_Ke, Tong_So_Luong, So_Luong_Kha_Dung, So_Lan_Muon, Tinh_Trang
-                FROM dbo.Sach 
-                WHERE Ma_Sach LIKE @Kw OR Tieu_De LIKE @Kw OR Tac_Gia LIKE @Kw OR The_Loai LIKE @Kw
-                ORDER BY Ma_So DESC";
+        SELECT 
+            Ma_So, Ma_Sach, Tieu_De, Tac_Gia, The_Loai,
+            Nam_Xuat_Ban, Nha_Xuat_Ban, Tong_So_Luong, 
+            So_Luong_Kha_Dung, So_Lan_Muon, Vi_Tri_Ke 
+        FROM dbo.Sach 
+        WHERE Tieu_De LIKE '%' + @TuKhoa + '%' 
+           OR Tac_Gia LIKE '%' + @TuKhoa + '%' 
+           OR Ma_Sach LIKE '%' + @TuKhoa + '%' 
+           OR The_Loai LIKE '%' + @TuKhoa + '%'
+        ORDER BY Ma_Sach ASC";
 
-            SqlParameter[] pars = { new SqlParameter("@Kw", $"%{keyword}%") };
-            return DatabaseHelper.ExecuteQuery(query, pars);
+            SqlParameter[] parameters = {
+        new SqlParameter("@TuKhoa", string.IsNullOrWhiteSpace(tuKhoa) ? "" : tuKhoa.Trim())
+    };
+
+            return await DatabaseHelper.ExecuteQueryAsync(query, parameters);
         }
 
         public bool ThanhLyMotCuonSach(string maSach)
@@ -116,6 +124,57 @@ namespace Library.DAL
 
             SqlParameter[] pars = { new SqlParameter("@MaSach", maSach) };
             return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
+        }
+
+        /// <summary>
+        /// Lấy danh sách các bản sao sách đang có sẵn trên kệ tại một chi nhánh cụ thể
+        /// </summary>
+        public DataTable LayBanSaoSanCoTaiChiNhanh(string maSach, int chiNhanhId)
+        {
+            string query = @"
+        SELECT 
+            bs.Ma_So AS BanSaoMaSo,
+            bs.Ma_Vach AS MaVach,
+            bs.Tinh_Trang AS TinhTrang
+        FROM dbo.Ban_Sao_Sach bs
+        INNER JOIN dbo.Sach s ON bs.Sach_Ma_So = s.Ma_So
+        WHERE s.Ma_Sach = @MaSach
+          AND bs.Chi_Nhanh_Ma_So = @ChiNhanhId
+          AND bs.Trang_Thai = N'Sẵn sàng'
+        ORDER BY bs.Ma_Vach ASC";
+
+            var parameters = new[]
+            {
+        new Microsoft.Data.SqlClient.SqlParameter("@MaSach", maSach),
+        new Microsoft.Data.SqlClient.SqlParameter("@ChiNhanhId", chiNhanhId)
+    };
+
+            return DatabaseHelper.ExecuteQuery(query, parameters);
+        }
+
+        /// <summary>
+        /// Thực hiện luân chuyển bản sao sách sang chi nhánh đích trong một giao dịch an toàn
+        /// </summary>
+        public bool ChuyenChiNhanhBanSao(int banSaoMaSo, int chiNhanhNguonId, int chiNhanhDichId, string ghiChu)
+        {
+            string query = @"
+        UPDATE dbo.Ban_Sao_Sach
+        SET Chi_Nhanh_Ma_So = @ChiNhanhDichId,
+            Ghi_Chu = CASE 
+                        WHEN @GhiChu <> '' THEN @GhiChu 
+                        ELSE N'Luân chuyển từ chi nhánh #' + CAST(@ChiNhanhNguonId AS NVARCHAR) 
+                      END
+        WHERE Ma_So = @BanSaoMaSo AND Trang_Thai = N'Sẵn sàng'";
+
+            var parameters = new[]
+            {
+        new Microsoft.Data.SqlClient.SqlParameter("@BanSaoMaSo", banSaoMaSo),
+        new Microsoft.Data.SqlClient.SqlParameter("@ChiNhanhNguonId", chiNhanhNguonId),
+        new Microsoft.Data.SqlClient.SqlParameter("@ChiNhanhDichId", chiNhanhDichId),
+        new Microsoft.Data.SqlClient.SqlParameter("@GhiChu", string.IsNullOrWhiteSpace(ghiChu) ? "" : ghiChu.Trim())
+    };
+
+            return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
         }
     }
 }

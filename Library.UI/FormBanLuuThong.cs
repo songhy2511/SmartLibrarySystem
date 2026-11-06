@@ -23,15 +23,12 @@ namespace Library.UI
             LoadDanhSachDocGia();
             CaiDatAutoCompleteTimKiemSach();
 
+            int soNgay = _phieuMuonBLL.LaySoNgayMuonToiDa();
             dtpNgayMuon.Value = DateTime.Now;
-            dtpNgayHenHan.Value = DateTime.Now.AddDays(_phieuMuonBLL.LaySoNgayMuonToiDa());
+            dtpNgayHenHan.Value = DateTime.Now.AddDays(soNgay);
 
             _isInitialized = true;
-
-            if (cboDocGia.SelectedValue != null)
-            {
-                LoadDanhSachDangMuon(cboDocGia.SelectedValue.ToString() ?? "");
-            }
+            TaiDanhSachDangMuon();
         }
 
         private void DinhDangDataGridView()
@@ -45,10 +42,9 @@ namespace Library.UI
             dgvSachDangMuon.MultiSelect = false;
             dgvSachDangMuon.ReadOnly = true;
             dgvSachDangMuon.RowHeadersVisible = false;
-            dgvSachDangMuon.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvSachDangMuon.RowTemplate.Height = 35;
 
-            dgvSachDangMuon.ColumnHeadersHeight = 40;
+            dgvSachDangMuon.ColumnHeadersHeight = 38;
             dgvSachDangMuon.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(19, 78, 74);
             dgvSachDangMuon.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             dgvSachDangMuon.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Semibold", 9.5f);
@@ -56,6 +52,7 @@ namespace Library.UI
             dgvSachDangMuon.DefaultCellStyle.Font = new Font("Segoe UI", 9f);
             dgvSachDangMuon.DefaultCellStyle.SelectionBackColor = Color.FromArgb(204, 251, 241);
             dgvSachDangMuon.DefaultCellStyle.SelectionForeColor = Color.Black;
+            dgvSachDangMuon.EnableDoubleBuffered(true);
         }
 
         private void CaiDatAutoCompleteTimKiemSach()
@@ -71,7 +68,6 @@ namespace Library.UI
                     string tieuDe = row["Tieu_De"].ToString() ?? "";
                     int khaDung = row["So_Luong_Kha_Dung"] != DBNull.Value ? Convert.ToInt32(row["So_Luong_Kha_Dung"]) : 0;
 
-                    // Cho phép thủ thư gõ tên sách, mã sách hoặc gợi ý kèm số lượng
                     collection.Add($"{tieuDe} (Còn {khaDung})");
                     collection.Add(tieuDe);
                     collection.Add(maSach);
@@ -81,7 +77,6 @@ namespace Library.UI
                 txtMaSach.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
                 txtMaSach.AutoCompleteSource = AutoCompleteSource.CustomSource;
                 txtMaSach.AutoCompleteCustomSource = collection;
-                txtMaSach.PlaceholderText = "Nhập mã sách, mã vạch hoặc tên sách...";
             }
             catch (Exception ex)
             {
@@ -93,14 +88,23 @@ namespace Library.UI
         {
             try
             {
-                string query = "SELECT Ma_So AS MaDocGia, Ma_Doc_Gia AS MaThe, Ho_Ten AS TenDocGia FROM dbo.Doc_Gia WHERE Trang_Thai = N'Hoạt động'";
+                string query = "SELECT Ma_So AS MaDocGia, Ma_Doc_Gia AS MaThe, Ho_Ten AS TenDocGia FROM dbo.Doc_Gia WHERE Trang_Thai = N'Hoạt động' ORDER BY Ho_Ten ASC";
                 DataTable dt = DatabaseHelper.ExecuteQuery(query);
 
                 dt.Columns.Add("HienThi", typeof(string), "MaThe + ' - ' + TenDocGia");
 
+                // Thêm mục 'Xem tất cả độc giả' lên đầu danh sách
+                DataRow drAll = dt.NewRow();
+                drAll["MaDocGia"] = 0;
+                drAll["MaThe"] = "ALL";
+                drAll["TenDocGia"] = "Tất cả";
+                drAll["HienThi"] = "-- Xem tất cả độc giả đang mượn --";
+                dt.Rows.InsertAt(drAll, 0);
+
                 cboDocGia.DataSource = dt;
                 cboDocGia.DisplayMember = "HienThi";
                 cboDocGia.ValueMember = "MaDocGia";
+                cboDocGia.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -110,46 +114,31 @@ namespace Library.UI
 
         private void cboDocGia_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_isInitialized && cboDocGia.SelectedValue != null)
+            if (_isInitialized)
             {
-                string selectedMaDocGia = cboDocGia.SelectedValue.ToString() ?? "";
-                if (!string.IsNullOrEmpty(selectedMaDocGia))
-                {
-                    LoadDanhSachDangMuon(selectedMaDocGia);
-                }
+                TaiDanhSachDangMuon();
             }
         }
 
-        private void LoadDanhSachDangMuon(string maDocGia)
+        private void chkChiQuaHan_CheckedChanged(object sender, EventArgs e)
+        {
+            TaiDanhSachDangMuon();
+        }
+
+        private void TaiDanhSachDangMuon()
         {
             try
             {
-                DataTable dt = _phieuMuonBLL.LayDanhSachDangMuon(maDocGia);
-                dgvSachDangMuon.DataSource = dt;
+                int docGiaMaSo = 0;
+                if (cboDocGia.SelectedValue != null)
+                {
+                    int.TryParse(cboDocGia.SelectedValue.ToString(), out docGiaMaSo);
+                }
 
-                if (dgvSachDangMuon.Columns["MaPhieu"] != null) { dgvSachDangMuon.Columns["MaPhieu"].HeaderText = "Mã Phiếu"; dgvSachDangMuon.Columns["MaPhieu"].Width = 110; }
-                if (dgvSachDangMuon.Columns["TenDocGia"] != null) { dgvSachDangMuon.Columns["TenDocGia"].HeaderText = "Tên Độc Giả"; dgvSachDangMuon.Columns["TenDocGia"].Width = 140; }
-                if (dgvSachDangMuon.Columns["TenSach"] != null) { dgvSachDangMuon.Columns["TenSach"].HeaderText = "Tên Sách"; }
-                if (dgvSachDangMuon.Columns["MaVach"] != null) { dgvSachDangMuon.Columns["MaVach"].HeaderText = "Mã Vạch"; dgvSachDangMuon.Columns["MaVach"].Width = 110; }
-                if (dgvSachDangMuon.Columns["NgayMuon"] != null)
-                {
-                    dgvSachDangMuon.Columns["NgayMuon"].HeaderText = "Ngày Mượn";
-                    dgvSachDangMuon.Columns["NgayMuon"].DefaultCellStyle.Format = "dd/MM/yyyy";
-                    dgvSachDangMuon.Columns["NgayMuon"].Width = 95;
-                }
-                if (dgvSachDangMuon.Columns["NgayHenHan"] != null)
-                {
-                    dgvSachDangMuon.Columns["NgayHenHan"].HeaderText = "Ngày Hẹn Trả";
-                    dgvSachDangMuon.Columns["NgayHenHan"].DefaultCellStyle.Format = "dd/MM/yyyy";
-                    dgvSachDangMuon.Columns["NgayHenHan"].Width = 100;
-                }
-                if (dgvSachDangMuon.Columns["SoLanGiaHan"] != null)
-                {
-                    dgvSachDangMuon.Columns["SoLanGiaHan"].HeaderText = "Gia Hạn";
-                    dgvSachDangMuon.Columns["SoLanGiaHan"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                    dgvSachDangMuon.Columns["SoLanGiaHan"].Width = 75;
-                }
-                if (dgvSachDangMuon.Columns["TrangThai"] != null) { dgvSachDangMuon.Columns["TrangThai"].HeaderText = "Trạng Thái"; dgvSachDangMuon.Columns["TrangThai"].Width = 100; }
+                bool chiQuaHan = chkChiQuaHan.Checked;
+                DataTable dt = _phieuMuonBLL.LayDanhSachDangMuonNangCao(docGiaMaSo, chiQuaHan);
+                dgvSachDangMuon.AutoGenerateColumns = false;
+                dgvSachDangMuon.DataSource = dt;
             }
             catch (Exception ex)
             {
@@ -157,13 +146,66 @@ namespace Library.UI
             }
         }
 
+        private void dgvSachDangMuon_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= dgvSachDangMuon.Rows.Count) return;
+            if (dgvSachDangMuon.Rows[e.RowIndex].DataBoundItem is not DataRowView drv) return;
+
+            string colName = dgvSachDangMuon.Columns[e.ColumnIndex]?.Name ?? string.Empty;
+
+            if (colName == "colNgayMuon" || colName == "colNgayHenHan")
+            {
+                if (e.Value != null && e.Value != DBNull.Value)
+                {
+                    e.Value = Convert.ToDateTime(e.Value).ToString("dd/MM/yyyy");
+                    e.FormattingApplied = true;
+                }
+            }
+            else if (colName == "colTinhTrangHan")
+            {
+                DateTime ngayHenHan = Convert.ToDateTime(drv["NgayHenHan"]);
+                int soNgayTre = drv["SoNgayTre"] != DBNull.Value ? Convert.ToInt32(drv["SoNgayTre"]) : 0;
+                int soNgayConLai = drv["SoNgayConLai"] != DBNull.Value ? Convert.ToInt32(drv["SoNgayConLai"]) : 0;
+
+                if (DateTime.Today > ngayHenHan.Date)
+                {
+                    e.Value = $"🔴 Quá hạn {soNgayTre} ngày";
+                    if (e.CellStyle != null)
+                    {
+                        e.CellStyle.ForeColor = Color.FromArgb(220, 38, 38);
+                        e.CellStyle.Font = new Font("Segoe UI Semibold", 9f, FontStyle.Bold);
+                    }
+                }
+                else
+                {
+                    e.Value = soNgayConLai == 0 ? "🟡 Hạn chót hôm nay" : $"🟢 Còn {soNgayConLai} ngày";
+                    if (e.CellStyle != null)
+                    {
+                        e.CellStyle.ForeColor = soNgayConLai == 0 ? Color.FromArgb(217, 119, 6) : Color.FromArgb(22, 101, 52);
+                    }
+                }
+                e.FormattingApplied = true;
+            }
+        }
+
+        private int KiemTraVaLayMaThuThu()
+        {
+            if (SessionContext.CurrentLibrarian == null)
+            {
+                MessageBox.Show("Phiên làm việc đã hết hạn hoặc mất kết nối tài khoản. Vui lòng đăng nhập lại để tiếp tục!", "Lỗi xác thực", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return 0;
+            }
+            return SessionContext.CurrentLibrarian.Ma_So;
+        }
+
         private void btnLapPhieuMuon_Click(object sender, EventArgs e)
         {
             try
             {
-                if (cboDocGia.SelectedValue == null)
+                if (cboDocGia.SelectedValue == null || Convert.ToInt32(cboDocGia.SelectedValue) == 0)
                 {
-                    MessageBox.Show("Vui lòng chọn độc giả trước khi cấp mượn!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Vui lòng chọn một độc giả cụ thể từ danh sách để cấp mượn!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    cboDocGia.Focus();
                     return;
                 }
 
@@ -175,10 +217,11 @@ namespace Library.UI
                     return;
                 }
 
-                string maDocGia = cboDocGia.SelectedValue.ToString() ?? "1";
+                string maDocGia = cboDocGia.SelectedValue.ToString()!;
                 DateTime ngayMuon = dtpNgayMuon.Value;
+                int thuThuMaSo = KiemTraVaLayMaThuThu();
+                if (thuThuMaSo == 0) return;
 
-                int thuThuMaSo = SessionContext.CurrentLibrarian?.Ma_So ?? 1;
                 int chiNhanhMaSo = 1;
 
                 string maPhieu = _phieuMuonBLL.LapPhieuMuon(maDocGia, inputSach, ngayMuon, thuThuMaSo, chiNhanhMaSo);
@@ -186,8 +229,8 @@ namespace Library.UI
                 {
                     MessageBox.Show($"Cấp mượn thành công!\nMã phiếu mượn: {maPhieu}", "Thông báo thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     txtMaSach.Clear();
-                    LoadDanhSachDangMuon(maDocGia);
-                    CaiDatAutoCompleteTimKiemSach(); // Cập nhật lại số lượng trong danh sách gợi ý
+                    TaiDanhSachDangMuon();
+                    CaiDatAutoCompleteTimKiemSach();
                 }
             }
             catch (Exception ex)
@@ -207,21 +250,20 @@ namespace Library.UI
             try
             {
                 var row = dgvSachDangMuon.SelectedRows[0];
-                string maPhieu = row.Cells["MaPhieu"].Value?.ToString() ?? string.Empty;
+                string maPhieu = row.Cells["colMaPhieu"].Value?.ToString() ?? string.Empty;
 
                 int soLanGiaHan = 0;
-                if (row.Cells["SoLanGiaHan"]?.Value != null)
+                if (row.Cells["colSoLanGiaHan"]?.Value != null)
                 {
-                    int.TryParse(row.Cells["SoLanGiaHan"].Value.ToString(), out soLanGiaHan);
+                    int.TryParse(row.Cells["colSoLanGiaHan"].Value.ToString(), out soLanGiaHan);
                 }
 
-                DateTime ngayHenHan = Convert.ToDateTime(row.Cells["NgayHenHan"].Value ?? DateTime.Now);
+                DateTime ngayHenHan = Convert.ToDateTime(row.Cells["colNgayHenHan"].Value ?? DateTime.Now);
 
                 if (_phieuMuonBLL.GiaHanPhieu(maPhieu, soLanGiaHan, ngayHenHan))
                 {
                     MessageBox.Show("Gia hạn thời hạn trả sách thành công thêm 7 ngày!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    string currentDocGia = cboDocGia.SelectedValue?.ToString() ?? "1";
-                    LoadDanhSachDangMuon(currentDocGia);
+                    TaiDanhSachDangMuon();
                 }
             }
             catch (Exception ex)
@@ -241,15 +283,8 @@ namespace Library.UI
             try
             {
                 var row = dgvSachDangMuon.SelectedRows[0];
-                string maPhieu = row.Cells["MaPhieu"].Value?.ToString() ?? string.Empty;
-
-                if (string.IsNullOrEmpty(maPhieu))
-                {
-                    MessageBox.Show("Mã phiếu không hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                DateTime ngayHenHan = Convert.ToDateTime(row.Cells["NgayHenHan"].Value ?? DateTime.Now);
+                string maPhieu = row.Cells["colMaPhieu"].Value?.ToString() ?? string.Empty;
+                DateTime ngayHenHan = Convert.ToDateTime(row.Cells["colNgayHenHan"].Value ?? DateTime.Now);
                 DateTime ngayTra = DateTime.Now;
 
                 if (_phieuMuonBLL.TraSach(maPhieu, ngayTra, ngayHenHan, out decimal tienPhat))
@@ -259,9 +294,8 @@ namespace Library.UI
                         : "Xác nhận trả sách đúng hạn thành công!";
 
                     MessageBox.Show(thongBao, "Thông báo hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    string currentDocGia = cboDocGia.SelectedValue?.ToString() ?? "1";
-                    LoadDanhSachDangMuon(currentDocGia);
-                    CaiDatAutoCompleteTimKiemSach(); // Cập nhật lại số lượng khả dụng
+                    TaiDanhSachDangMuon();
+                    CaiDatAutoCompleteTimKiemSach();
                 }
             }
             catch (Exception ex)
@@ -270,16 +304,67 @@ namespace Library.UI
             }
         }
 
+        private void btnDoiSDT_Click(object sender, EventArgs e)
+        {
+            if (dgvSachDangMuon.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn một dòng độc giả cần cập nhật số điện thoại!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var row = dgvSachDangMuon.SelectedRows[0];
+            int docGiaMaSo = Convert.ToInt32(row.Cells["colMaDocGia"].Value != null && int.TryParse(row.Cells["colMaDocGia"].Value.ToString()?.Replace("DG", ""), out int id) ? id : 1);
+            string tenDocGia = row.Cells["colTenDocGia"].Value?.ToString() ?? "Độc giả";
+            string sdtCu = row.Cells["colSoDienThoai"].Value?.ToString() ?? "";
+
+            // Form prompt đơn giản
+            Form prompt = new Form()
+            {
+                Width = 380,
+                Height = 180,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                Text = "Cập nhật liên hệ",
+                StartPosition = FormStartPosition.CenterParent,
+                MaximizeBox = false,
+                MinimizeBox = false
+            };
+            Label textLabel = new Label() { Left = 20, Top = 15, Width = 320, Text = $"Nhập SĐT liên hệ mới cho: {tenDocGia}" };
+            TextBox textBox = new TextBox() { Left = 20, Top = 45, Width = 320, Text = sdtCu == "--" ? "" : sdtCu };
+            Button confirmation = new Button() { Text = "Xác nhận", Left = 160, Width = 85, Top = 85, DialogResult = DialogResult.OK };
+            Button cancel = new Button() { Text = "Hủy", Left = 255, Width = 85, Top = 85, DialogResult = DialogResult.Cancel };
+            prompt.Controls.Add(textLabel);
+            prompt.Controls.Add(textBox);
+            prompt.Controls.Add(confirmation);
+            prompt.Controls.Add(cancel);
+            prompt.AcceptButton = confirmation;
+            prompt.CancelButton = cancel;
+
+            if (prompt.ShowDialog() == DialogResult.OK)
+            {
+                string sdtMoi = textBox.Text.Trim();
+                if (string.IsNullOrEmpty(sdtMoi))
+                {
+                    MessageBox.Show("Số điện thoại không được để trống!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (_phieuMuonBLL.CapNhatSoDienThoaiDocGia(docGiaMaSo, sdtMoi))
+                {
+                    MessageBox.Show("Cập nhật số điện thoại thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    TaiDanhSachDangMuon();
+                }
+            }
+        }
+
         private void btnLamMoi_Click(object sender, EventArgs e)
         {
             txtMaSach.Clear();
+            int soNgay = _phieuMuonBLL.LaySoNgayMuonToiDa();
             dtpNgayMuon.Value = DateTime.Now;
-            dtpNgayHenHan.Value = DateTime.Now.AddDays(_phieuMuonBLL.LaySoNgayMuonToiDa());
-
-            if (cboDocGia.SelectedValue != null)
-            {
-                LoadDanhSachDangMuon(cboDocGia.SelectedValue.ToString() ?? "");
-            }
+            dtpNgayHenHan.Value = DateTime.Now.AddDays(soNgay);
+            chkChiQuaHan.Checked = false;
+            cboDocGia.SelectedIndex = 0;
+            TaiDanhSachDangMuon();
             CaiDatAutoCompleteTimKiemSach();
         }
     }

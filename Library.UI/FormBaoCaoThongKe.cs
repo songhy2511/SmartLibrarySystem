@@ -2,6 +2,7 @@
 using System.Data;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.Linq;
 using System.Windows.Forms;
 using Library.BLL;
 using Library.DTO;
@@ -11,27 +12,38 @@ namespace Library.UI
     public partial class FormBaoCaoThongKe : Form
     {
         private readonly BaoCaoBLL _bll = new BaoCaoBLL();
+        private int _dongIn;
+        private readonly Font _fontLechQuy = new Font("Segoe UI", 9F, FontStyle.Bold);
 
         public FormBaoCaoThongKe()
         {
             InitializeComponent();
+            dgvDoanhThuCa.CellFormatting += DgvDoanhThuCa_CellFormatting;
+            FormClosed += (_, _) => _fontLechQuy.Dispose();
         }
 
         private void FormBaoCaoThongKe_Load(object sender, EventArgs e)
         {
-            if (dtpTuNgay != null) dtpTuNgay.Value = DateTime.Today.AddDays(-30);
-            if (dtpDenNgay != null) dtpDenNgay.Value = DateTime.Today;
-
+            dtpTuNgay.Value = DateTime.Today.AddDays(-29);
+            dtpDenNgay.Value = DateTime.Today;
+            NapChiNhanh();
             TaiDuLieuBaoCao();
         }
 
-        private void btnXem_Click(object sender, EventArgs e)
-        {
-            TaiDuLieuBaoCao();
-        }
+        private void btnXem_Click(object sender, EventArgs e) => TaiDuLieuBaoCao();
 
-        private void tabControlBaoCao_SelectedIndexChanged(object sender, EventArgs e)
+        private void cboChiNhanh_SelectedIndexChanged(object sender, EventArgs e) => TaiDuLieuBaoCao();
+
+        private void tabControlBaoCao_SelectedIndexChanged(object sender, EventArgs e) => TaiDuLieuBaoCao();
+
+        private void btn7Ngay_Click(object sender, EventArgs e) => ChonKy(DateTime.Today.AddDays(-6), DateTime.Today);
+
+        private void btn30Ngay_Click(object sender, EventArgs e) => ChonKy(DateTime.Today.AddDays(-29), DateTime.Today);
+
+        private void ChonKy(DateTime tu, DateTime den)
         {
+            dtpTuNgay.Value = tu;
+            dtpDenNgay.Value = den;
             TaiDuLieuBaoCao();
         }
 
@@ -39,62 +51,62 @@ namespace Library.UI
         {
             try
             {
-                if (dtpTuNgay.Value > dtpDenNgay.Value)
+                if (dtpTuNgay.Value.Date > dtpDenNgay.Value.Date)
                 {
-                    MessageBox.Show("Mốc 'Từ ngày' không được lớn hơn 'Đến ngày'!", "Lỗi Lọc Dữ Liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Mốc 'Từ ngày' không được lớn hơn 'Đến ngày'.", "Lọc dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 Cursor = Cursors.WaitCursor;
+                DateTime tu = dtpTuNgay.Value.Date;
+                DateTime den = dtpDenNgay.Value.Date;
+                int? chiNhanh = ChiNhanhDangChon();
+                DataTable dt;
 
-                DateTime tu = dtpTuNgay.Value;
-                DateTime den = dtpDenNgay.Value;
-                DataTable dt = null;
-
-                // Xác định dữ liệu cần tải dựa theo Tab đang chọn
-                if (tabControlBaoCao.SelectedTab == tabDoanhThuCa)
+                if (tabControlBaoCao.SelectedTab == tabTopSach)
                 {
-                    dt = _bll.GetDoanhThuTheoCa(tu, den, null);
-                    if (dgvDoanhThuCa != null)
-                    {
-                        dgvDoanhThuCa.DataSource = null;
-                        dgvDoanhThuCa.DataSource = dt;
-                        DinhDangCotGridView(dgvDoanhThuCa);
-                    }
-                }
-                else if (tabControlBaoCao.SelectedTab == tabTopSach)
-                {
-                    dt = _bll.GetTopHotBooks(10, tu, den, null);
-                    if (dgvTopSach != null)
-                    {
-                        dgvTopSach.DataSource = null;
-                        dgvTopSach.DataSource = dt;
-                        DinhDangCotGridView(dgvTopSach);
-                    }
+                    dt = _bll.GetTopHotBooks((int)nudTopSach.Value, tu, den, chiNhanh);
+                    GanNguon(dgvTopSach, dt);
                 }
                 else if (tabControlBaoCao.SelectedTab == tabQuayVong)
                 {
-                    dt = _bll.GetQuayVongChiNhanh(tu, den);
-                    if (dgvQuayVong != null)
-                    {
-                        dgvQuayVong.DataSource = null;
-                        dgvQuayVong.DataSource = dt;
-                        DinhDangCotGridView(dgvQuayVong);
-                    }
+                    dt = _bll.GetQuayVongChiNhanh(tu, den, chiNhanh);
+                    GanNguon(dgvQuayVong, dt);
+                }
+                else
+                {
+                    dt = _bll.GetDoanhThuTheoCa(tu, den, chiNhanh);
+                    GanNguon(dgvDoanhThuCa, dt);
                 }
 
-                // Cập nhật thông tin KPI chung ở các thẻ Card phía trên
-                BaoCaoKPIDTO kpi = _bll.GetKPISummary(tu, den, null);
+                BaoCaoKPIDTO kpi = _bll.GetKPISummary(tu, den, chiNhanh);
+                lblValTongDoanhThu.Text = kpi.TongTienPhatDaThu.ToString("N0") + " đ";
+                lblValTienConNo.Text = kpi.TongTienPhatChuaThu.ToString("N0") + " đ";
+                lblValLuotMuon.Text = kpi.LuotMuonTrongKy.ToString("N0");
+                lblValCaLech.Text = kpi.SoCaLechTien.ToString("N0");
+                lblValCaLech.ForeColor = kpi.SoCaLechTien > 0
+                    ? Color.FromArgb(190, 18, 60)
+                    : Color.FromArgb(15, 23, 42);
 
-                if (lblValTongDoanhThu != null)
-                    lblValTongDoanhThu.Text = string.Format("{0:N0} đ", kpi.TongTienPhatDaThu);
-
-                if (lblValTongSoGiaoDich != null)
-                    lblValTongSoGiaoDich.Text = dt != null ? dt.Rows.Count.ToString("N0") : "0";
+                if (kpi.PhieuKhongGanCa > 0 || kpi.ThuKhongGanCa > 0)
+                {
+                    lblCanhBao.Text = $"Có {kpi.PhieuKhongGanCa} phiếu phạt và {kpi.ThuKhongGanCa} lần thu không gắn được vào ca trực. Kiểm tra lịch phân ca của thủ thư trong kỳ.";
+                    lblCanhBao.ForeColor = Color.FromArgb(180, 83, 9);
+                }
+                else if (dt.Rows.Count == 0)
+                {
+                    lblCanhBao.Text = "Không có phát sinh trong kỳ và phạm vi đang chọn.";
+                    lblCanhBao.ForeColor = Color.FromArgb(100, 116, 139);
+                }
+                else
+                {
+                    lblCanhBao.Text = "Tiền đã thu gắn vào ca của thủ thư thu tiền. Tiền lý thuyết = tiền đầu ca + tiền đã thu. Chênh lệch quỹ = tiền kết ca − tiền lý thuyết.";
+                    lblCanhBao.ForeColor = Color.FromArgb(71, 85, 105);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi nạp dữ liệu báo cáo: {ex.Message}", "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi nạp dữ liệu báo cáo: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -102,95 +114,201 @@ namespace Library.UI
             }
         }
 
+        private void btnXuatFile_Click(object sender, EventArgs e)
+        {
+            XuatFile("CSV (*.csv)|*.csv", "csv", (dt, path) =>
+                _bll.ExportToCsv(dt, path, SessionContext.CurrentUser?.Ma_So));
+        }
+
+        private void btnXuatExcel_Click(object sender, EventArgs e)
+        {
+            XuatFile("Excel (*.xlsx)|*.xlsx", "xlsx", (dt, path) =>
+                _bll.ExportToExcel(dt, path, TieuDeBaoCao(), PhuDeBaoCao(), SessionContext.CurrentUser?.Ma_So));
+        }
+
+        private void btnXuatPdf_Click(object sender, EventArgs e)
+        {
+            XuatFile("PDF (*.pdf)|*.pdf", "pdf", (dt, path) =>
+                _bll.ExportToPdf(dt, path, TieuDeBaoCao(), PhuDeBaoCao(), SessionContext.CurrentUser?.Ma_So));
+        }
+
+        private void btnInBaoCao_Click(object sender, EventArgs e)
+        {
+            DataGridView activeDgv = GetCurrentActiveDataGridView();
+            if (activeDgv.Rows.Count == 0)
+            {
+                MessageBox.Show("Không có dữ liệu để in báo cáo.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            _dongIn = 0;
+            using var printDoc = new PrintDocument();
+            printDoc.DefaultPageSettings.Landscape = true;
+            printDoc.DocumentName = TieuDeBaoCao();
+            printDoc.PrintPage += PrintDoc_PrintPage;
+
+            using var previewDlg = new PrintPreviewDialog
+            {
+                Document = printDoc,
+                Width = 1000,
+                Height = 720,
+                Text = "Xem trước bản in - " + TieuDeBaoCao()
+            };
+            previewDlg.ShowDialog(this);
+        }
+
+        private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
+        {
+            DataGridView activeDgv = GetCurrentActiveDataGridView();
+            using Font fontTitle = new Font("Segoe UI", 16, FontStyle.Bold);
+            using Font fontSub = new Font("Segoe UI", 10, FontStyle.Italic);
+            using Font fontHeader = new Font("Segoe UI", 9, FontStyle.Bold);
+            using Font fontRow = new Font("Segoe UI", 9, FontStyle.Regular);
+            using Pen penGrid = new Pen(Color.FromArgb(160, 160, 160), 1);
+            using Brush headerBrush = new SolidBrush(Color.FromArgb(235, 240, 245));
+
+            var cot = activeDgv.Columns.Cast<DataGridViewColumn>().Where(c => c.Visible).ToList();
+            if (cot.Count == 0 || e.Graphics == null)
+            {
+                e.HasMorePages = false;
+                return;
+            }
+
+            float startX = e.MarginBounds.Left;
+            float startY = e.MarginBounds.Top;
+            float printableWidth = e.MarginBounds.Width;
+            float currentY = startY;
+
+            e.Graphics.DrawString(TieuDeBaoCao().ToUpper(), fontTitle, Brushes.Black, startX, currentY);
+            currentY += 30;
+            e.Graphics.DrawString(PhuDeBaoCao() + $"    |    Ngày in: {DateTime.Now:dd/MM/yyyy HH:mm}", fontSub, Brushes.Black, startX, currentY);
+            currentY += 24;
+            e.Graphics.DrawLine(Pens.Black, startX, currentY, startX + printableWidth, currentY);
+            currentY += 12;
+
+            float totalWeight = cot.Sum(c => TrongSoCot(c.HeaderText));
+            float[] colWidths = cot.Select(c => printableWidth * TrongSoCot(c.HeaderText) / totalWeight).ToArray();
+            const float headerHeight = 30;
+            const float rowHeight = 26;
+
+            VeDong(e.Graphics, cot.Select(c => c.HeaderText).ToArray(), colWidths, startX, currentY, headerHeight, fontHeader, headerBrush, penGrid, true);
+            currentY += headerHeight;
+
+            while (_dongIn < activeDgv.Rows.Count)
+            {
+                DataGridViewRow row = activeDgv.Rows[_dongIn];
+                if (row.IsNewRow)
+                {
+                    _dongIn++;
+                    continue;
+                }
+
+                if (currentY + rowHeight > e.MarginBounds.Bottom)
+                {
+                    e.HasMorePages = true;
+                    return;
+                }
+
+                string[] values = cot.Select(c => row.Cells[c.Index].FormattedValue?.ToString() ?? "").ToArray();
+                VeDong(e.Graphics, values, colWidths, startX, currentY, rowHeight, fontRow, Brushes.White, penGrid, false);
+                currentY += rowHeight;
+                _dongIn++;
+            }
+
+            _dongIn = 0;
+            e.HasMorePages = false;
+        }
+
+        private void NapChiNhanh()
+        {
+            cboChiNhanh.Items.Clear();
+            cboChiNhanh.Items.Add(new MucChiNhanh(null, "Tất cả chi nhánh"));
+            try
+            {
+                foreach (ChiNhanhDTO cn in new ChiNhanhBLL().LayDanhSachChiNhanh().Where(x => x.Dang_Hoat_Dong))
+                    cboChiNhanh.Items.Add(new MucChiNhanh(cn.Ma_So, cn.Ten_Chi_Nhanh));
+            }
+            catch
+            {
+                // Giữ lựa chọn tất cả chi nhánh nếu truy vấn danh mục thất bại
+            }
+
+            cboChiNhanh.SelectedIndex = 0;
+        }
+
+        private int? ChiNhanhDangChon() => (cboChiNhanh.SelectedItem as MucChiNhanh)?.MaSo;
+
+        private void GanNguon(DataGridView dgv, DataTable dt)
+        {
+            dgv.DataSource = null;
+            dgv.DataSource = dt;
+            DinhDangCotGridView(dgv);
+        }
+
         private static void DinhDangCotGridView(DataGridView dgv)
         {
-            if (dgv == null || dgv.Columns.Count == 0) return;
-
+            if (dgv.Columns.Count == 0) return;
             dgv.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
             foreach (DataGridViewColumn col in dgv.Columns)
             {
-                string colName = col.Name.ToLower();
+                col.HeaderText = BaoCaoBLL.TenCot(col.Name);
+                col.SortMode = DataGridViewColumnSortMode.Automatic;
+                bool laTien = col.Name.Contains("Tien", StringComparison.OrdinalIgnoreCase)
+                    || col.Name.Contains("ChenhLech", StringComparison.OrdinalIgnoreCase);
+                bool laTyLe = col.Name.Contains("TyLe", StringComparison.OrdinalIgnoreCase);
+                bool laNgay = col.Name.Contains("Ngay", StringComparison.OrdinalIgnoreCase);
+                bool laChu = col.Name is "TenCa" or "ThuThu" or "ChiNhanh" or "TieuDe" or "TacGia" or "TheLoai" or "TrangThai";
 
-                // Đổi tiêu đề tiếng Việt thân thiện
-                if (colName.Contains("ngaytruc") || colName.Contains("ngay"))
-                    col.HeaderText = "Ngày Trực";
-                else if (colName.Contains("tenca"))
-                    col.HeaderText = "Tên Ca";
-                else if (colName.Contains("thuthu"))
-                    col.HeaderText = "Thủ Thư";
-                else if (colName.Contains("chinhanh"))
-                    col.HeaderText = "Chi Nhánh";
-                else if (colName.Contains("sophieuphat"))
-                    col.HeaderText = "Số Phiếu Phạt";
-                else if (colName.Contains("tiendathu"))
-                    col.HeaderText = "Tiền Đã Thu";
-                else if (colName.Contains("tienchuathu"))
-                    col.HeaderText = "Tiền Chưa Thu";
-                else if (colName.Contains("masach"))
-                    col.HeaderText = "Mã Sách";
-                else if (colName.Contains("tieude"))
-                    col.HeaderText = "Tên Đầu Sách";
-                else if (colName.Contains("tacgia"))
-                    col.HeaderText = "Tác Giả";
-                else if (colName.Contains("soluotmuon"))
-                    col.HeaderText = "Số Lượt Mượn";
-                else if (colName.Contains("sobansao"))
-                    col.HeaderText = "Tổng Bản Sao";
-                else if (colName.Contains("luotmuon"))
-                    col.HeaderText = "Tổng Lượt Mượn";
-                else if (colName.Contains("tyletquaytong") || colName.Contains("tylequinvong"))
-                    col.HeaderText = "Tỷ Lệ Quay Vòng";
+                if (laTien) col.DefaultCellStyle.Format = "N0";
+                else if (laTyLe) col.DefaultCellStyle.Format = "N2";
+                else if (laNgay) col.DefaultCellStyle.Format = "dd/MM/yyyy";
 
-                if (colName.Contains("doanhthu") || colName.Contains("tiendathu") || colName.Contains("tienchuathu"))
-                {
-                    col.DefaultCellStyle.Format = "N0";
-                }
+                col.DefaultCellStyle.Alignment = laChu
+                    ? DataGridViewContentAlignment.MiddleLeft
+                    : DataGridViewContentAlignment.MiddleCenter;
+                if (laTien) col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            }
+        }
 
-                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                col.SortMode = DataGridViewColumnSortMode.NotSortable;
+        private void DgvDoanhThuCa_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            string ten = dgvDoanhThuCa.Columns[e.ColumnIndex].Name;
+            if (ten == "ChenhLech" && e.Value != null && e.Value != DBNull.Value && Convert.ToDecimal(e.Value) != 0)
+            {
+                e.CellStyle!.ForeColor = Color.FromArgb(190, 18, 60);
+                e.CellStyle.Font = _fontLechQuy;
             }
         }
 
         private DataGridView GetCurrentActiveDataGridView()
         {
-            if (tabControlBaoCao.SelectedTab == tabDoanhThuCa) return dgvDoanhThuCa;
             if (tabControlBaoCao.SelectedTab == tabTopSach) return dgvTopSach;
             if (tabControlBaoCao.SelectedTab == tabQuayVong) return dgvQuayVong;
             return dgvDoanhThuCa;
         }
 
-        private void btnXuatFile_Click(object sender, EventArgs e) => ThucHienXuatCsv();
-        private void btnXuatExcel_Click(object sender, EventArgs e) => ThucHienXuatCsv();
-        private void btnXuatPdf_Click(object sender, EventArgs e) => ThucHienXuatCsv();
-
-        private void ThucHienXuatCsv()
+        private void XuatFile(string filter, string extension, Action<DataTable, string> xuat)
         {
             try
             {
                 DataGridView activeDgv = GetCurrentActiveDataGridView();
-                if (activeDgv == null || activeDgv.Rows.Count == 0)
+                if (activeDgv.DataSource is not DataTable dt || dt.Rows.Count == 0)
                 {
-                    MessageBox.Show("Không có dữ liệu để xuất báo cáo!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Không có dữ liệu để xuất báo cáo.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                using (SaveFileDialog sfd = new SaveFileDialog())
+                using var sfd = new SaveFileDialog
                 {
-                    sfd.Filter = "CSV file (*.csv)|*.csv";
-                    sfd.FileName = "BaoCao_" + tabControlBaoCao.SelectedTab.Text.Trim() + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
+                    Filter = filter,
+                    FileName = $"BaoCao_{TenTap()}_{DateTime.Now:yyyyMMdd_HHmmss}.{extension}"
+                };
+                if (sfd.ShowDialog(this) != DialogResult.OK) return;
 
-                    if (sfd.ShowDialog() == DialogResult.OK)
-                    {
-                        if (activeDgv.DataSource is DataTable dt)
-                        {
-                            int? userId = SessionContext.CurrentUser?.Ma_So;
-                            _bll.ExportToCsv(dt, sfd.FileName, userId);
-                            MessageBox.Show("Xuất file báo cáo thành công!", "Thành Công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-                    }
-                }
+                xuat(dt, sfd.FileName);
+                MessageBox.Show("Xuất file báo cáo thành công.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -198,145 +316,81 @@ namespace Library.UI
             }
         }
 
-        private void btnInBaoCao_Click(object sender, EventArgs e)
+        private string TieuDeBaoCao()
         {
-            DataGridView activeDgv = GetCurrentActiveDataGridView();
-            if (activeDgv == null || activeDgv.Rows.Count == 0)
-            {
-                MessageBox.Show("Không có dữ liệu để in báo cáo!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (tabControlBaoCao.SelectedTab == tabTopSach) return "Báo cáo top sách được mượn nhiều";
+            if (tabControlBaoCao.SelectedTab == tabQuayVong) return "Báo cáo tỷ lệ quay vòng theo chi nhánh";
+            return "Báo cáo doanh thu và đối soát ca trực";
+        }
 
-            PrintDocument printDoc = new PrintDocument();
-            printDoc.PrintPage += new PrintPageEventHandler(PrintDoc_PrintPage);
+        private string PhuDeBaoCao()
+        {
+            return $"Kỳ {dtpTuNgay.Value:dd/MM/yyyy} - {dtpDenNgay.Value:dd/MM/yyyy}  |  {cboChiNhanh.Text}";
+        }
 
-            using (PrintPreviewDialog previewDlg = new PrintPreviewDialog())
+        private string TenTap()
+        {
+            if (tabControlBaoCao.SelectedTab == tabTopSach) return "TopSach";
+            if (tabControlBaoCao.SelectedTab == tabQuayVong) return "QuayVong";
+            return "DoanhThuCa";
+        }
+
+        private static float TrongSoCot(string header)
+        {
+            string name = header.ToLowerInvariant();
+            // Tăng trọng số cho các cột dài để có không gian hiển thị đầy đủ
+            if (name.Contains("chi nhánh") || name.Contains("thủ thư") || name.Contains("đầu sách") || name.Contains("tác giả") || name.Contains("thể loại"))
+                return 2.5f;
+            if (name.Contains("trạng thái") || name.Contains("lý thuyết") || name.Contains("chênh lệch") || name.Contains("ngày trực"))
+                return 1.8f;
+            return 1.2f;
+        }
+
+        private static void VeDong(Graphics graphics, string[] values, float[] widths, float x, float y, float height, Font font, Brush background, Pen border, bool laTieuDe)
+        {
+            float currentX = x;
+            for (int i = 0; i < values.Length; i++)
             {
-                previewDlg.Document = printDoc;
-                previewDlg.Width = 900;
-                previewDlg.Height = 700;
-                previewDlg.Text = "Xem Trước Bản In - " + tabControlBaoCao.SelectedTab.Text;
-                previewDlg.ShowDialog();
+                var rect = new RectangleF(currentX + 2, y + 2, widths[i] - 4, height - 4);
+                if (laTieuDe) graphics.FillRectangle(background, new RectangleF(currentX, y, widths[i], height));
+
+                // Sử dụng Font nhỏ hơn một chút cho tiêu đề nếu cần thiết để vừa khít ô
+                Font drawFont = font;
+                if (laTieuDe)
+                {
+                    // Tự động co chữ tiêu đề nếu chuỗi dài để tránh bị cắt cụt
+                    SizeF textSize = graphics.MeasureString(values[i], font);
+                    if (textSize.Width > rect.Width)
+                    {
+                        drawFont = new Font(font.FontFamily, Math.Max(7.5f, font.Size - 1.5f), FontStyle.Bold);
+                    }
+                }
+
+                var format = new StringFormat
+                {
+                    Alignment = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center,
+                    Trimming = StringTrimming.None, // Không cắt cụt chữ bằng dấu ... nữa
+                    FormatFlags = StringFormatFlags.LineLimit
+                };
+
+                graphics.DrawString(values[i], drawFont, Brushes.Black, rect, format);
+                graphics.DrawRectangle(border, currentX, y, widths[i], height);
+                currentX += widths[i];
             }
         }
 
-        private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
+        private sealed class MucChiNhanh
         {
-            e.PageSettings.Landscape = true;
-            DataGridView activeDgv = GetCurrentActiveDataGridView();
-
-            Font fontTitle = new Font("Segoe UI", 16, FontStyle.Bold);
-            Font fontSub = new Font("Segoe UI", 10, FontStyle.Italic);
-            Font fontHeader = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            Font fontRow = new Font("Segoe UI", 9F, FontStyle.Regular);
-
-            Brush brush = Brushes.Black;
-            Pen penGrid = new Pen(Color.FromArgb(160, 160, 160), 1);
-
-            float startX = 30;
-            float startY = 40;
-            float printableWidth = e.PageBounds.Width - 60;
-            float offsetY = 0;
-
-            e.Graphics.DrawString("BÁO CÁO THỐNG KÊ - " + tabControlBaoCao.SelectedTab.Text.ToUpper(), fontTitle, brush, startX, startY + offsetY);
-            offsetY += 32;
-
-            string timeStr = $"Khoảng thời gian: {dtpTuNgay.Value:dd/MM/yyyy} - {dtpDenNgay.Value:dd/MM/yyyy}   |   Ngày in: {DateTime.Now:dd/MM/yyyy HH:mm}";
-            e.Graphics.DrawString(timeStr, fontSub, brush, startX, startY + offsetY);
-            offsetY += 28;
-
-            e.Graphics.DrawLine(Pens.Black, startX, startY + offsetY, startX + printableWidth, startY + offsetY);
-            offsetY += 15;
-
-            int visibleColsCount = 0;
-            foreach (DataGridViewColumn col in activeDgv.Columns)
+            public MucChiNhanh(int? maSo, string ten)
             {
-                if (col.Visible) visibleColsCount++;
+                MaSo = maSo;
+                Ten = ten;
             }
 
-            if (visibleColsCount == 0) return;
-
-            float[] colWidths = new float[visibleColsCount];
-            float totalWeight = 0;
-            int idx = 0;
-
-            foreach (DataGridViewColumn col in activeDgv.Columns)
-            {
-                if (col.Visible)
-                {
-                    string name = col.HeaderText.ToLower();
-                    if (name.Contains("chi nhánh") || name.Contains("thủ thư") || name.Contains("đầu sách") || name.Contains("tên"))
-                    {
-                        colWidths[idx] = 2.2f;
-                    }
-                    else
-                    {
-                        colWidths[idx] = 1.0f;
-                    }
-                    totalWeight += colWidths[idx];
-                    idx++;
-                }
-            }
-
-            for (int i = 0; i < visibleColsCount; i++)
-            {
-                colWidths[i] = (colWidths[i] / totalWeight) * printableWidth;
-            }
-
-            float currentY = startY + offsetY;
-            float headerHeight = 32;
-
-            e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(235, 240, 245)), startX, currentY, printableWidth, headerHeight);
-
-            float currentX = startX;
-            int colIndex = 0;
-
-            foreach (DataGridViewColumn col in activeDgv.Columns)
-            {
-                if (col.Visible)
-                {
-                    float currentWidth = colWidths[colIndex];
-                    StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                    RectangleF cellRect = new RectangleF(currentX, currentY, currentWidth, headerHeight);
-                    e.Graphics.DrawString(col.HeaderText, fontHeader, brush, cellRect, sf);
-                    e.Graphics.DrawRectangle(penGrid, currentX, currentY, currentWidth, headerHeight);
-                    currentX += currentWidth;
-                    colIndex++;
-                }
-            }
-            currentY += headerHeight;
-
-            float rowHeight = 28;
-            foreach (DataGridViewRow row in activeDgv.Rows)
-            {
-                if (row.IsNewRow) continue;
-                currentX = startX;
-                colIndex = 0;
-
-                foreach (DataGridViewCell cell in row.Cells)
-                {
-                    if (cell.Visible)
-                    {
-                        float currentWidth = colWidths[colIndex];
-                        string val = cell.Value?.ToString() ?? "";
-
-                        StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                        RectangleF cellRect = new RectangleF(currentX, currentY, currentWidth, rowHeight);
-                        e.Graphics.DrawString(val, fontRow, brush, cellRect, sf);
-                        e.Graphics.DrawRectangle(penGrid, currentX, currentY, currentWidth, rowHeight);
-                        currentX += currentWidth;
-                        colIndex++;
-                    }
-                }
-                currentY += rowHeight;
-
-                if (currentY > e.MarginBounds.Height + 280)
-                {
-                    e.HasMorePages = true;
-                    return;
-                }
-            }
-            e.HasMorePages = false;
+            public int? MaSo { get; }
+            public string Ten { get; }
+            public override string ToString() => Ten;
         }
     }
 }

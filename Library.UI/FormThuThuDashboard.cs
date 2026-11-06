@@ -105,7 +105,7 @@ namespace Library.UI
 
         private void btnQuanLySach_Click(object sender, EventArgs e)
         {
-            HighlightActiveButton(sender as Button, "QUẢN LÝ DANH MỤC & KHO SÁCH VẬT LÝ");
+            HighlightActiveButton(sender as Button, "QUẢN LÝ KHO SÁCH CHI NHÁNH & DANH MỤC BIỂU GHI");
             OpenChildForm(new FormQuanLySach());
         }
 
@@ -152,28 +152,46 @@ namespace Library.UI
 
         private void btnDangXuat_Click(object sender, EventArgs e)
         {
-            var dialogResult = MessageBox.Show(
-                "Bạn có muốn kết thúc ca trực và đăng xuất tài khoản?",
-                "Xác nhận",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
-
-            if (dialogResult == DialogResult.Yes)
+            // Bắt lỗi mất session
+            if (SessionContext.CurrentLibrarian == null)
             {
-                if (SessionContext.CurrentUser != null)
-                {
-                    SystemLogger.Log(
-                        LogLevel.SECURITY,
-                        "Đăng xuất",
-                        $"Thủ thư '{SessionContext.CurrentLibrarian?.Ho_Ten ?? SessionContext.CurrentUser.Ten_Dang_Nhap}' đã đăng xuất.",
-                        SessionContext.CurrentUser.Ma_So
-                    );
-                }
-
                 SessionContext.Clear();
                 this.Close();
+                return;
             }
+
+            int thuThuId = SessionContext.CurrentLibrarian.Ma_So;
+            var bll = new CaTrucBLL();
+            var caTruc = bll.LayCaTrucHienTai(thuThuId);
+
+            // Nếu thủ thư đang có ca trực chưa chốt
+            if (caTruc.HasShift)
+            {
+                using var formChotCa = new FormChotCaTruc(caTruc.CaTrucId, caTruc.TenCa, caTruc.TienDauCa, caTruc.TienThuPhat);
+                if (formChotCa.ShowDialog(this) != DialogResult.OK)
+                {
+                    return; // Hủy thao tác đăng xuất nếu thủ thư tắt form chốt ca
+                }
+            }
+            else
+            {
+                // Nếu không có ca trực nào cần chốt (hoặc đã chốt rồi), hỏi đăng xuất bình thường
+                var confirm = MessageBox.Show(
+                    "Bạn có muốn đăng xuất khỏi tài khoản?",
+                    "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (confirm != DialogResult.Yes) return;
+            }
+
+            SystemLogger.Log(
+                LogLevel.SECURITY,
+                "Đăng xuất",
+                $"Thủ thư '{SessionContext.CurrentLibrarian.Ho_Ten}' đã đăng xuất.",
+                SessionContext.CurrentUser?.Ma_So
+            );
+
+            SessionContext.Clear();
+            this.Close();
         }
 
         private void FormThuThuDashboard_FormClosing(object sender, FormClosingEventArgs e)

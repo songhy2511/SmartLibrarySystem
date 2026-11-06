@@ -2,7 +2,7 @@
 -- DỰ ÁN: SMART LIBRARY MANAGEMENT SYSTEM
 -- TẬP TIN: LibraryDB.sql
 -- MÔ TẢ: Khởi tạo toàn bộ Database, thiết lập bảng và nạp dữ liệu mẫu hoàn chỉnh
--- PHIÊN BẢN: 2.0 (Chuẩn PBKDF2-HMAC-SHA256, Đầy đủ ràng buộc và dữ liệu đối soát)
+-- PHIÊN BẢN: 2.2 (Đã đồng bộ thời gian thu phạt khớp hoàn toàn với ca trực)
 -- ============================================================================
 
 USE [master];
@@ -106,7 +106,7 @@ CREATE TABLE [dbo].[The_Loai] (
 );
 GO
 
--- 7. Bảng Đầu sách (Danh mục sách)
+-- 7. Bảng Đầu sách (Danh mục sách - Có giá bìa để tính đền bù)
 CREATE TABLE [dbo].[Sach] (
     [Ma_So] INT IDENTITY(1,1) PRIMARY KEY,
     [Ma_Sach] VARCHAR(20) NOT NULL UNIQUE,
@@ -116,6 +116,7 @@ CREATE TABLE [dbo].[Sach] (
     [The_Loai] NVARCHAR(100) NULL,
     [Nam_Xuat_Ban] INT NULL,
     [Nha_Xuat_Ban] NVARCHAR(150) NULL,
+    [Gia_Bia] DECIMAL(18,0) NOT NULL DEFAULT 80000,
     [Tong_So_Luong] INT NOT NULL DEFAULT 0,
     [So_Luong_Kha_Dung] INT NOT NULL DEFAULT 0,
     [So_Lan_Muon] INT NOT NULL DEFAULT 0,
@@ -259,12 +260,15 @@ GO
 -- PHẦN II: NẠP DỮ LIỆU KHỞI TẠO (SEED DATA)
 -- ============================================================================
 
--- A. Quy chế hệ thống mặc định
+-- A. Quy chế hệ thống mặc định (Đầy đủ 7 tham số quy chế động)
 INSERT INTO [dbo].[Cau_Hinh_He_Thong] ([Ten_Tham_So], [Gia_Tri], [Mo_Ta]) VALUES
-('So_Sach_Muon_Toi_Da', '5', N'Số lượng tài liệu độc giả được mượn cùng lúc'),
+('So_Sach_Muon_Toi_Da', '5', N'Số lượng tài liệu độc giả được mượn cùng lúc (cuốn)'),
 ('So_Ngay_Muon_Toi_Da', '14', N'Thời gian mượn tối đa cho mỗi lượt (ngày)'),
-('Tien_Phat_Moi_Ngay', '5000', N'Tiền phạt quá hạn mỗi cuốn trên mỗi ngày trễ (VNĐ)'),
-('Thoi_Han_The_Thang', '48', N'Thời hạn hiệu lực mặc định của thẻ độc giả (tháng)');
+('Tien_Phat_Moi_Ngay', '3000', N'Tiền phạt trễ hạn mỗi cuốn trên mỗi ngày trễ (VNĐ)'),
+('Thoi_Han_The_Thang', '12', N'Thời hạn hiệu lực mặc định của thẻ độc giả (tháng)'),
+('Ty_Le_Phat_Rach', '30', N'Tỷ lệ đền bù khi làm rách / hư hỏng nhẹ tài liệu (% giá bìa)'),
+('Ty_Le_Phat_Hong', '60', N'Tỷ lệ đền bù khi làm hư hỏng nặng tài liệu (% giá bìa)'),
+('Ty_Le_Phat_Mat', '100', N'Tỷ lệ đền bù khi làm mất tài liệu (% giá bìa)');
 GO
 
 -- B. Tài khoản Người dùng & Hồ sơ Thủ thư (PBKDF2-HMAC-SHA256 chuẩn)
@@ -306,35 +310,28 @@ INSERT INTO [dbo].[The_Loai] ([Ma_The_Loai], [Ten_The_Loai], [Mo_Ta]) VALUES
 ('TL04', N'Khoa học xã hội', N'Tâm lý học, lịch sử, nhân chủng học và văn hóa xã hội');
 GO
 
--- E. Dữ liệu Đầu sách phong phú
+-- E. Dữ liệu Đầu sách (Có giá bìa chuẩn xác)
 INSERT INTO [dbo].[Sach] 
-([Ma_Sach], [Tieu_De], [Tac_Gia], [The_Loai_Ma_So], [The_Loai], [Nam_Xuat_Ban], [Nha_Xuat_Ban], [Tong_So_Luong], [So_Luong_Kha_Dung], [So_Lan_Muon], [Vi_Tri_Day], [Vi_Tri_Ke], [Vi_Tri_Tang], [Tinh_Trang])
+([Ma_Sach], [Tieu_De], [Tac_Gia], [The_Loai_Ma_So], [The_Loai], [Nam_Xuat_Ban], [Nha_Xuat_Ban], [Gia_Bia], [Tong_So_Luong], [So_Luong_Kha_Dung], [So_Lan_Muon], [Vi_Tri_Day], [Vi_Tri_Ke], [Vi_Tri_Tang], [Tinh_Trang])
 VALUES
--- CNTT
-('B0001', N'Clean Code - Mã Sạch', N'Robert C. Martin', 1, N'Công nghệ thông tin', 2020, N'NXB Thông Tin & Truyền Thông', 5, 4, 15, N'Dãy A', N'Kệ 01', N'Tầng 2', N'Bình thường'),
-('B0002', N'Design Patterns Explained', N'Alan Shalloway', 1, N'Công nghệ thông tin', 2019, N'NXB Khoa Học & Kỹ Thuật', 3, 3, 8, N'Dãy A', N'Kệ 02', N'Tầng 2', N'Bình thường'),
-('B0005', N'Lập trình C# 12 và .NET 8', N'Mark J. Price', 1, N'Công nghệ thông tin', 2024, N'NXB Thông Tin & Truyền Thông', 8, 7, 15, N'Dãy A', N'Kệ 01', N'Tầng 2', N'Bình thường'),
-('B0006', N'Refactoring - Cải tiến mã hiện có', N'Martin Fowler', 1, N'Công nghệ thông tin', 2021, N'NXB Khoa Học & Kỹ Thuật', 5, 4, 18, N'Dãy A', N'Kệ 02', N'Tầng 2', N'Bảo trì'),
-('B0007', N'Designing Data-Intensive Applications', N'Martin Kleppmann', 1, N'Công nghệ thông tin', 2023, N'NXB Bách Khoa', 6, 6, 9, N'Dãy A', N'Kệ 03', N'Tầng 2', N'Bình thường'),
-('B0008', N'Nhập môn Trí tuệ nhân tạo & ML', N'Stuart Russell', 1, N'Công nghệ thông tin', 2022, N'NXB Đại Học Quốc Gia', 7, 5, 22, N'Dãy A', N'Kệ 04', N'Tầng 2', N'Bình thường'),
-
--- Kinh tế & Quản trị
-('B0009', N'Khởi nghiệp tinh gọn (The Lean Startup)', N'Eric Ries', 2, N'Kinh tế & Quản trị', 2020, N'NXB Trẻ', 10, 8, 34, N'Dãy B', N'Kệ 01', N'Tầng 1', N'Bình thường'),
-('B0010', N'Nhà đầu tư thông minh', N'Benjamin Graham', 2, N'Kinh tế & Quản trị', 2021, N'NXB Lao Động Xã Hội', 8, 6, 27, N'Dãy B', N'Kệ 02', N'Tầng 1', N'Bình thường'),
-('B0011', N'Kinh tế học hài hước (Freakonomics)', N'Steven D. Levitt', 2, N'Kinh tế & Quản trị', 2019, N'NXB Thế Giới', 5, 5, 12, N'Dãy B', N'Kệ 03', N'Tầng 1', N'Bình thường'),
-
--- Văn học nghệ thuật
-('B0003', N'Đắc Nhân Tâm', N'Dale Carnegie', 3, N'Văn học nghệ thuật', 2021, N'NXB Tổng Hợp TP.HCM', 10, 9, 45, N'Dãy C', N'Kệ 01', N'Tầng 1', N'Bình thường'),
-('B0004', N'Kính Vạn Hoa', N'Nguyễn Nhật Ánh', 3, N'Văn học nghệ thuật', 2022, N'NXB Kim Đồng', 6, 5, 20, N'Dãy C', N'Kệ 02', N'Tầng 1', N'Bình thường'),
-('B0012', N'Mắt Biếc', N'Nguyễn Nhật Ánh', 3, N'Văn học nghệ thuật', 2021, N'NXB Trẻ', 12, 10, 52, N'Dãy C', N'Kệ 01', N'Tầng 1', N'Bình thường'),
-('B0013', N'Cho Tôi Xin Một Vé Đi Tuổi Thơ', N'Nguyễn Nhật Ánh', 3, N'Văn học nghệ thuật', 2022, N'NXB Trẻ', 9, 7, 41, N'Dãy C', N'Kệ 01', N'Tầng 1', N'Bình thường'),
-('B0014', N'Rừng Na Uy', N'Haruki Murakami', 3, N'Văn học nghệ thuật', 2020, N'NXB Hội Nhà Văn', 6, 5, 30, N'Dãy C', N'Kệ 02', N'Tầng 1', N'Bình thường'),
-('B0015', N'Nhà Giả Kim (The Alchemist)', N'Paulo Coelho', 3, N'Văn học nghệ thuật', 2023, N'NXB Phụ Nữ', 15, 12, 85, N'Dãy C', N'Kệ 03', N'Tầng 1', N'Bình thường'),
-
--- Khoa học xã hội & Tâm lý
-('B0016', N'Tư Duy Nhanh Và Chậm', N'Daniel Kahneman', 4, N'Khoa học xã hội', 2021, N'NXB Thế Giới', 8, 7, 39, N'Dãy D', N'Kệ 01', N'Tầng 3', N'Bình thường'),
-('B0017', N'Tâm Lý Học Tội Phạm', N'Stanton E. Samenow', 4, N'Khoa học xã hội', 2022, N'NXB Công An Nhân Dân', 5, 4, 16, N'Dãy D', N'Kệ 02', N'Tầng 3', N'Bình thường'),
-('B0018', N'Sapiens: Lược Sử Loài Người', N'Yuval Noah Harari', 4, N'Khoa học xã hội', 2023, N'NXB Tri Thức', 10, 8, 64, N'Dãy D', N'Kệ 03', N'Tầng 3', N'Bình thường');
+('B0001', N'Clean Code - Mã Sạch', N'Robert C. Martin', 1, N'Công nghệ thông tin', 2020, N'NXB Thông Tin & Truyền Thông', 120000, 5, 4, 15, N'Dãy A', N'Kệ 01', N'Tầng 2', N'Bình thường'),
+('B0002', N'Design Patterns Explained', N'Alan Shalloway', 1, N'Công nghệ thông tin', 2019, N'NXB Khoa Học & Kỹ Thuật', 150000, 3, 3, 8, N'Dãy A', N'Kệ 02', N'Tầng 2', N'Bình thường'),
+('B0005', N'Lập trình C# 12 và .NET 8', N'Mark J. Price', 1, N'Công nghệ thông tin', 2024, N'NXB Thông Tin & Truyền Thông', 180000, 8, 7, 15, N'Dãy A', N'Kệ 01', N'Tầng 2', N'Bình thường'),
+('B0006', N'Refactoring - Cải tiến mã hiện có', N'Martin Fowler', 1, N'Công nghệ thông tin', 2021, N'NXB Khoa Học & Kỹ Thuật', 160000, 5, 4, 18, N'Dãy A', N'Kệ 02', N'Tầng 2', N'Bảo trì'),
+('B0007', N'Designing Data-Intensive Applications', N'Martin Kleppmann', 1, N'Công nghệ thông tin', 2023, N'NXB Bách Khoa', 135000, 6, 6, 9, N'Dãy A', N'Kệ 03', N'Tầng 2', N'Bình thường'),
+('B0008', N'Nhập môn Trí tuệ nhân tạo & ML', N'Stuart Russell', 1, N'Công nghệ thông tin', 2022, N'NXB Đại Học Quốc Gia', 210000, 7, 5, 22, N'Dãy A', N'Kệ 04', N'Tầng 2', N'Bình thường'),
+('B0009', N'Khởi nghiệp tinh gọn (The Lean Startup)', N'Eric Ries', 2, N'Kinh tế & Quản trị', 2020, N'NXB Trẻ', 110000, 10, 8, 34, N'Dãy B', N'Kệ 01', N'Tầng 1', N'Bình thường'),
+('B0010', N'Nhà đầu tư thông minh', N'Benjamin Graham', 2, N'Kinh tế & Quản trị', 2021, N'NXB Lao Động Xã Hội', 125000, 8, 6, 27, N'Dãy B', N'Kệ 02', N'Tầng 1', N'Bình thường'),
+('B0011', N'Kinh tế học hài hước (Freakonomics)', N'Steven D. Levitt', 2, N'Kinh tế & Quản trị', 2019, N'NXB Thế Giới', 95000, 5, 5, 12, N'Dãy B', N'Kệ 03', N'Tầng 1', N'Bình thường'),
+('B0003', N'Đắc Nhân Tâm', N'Dale Carnegie', 3, N'Văn học nghệ thuật', 2021, N'NXB Tổng Hợp TP.HCM', 95000, 10, 9, 45, N'Dãy C', N'Kệ 01', N'Tầng 1', N'Bình thường'),
+('B0004', N'Kính Vạn Hoa', N'Nguyễn Nhật Ánh', 3, N'Văn học nghệ thuật', 2022, N'NXB Kim Đồng', 85000, 6, 5, 20, N'Dãy C', N'Kệ 02', N'Tầng 1', N'Bình thường'),
+('B0012', N'Mắt Biếc', N'Nguyễn Nhật Ánh', 3, N'Văn học nghệ thuật', 2021, N'NXB Trẻ', 90000, 12, 10, 52, N'Dãy C', N'Kệ 01', N'Tầng 1', N'Bình thường'),
+('B0013', N'Cho Tôi Xin Một Vé Đi Tuổi Thơ', N'Nguyễn Nhật Ánh', 3, N'Văn học nghệ thuật', 2022, N'NXB Trẻ', 85000, 9, 7, 41, N'Dãy C', N'Kệ 01', N'Tầng 1', N'Bình thường'),
+('B0014', N'Rừng Na Uy', N'Haruki Murakami', 3, N'Văn học nghệ thuật', 2020, N'NXB Hội Nhà Văn', 115000, 6, 5, 30, N'Dãy C', N'Kệ 02', N'Tầng 1', N'Bình thường'),
+('B0015', N'Nhà Giả Kim (The Alchemist)', N'Paulo Coelho', 3, N'Văn học nghệ thuật', 2023, N'NXB Phụ Nữ', 75000, 15, 12, 85, N'Dãy C', N'Kệ 03', N'Tầng 1', N'Bình thường'),
+('B0016', N'Tư Duy Nhanh Và Chậm', N'Daniel Kahneman', 4, N'Khoa học xã hội', 2021, N'NXB Thế Giới', 145000, 8, 7, 39, N'Dãy D', N'Kệ 01', N'Tầng 3', N'Bình thường'),
+('B0017', N'Tâm Lý Học Tội Phạm', N'Stanton E. Samenow', 4, N'Khoa học xã hội', 2022, N'NXB Công An Nhân Dân', 105000, 5, 4, 16, N'Dãy D', N'Kệ 02', N'Tầng 3', N'Bình thường'),
+('B0018', N'Sapiens: Lược Sử Loài Người', N'Yuval Noah Harari', 4, N'Khoa học xã hội', 2023, N'NXB Tri Thức', 175000, 10, 8, 64, N'Dãy D', N'Kệ 03', N'Tầng 3', N'Bình thường');
 GO
 
 -- F. Dữ liệu Bản sao sách vật lý
@@ -374,11 +371,11 @@ VALUES
 ('DG0011', N'Lê Quốc Cường', '0932114477', 'cuong.le@yahoo.com', N'Tân Phú, TP. Hồ Chí Minh', '2023-09-12', '2027-09-12', N'Khóa tạm thời', 4);
 GO
 
--- H. Dữ liệu Phân ca trực và Quản lý tiền mặt
+-- H. Dữ liệu Phân ca trực và Quản lý tiền mặt (Đảm bảo có ca hôm qua của thủ thư 1)
 INSERT INTO [dbo].[Ca_Truc]
 ([Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [Ngay_Truc], [Ten_Ca], [Gio_Bat_Dau], [Gio_Ket_Thuc], [Tien_Mat_Dau_Ca], [Tien_Mat_Cuoi_Ca], [Tien_Dau_Ca], [Tien_Ket_Ca], [Trang_Thai], [Ghi_Chu], [Ngay_Tao])
 VALUES
--- Ca hôm qua
+-- Ca hôm qua (Ca Sáng: 07:30 - 12:00 của Thủ thư 1 tại Chi nhánh 1)
 (1, 1, DATEADD(DAY, -1, CAST(GETDATE() AS DATE)), N'Ca Sáng (07:30 - 12:00)', '07:30', '12:00', 500000, 560000, 500000, 560000, N'Đã hoàn thành', N'Bàn giao đủ tiền mặt và biên lai', DATEADD(DAY, -2, GETDATE())),
 (2, 1, DATEADD(DAY, -1, CAST(GETDATE() AS DATE)), N'Ca Chiều (12:30 - 17:00)', '12:30', '17:00', 500000, 520000, 500000, 520000, N'Đã hoàn thành', N'Không có sự cố phát sinh', DATEADD(DAY, -2, GETDATE())),
 
@@ -393,15 +390,13 @@ VALUES
 GO
 
 -- I. Dữ liệu Lưu thông Mượn - Trả sách
--- Phiếu mượn 1: Đã hoàn thành (mượn tuần trước, đã trả đúng hạn)
 INSERT INTO [dbo].[Phieu_Muon] ([Ma_Phieu_Muon], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [Ngay_Muon], [Ngay_Hen_Tra], [Trang_Thai], [Ghi_Chu], [Ngay_Tao])
 VALUES ('BR0001', 1, 1, 1, DATEADD(DAY, -10, GETDATE()), DATEADD(DAY, 4, GETDATE()), N'Đã hoàn thành', N'Độc giả trả sách đúng hẹn', DATEADD(DAY, -10, GETDATE()));
 DECLARE @PM1 INT = SCOPE_IDENTITY();
 
 INSERT INTO [dbo].[Chi_Tiet_Phieu_Muon] ([Phieu_Muon_Ma_So], [Ban_Sao_Sach_Ma_So], [Ngay_Tra_Thuc_Te], [Tinh_Trang_Khi_Tra], [Tien_Phat])
-VALUES (@PM1, 1, DATEADD(DAY, -2, GETDATE()), N'Bình thường', 0);
+VALUES (@PM1, 1, DATEADD(DAY, -1, CAST(GETDATE() AS DATE)), N'Bình thường', 0);
 
--- Phiếu mượn 2: Đang mượn (còn hạn)
 INSERT INTO [dbo].[Phieu_Muon] ([Ma_Phieu_Muon], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [Ngay_Muon], [Ngay_Hen_Tra], [Trang_Thai], [Ghi_Chu], [Ngay_Tao])
 VALUES ('BR0002', 2, 1, 1, DATEADD(DAY, -3, GETDATE()), DATEADD(DAY, 11, GETDATE()), N'Đang mượn', N'Mượn phục vụ nghiên cứu', DATEADD(DAY, -3, GETDATE()));
 DECLARE @PM2 INT = SCOPE_IDENTITY();
@@ -409,7 +404,6 @@ DECLARE @PM2 INT = SCOPE_IDENTITY();
 INSERT INTO [dbo].[Chi_Tiet_Phieu_Muon] ([Phieu_Muon_Ma_So], [Ban_Sao_Sach_Ma_So], [Ngay_Tra_Thuc_Te], [Tinh_Trang_Khi_Tra], [Tien_Phat])
 VALUES (@PM2, 6, NULL, NULL, 0);
 
--- Phiếu mượn 3: Quá hạn (mượn 20 ngày trước, hạn 14 ngày)
 INSERT INTO [dbo].[Phieu_Muon] ([Ma_Phieu_Muon], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [Ngay_Muon], [Ngay_Hen_Tra], [Trang_Thai], [Ghi_Chu], [Ngay_Tao])
 VALUES ('BR0003', 3, 2, 1, DATEADD(DAY, -20, GETDATE()), DATEADD(DAY, -6, GETDATE()), N'Quá hạn', N'Quá hạn 6 ngày chưa thấy trả', DATEADD(DAY, -20, GETDATE()));
 DECLARE @PM3 INT = SCOPE_IDENTITY();
@@ -418,14 +412,14 @@ INSERT INTO [dbo].[Chi_Tiet_Phieu_Muon] ([Phieu_Muon_Ma_So], [Ban_Sao_Sach_Ma_So
 VALUES (@PM3, 13, NULL, NULL, 30000);
 GO
 
--- J. Dữ liệu Vi phạm & Thu tiền phạt
--- Phiếu phạt 1: Quá hạn đã thanh toán
+-- J. Dữ liệu Vi phạm & Thu tiền phạt 
+-- FIX QUAN TRỌNG: Đồng bộ thời gian Ngay_Lap và Ngay_Thu vào đúng 09:00 sáng hôm qua (Nằm trọn trong Ca Sáng của Thủ thư 1)
 INSERT INTO [dbo].[Phieu_Phat] ([Phieu_Muon_Ma_So], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [So_Tien_Phat], [Ly_Do], [Ngay_Lap], [Trang_Thai], [Da_Thanh_Toan], [Ngay_Tao])
-VALUES (1, 1, 1, 1, 20000, N'Trả sách trễ 4 ngày', DATEADD(DAY, -2, GETDATE()), N'Đã thu', 1, DATEADD(DAY, -2, GETDATE()));
+VALUES (1, 1, 1, 1, 20000, N'Trả sách trễ 4 ngày', DATEADD(HOUR, 9, DATEADD(DAY, -1, CAST(GETDATE() AS DATE))), N'Đã thu', 1, DATEADD(DAY, -1, GETDATE()));
 DECLARE @PP1 INT = SCOPE_IDENTITY();
 
 INSERT INTO [dbo].[Phat_Tien] ([Phieu_Phat_Ma_So], [Thu_Thu_Ma_So], [So_Tien_Thu], [Ngay_Thu], [Hinh_Thuc_Thanh_Toan])
-VALUES (@PP1, 1, 20000, DATEADD(DAY, -2, GETDATE()), N'Tiền mặt');
+VALUES (@PP1, 1, 20000, DATEADD(HOUR, 9, DATEADD(DAY, -1, CAST(GETDATE() AS DATE))), N'Tiền mặt');
 
 -- Phiếu phạt 2: Rách mục lục sách (chưa thu)
 INSERT INTO [dbo].[Phieu_Phat] ([Phieu_Muon_Ma_So], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [So_Tien_Phat], [Ly_Do], [Ngay_Lap], [Trang_Thai], [Da_Thanh_Toan], [Ngay_Tao])
@@ -436,7 +430,7 @@ GO
 INSERT INTO [dbo].[Nhat_Ky_He_Thong] ([Nguoi_Dung_Ma_So], [Thoi_Gian], [Muc_Do], [Hanh_Dong], [Chi_Tiet], [Dia_Chi_IP])
 VALUES
 (1, DATEADD(MINUTE, -120, GETDATE()), 'SECURITY', N'Đăng nhập hệ thống', N'Quản trị viên đăng nhập thành công vào trang quản trị.', '192.168.1.105'),
-(1, DATEADD(MINUTE, -110, GETDATE()), 'INFO', N'Cập nhật quy chế', N'Thay đổi thời hạn thẻ độc giả thành 48 tháng.', '192.168.1.105'),
+(1, DATEADD(MINUTE, -110, GETDATE()), 'INFO', N'Cập nhật quy chế', N'Thay đổi thời hạn thẻ độc giả thành 12 tháng và bổ sung tỷ lệ đền bù.', '192.168.1.105'),
 (1, DATEADD(MINUTE, -95, GETDATE()), 'INFO', N'Phân ca trực', N'Phân bổ ca trực sáng và chiều cho thủ thư Lê Minh Tuấn tại Thư viện Trung Tâm.', '192.168.1.105'),
 (2, DATEADD(MINUTE, -60, GETDATE()), 'SECURITY', N'Đăng nhập hệ thống', N'Thủ thư Lê Minh Tuấn đăng nhập phiên làm việc ca sáng.', '192.168.1.120'),
 (2, DATEADD(MINUTE, -45, GETDATE()), 'INFO', N'Lập phiếu mượn', N'Tạo thành công phiếu mượn mã BR0002 cho bạn đọc Nguyễn Thị Mai (DG0002).', '192.168.1.120'),

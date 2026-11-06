@@ -277,5 +277,69 @@ namespace Library.DAL
 
             return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
         }
+
+        /// <summary>
+        /// Truy vấn danh sách mượn sách mở rộng: hỗ trợ xem tất cả độc giả, lọc quá hạn, tính số ngày mượn/trễ và lấy SĐT liên hệ
+        /// </summary>
+        public DataTable LayDanhSachDangMuonNangCao(int docGiaMaSo = 0, bool chiQuaHan = false, string tuKhoa = "")
+        {
+            string query = @"
+        SELECT 
+            pm.Ma_So AS PhieuMaSo,
+            pm.Ma_Phieu_Muon AS MaPhieu,
+            dg.Ma_So AS DocGiaMaSo,
+            dg.Ma_Doc_Gia AS MaDocGia,
+            dg.Ho_Ten AS TenDocGia,
+            ISNULL(dg.So_Dien_Thoai, N'--') AS SoDienThoai,
+            ISNULL(s.Tieu_De, N'Chưa liên kết sách') AS TenSach,
+            ISNULL(bs.Ma_Vach, N'--') AS MaVach,
+            pm.Ngay_Muon AS NgayMuon,
+            pm.Ngay_Hen_Tra AS NgayHenHan,
+            DATEDIFF(DAY, pm.Ngay_Muon, GETDATE()) AS SoNgayDaMuon,
+            DATEDIFF(DAY, pm.Ngay_Hen_Tra, CAST(GETDATE() AS DATE)) AS SoNgayTre,
+            DATEDIFF(DAY, CAST(GETDATE() AS DATE), pm.Ngay_Hen_Tra) AS SoNgayConLai,
+            ISNULL(pm.So_Lan_Gia_Han, 0) AS SoLanGiaHan,
+            pm.Trang_Thai AS TrangThai
+        FROM dbo.Phieu_Muon pm
+        INNER JOIN dbo.Doc_Gia dg ON pm.Doc_Gia_Ma_So = dg.Ma_So
+        LEFT JOIN dbo.Chi_Tiet_Phieu_Muon ctpm ON pm.Ma_So = ctpm.Phieu_Muon_Ma_So
+        LEFT JOIN dbo.Ban_Sao_Sach bs ON ctpm.Ban_Sao_Sach_Ma_So = bs.Ma_So
+        LEFT JOIN dbo.Sach s ON bs.Sach_Ma_So = s.Ma_So
+        WHERE pm.Trang_Thai = N'Đang mượn'
+          AND (@DocGiaMaSo = 0 OR dg.Ma_So = @DocGiaMaSo)
+          AND (@ChiQuaHan = 0 OR pm.Ngay_Hen_Tra < CAST(GETDATE() AS DATE))
+          AND (@TuKhoa = '' 
+               OR dg.Ho_Ten LIKE '%' + @TuKhoa + '%' 
+               OR dg.Ma_Doc_Gia LIKE '%' + @TuKhoa + '%' 
+               OR s.Tieu_De LIKE '%' + @TuKhoa + '%'
+               OR bs.Ma_Vach LIKE '%' + @TuKhoa + '%')
+        ORDER BY 
+            CASE WHEN pm.Ngay_Hen_Tra < CAST(GETDATE() AS DATE) THEN 0 ELSE 1 END,
+            pm.Ngay_Hen_Tra ASC,
+            pm.Ngay_Muon DESC";
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+        new SqlParameter("@DocGiaMaSo", docGiaMaSo),
+        new SqlParameter("@ChiQuaHan", chiQuaHan ? 1 : 0),
+        new SqlParameter("@TuKhoa", string.IsNullOrWhiteSpace(tuKhoa) ? "" : tuKhoa.Trim())
+            };
+
+            return DatabaseHelper.ExecuteQuery(query, parameters);
+        }
+
+        /// <summary>
+        /// Cập nhật nhanh số điện thoại liên hệ của độc giả trực tiếp từ bàn lưu thông
+        /// </summary>
+        public bool CapNhatSoDienThoaiDocGia(int docGiaMaSo, string soDienThoai)
+        {
+            string query = "UPDATE dbo.Doc_Gia SET So_Dien_Thoai = @SDT WHERE Ma_So = @MaSo";
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+        new SqlParameter("@MaSo", docGiaMaSo),
+        new SqlParameter("@SDT", soDienThoai.Trim())
+            };
+            return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
+        }
     }
 }
