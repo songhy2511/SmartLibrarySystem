@@ -164,7 +164,7 @@
             btnXuatPdf.Name = "btnXuatPdf";
             btnXuatPdf.Size = new Size(160, 49);
             btnXuatPdf.TabIndex = 1;
-            btnXuatPdf.Text = "📄 Xuất File";
+            btnXuatPdf.Text = "📄 Xuất pdf";
             btnXuatPdf.UseVisualStyleBackColor = false;
             btnXuatPdf.Click += btnXuatPdf_Click;
             // 

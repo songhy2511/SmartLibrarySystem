@@ -11,12 +11,12 @@ namespace Library.DAL
         {
             string query = @"
                 SELECT 
-                    (SELECT COUNT(*) FROM Doc_Gia WHERE Ngay_Tao <= @DenNgay) AS TongDocGia,
+                    (SELECT COUNT(*) FROM Doc_Gia WHERE Ngay_Cap_The <= @DenNgay) AS TongDocGia,
                     (SELECT ISNULL(SUM(So_Luong_Kha_Dung), 0) FROM Sach) AS SachSanCo,
                     (SELECT COUNT(*) FROM Phieu_Muon WHERE Trang_Thai = N'Đang mượn') AS LuotDangMuon,
-                    (SELECT ISNULL(SUM(So_Tien_Phat), 0) FROM Phieu_Phat WHERE Da_Thanh_Toan = 1 AND Ngay_Tao >= @TuNgay AND Ngay_Tao <= @DenNgay) AS TongTienPhatDaThu,
-                    (SELECT COUNT(*) FROM Ca_Truc WHERE Trang_Thai = N'Đã kết thúc' AND Ngay_Truc >= @TuNgay AND Ngay_Truc <= @DenNgay) AS TongCaDaKetThuc,
-                    (SELECT COUNT(*) FROM Ca_Truc WHERE Tien_Ket_Ca IS NOT NULL AND Tien_Ket_Ca <> (Tien_Dau_Ca + Tong_Tien_Thu) AND Ngay_Truc >= @TuNgay AND Ngay_Truc <= @DenNgay) AS SoCaLechTien";
+                    (SELECT ISNULL(SUM(So_Tien_Phat), 0) FROM Phieu_Phat WHERE Da_Thanh_Toan = 1 AND Ngay_Lap >= @TuNgay AND Ngay_Lap <= @DenNgay) AS TongTienPhatDaThu,
+                    (SELECT COUNT(*) FROM Ca_Truc WHERE Trang_Thai = N'Đã hoàn thành' AND Ngay_Truc >= @TuNgay AND Ngay_Truc <= @DenNgay) AS TongCaDaKetThuc,
+                    (SELECT COUNT(*) FROM Ca_Truc WHERE Tien_Ket_Ca IS NOT NULL AND Tien_Ket_Ca <> Tien_Mat_Dau_Ca AND Ngay_Truc >= @TuNgay AND Ngay_Truc <= @DenNgay) AS SoCaLechTien";
 
             SqlParameter[] parameters = {
                 new SqlParameter("@TuNgay", SqlDbType.DateTime) { Value = tuNgay.Date },

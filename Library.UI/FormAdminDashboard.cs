@@ -85,7 +85,7 @@ namespace Library.UI
             lblCurrentPageTitle.Text = pageTitle;
         }
 
-        private void btnTongQuan_Click_1(object sender, EventArgs e)
+        private void btnTongQuan_Click(object sender, EventArgs e)
         {
             LoadChildForm(new FormTongQuanHeThong(), "TỔNG QUAN HỆ THỐNG & ĐỐI SOÁT KPI", (Button)sender);
         }
@@ -115,14 +115,14 @@ namespace Library.UI
             LoadChildForm(new FormNhatKyHeThong(), "NHẬT KÝ HOẠT ĐỘNG HỆ THỐNG", (Button)sender);
         }
 
-        // 👉 Mở Form Báo Cáo Thống Kê dạng Popup độc lập (ShowDialog)
+        // 📊 Mở Form Báo Cáo Thống Kê dạng Popup độc lập (ShowDialog)
         private void btnBaoCao_Click(object sender, EventArgs e)
         {
             using var form = new FormBaoCaoThongKe();
             form.ShowDialog(this);
         }
 
-        // 👉 Mở Form Đổi Mật Khẩu dạng Popup độc lập[cite: 8]
+        // 🔑 Mở Form Đổi Mật Khẩu dạng Popup độc lập
         private void btnDoiMatKhau_Click(object sender, EventArgs e)
         {
             using var form = new FormDoiMatKhau();
