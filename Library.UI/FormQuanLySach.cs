@@ -98,7 +98,6 @@ namespace Library.UI
                     The_Loai = txtTheLoai?.Text.Trim() ?? string.Empty,
                     Vi_Tri_Ke = txtViTri?.Text.Trim() ?? "Kệ A1-01",
                     Nam_Xuat_Ban = drv["Nam_Xuat_Ban"] != DBNull.Value ? Convert.ToInt32(drv["Nam_Xuat_Ban"]) : 2024,
-                    Gia_Bia = drv["Gia_Bia"] != DBNull.Value ? Convert.ToDecimal(drv["Gia_Bia"]) : 50000,
                     Tong_So_Luong = nudTongSoLuong != null ? (int)nudTongSoLuong.Value : 1,
                     So_Luong_Kha_Dung = drv["So_Luong_Kha_Dung"] != DBNull.Value ? Convert.ToInt32(drv["So_Luong_Kha_Dung"]) : 1
                 };

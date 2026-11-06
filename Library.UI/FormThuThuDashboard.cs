@@ -1,11 +1,14 @@
-﻿using Library.BLL;
-using System;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
+using Library.BLL;
 
 namespace Library.UI
 {
     public partial class FormThuThuDashboard : Form
     {
+        private Form? activeForm = null;
+
         public FormThuThuDashboard()
         {
             InitializeComponent();
@@ -13,6 +16,8 @@ namespace Library.UI
 
         private void FormThuThuDashboard_Load(object sender, EventArgs e)
         {
+            SetupSidebarHoverEffects();
+
             if (SessionContext.CurrentUser == null || !SessionContext.IsLibrarian)
             {
                 MessageBox.Show("Bạn không có quyền truy cập vào bàn làm việc của Thủ thư!", "Truy cập bị từ chối", MessageBoxButtons.OK, MessageBoxIcon.Stop);
@@ -23,6 +28,105 @@ namespace Library.UI
             string librarianName = SessionContext.CurrentLibrarian?.Ho_Ten ?? SessionContext.CurrentUser.Ten_Dang_Nhap;
             string desk = SessionContext.CurrentLibrarian?.Quay_Phu_Trach ?? "Quầy số 1";
             lblLibrarianInfo.Text = $"Thủ thư: {librarianName} | {desk} | Đăng nhập: {SessionContext.LoginTime:HH:mm:ss}";
+
+            // Mặc định khi vừa đăng nhập -> Mở Bàn Lưu Thông
+            btnBanLuuThong.PerformClick();
+        }
+
+        private void SetupSidebarHoverEffects()
+        {
+            Color hoverColor = Color.FromArgb(15, 118, 110);
+            Color downColor = Color.FromArgb(13, 148, 136);
+
+            foreach (Control ctrl in pnlSidebar.Controls)
+            {
+                if (ctrl is Button btn && btn != btnDangXuat)
+                {
+                    btn.FlatStyle = FlatStyle.Flat;
+                    btn.FlatAppearance.BorderSize = 0;
+                    btn.FlatAppearance.MouseOverBackColor = hoverColor;
+                    btn.FlatAppearance.MouseDownBackColor = downColor;
+                }
+            }
+
+            if (btnDangXuat != null)
+            {
+                btnDangXuat.FlatStyle = FlatStyle.Flat;
+                btnDangXuat.FlatAppearance.BorderSize = 0;
+                btnDangXuat.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 38, 38);
+                btnDangXuat.FlatAppearance.MouseDownBackColor = Color.FromArgb(153, 27, 27);
+            }
+        }
+
+        private void HighlightActiveButton(Button? activeBtn, string pageTitle)
+        {
+            if (activeBtn == null) return;
+
+            // Đặt lại màu nền mặc định cho tất cả nút menu
+            foreach (Control ctrl in pnlSidebar.Controls)
+            {
+                if (ctrl is Button btn && btn != btnDangXuat)
+                {
+                    btn.BackColor = Color.Transparent;
+                    btn.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
+                    btn.ForeColor = Color.FromArgb(204, 251, 241);
+                }
+            }
+
+            // Đánh dấu nút được chọn
+            activeBtn.BackColor = Color.FromArgb(15, 118, 110);
+            activeBtn.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            activeBtn.ForeColor = Color.White;
+            lblPageTitle.Text = pageTitle;
+        }
+
+        private void OpenChildForm(Form childForm)
+        {
+            if (activeForm != null)
+            {
+                activeForm.Close();
+            }
+
+            activeForm = childForm;
+            childForm.TopLevel = false;
+            childForm.FormBorderStyle = FormBorderStyle.None;
+            childForm.Dock = DockStyle.Fill;
+
+            pnlContent.Controls.Clear();
+            pnlContent.Controls.Add(childForm);
+            pnlContent.Tag = childForm;
+            childForm.BringToFront();
+            childForm.Show();
+        }
+
+        private void btnQuanLyDocGia_Click(object sender, EventArgs e)
+        {
+            HighlightActiveButton(sender as Button, "QUẢN LÝ BẠN ĐỌC & HỒ SƠ ĐỘC GIẢ");
+            OpenChildForm(new FormQuanLyDocGia());
+        }
+
+        private void btnQuanLySach_Click(object sender, EventArgs e)
+        {
+            HighlightActiveButton(sender as Button, "QUẢN LÝ DANH MỤC & KHO SÁCH VẬT LÝ");
+            OpenChildForm(new FormQuanLySach());
+        }
+
+        private void btnBanLuuThong_Click(object sender, EventArgs e)
+        {
+            HighlightActiveButton(sender as Button, "BÀN TÁC NGHIỆP LƯU THÔNG (MƯỢN - TRẢ SÁCH)");
+            OpenChildForm(new FormBanLuuThong());
+        }
+
+        private void btnXuLyViPham_Click(object sender, EventArgs e)
+        {
+            HighlightActiveButton(sender as Button, "QUẢN LÝ VI PHẠM & XỬ LÝ PHẠT");
+            OpenChildForm(new FormLapBienBanViPham());
+        }
+
+        private void btnLichTruc_Click(object sender, EventArgs e)
+        {
+            HighlightActiveButton(sender as Button, "LỊCH TRỰC & BÀN GIAO CA");
+            MessageBox.Show("Chức năng Lịch Trực Cá Nhân đang được kết nối với ca trực hôm nay của bạn.", "Lịch trực thủ thư", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void btnDoiMatKhau_Click(object sender, EventArgs e)
@@ -42,7 +146,6 @@ namespace Library.UI
 
             if (dialogResult == DialogResult.Yes)
             {
-                // 👉 GHI LOG ĐĂNG XUẤT CỦA THỦ THƯ
                 if (SessionContext.CurrentUser != null)
                 {
                     SystemLogger.Log(
@@ -64,75 +167,6 @@ namespace Library.UI
             {
                 Application.Exit();
             }
-        }
-        // ... Các mã nguồn hiện có của Form ...
-
-        /// <summary>
-        /// Sự kiện mở Form Quản Lý Độc Giả
-        /// </summary>
-        private void btnQuanLyDocGia_Click(object sender, EventArgs e)
-        {
-            HighlightActiveButton(sender as Button);
-            OpenChildForm(new FormQuanLyDocGia());
-        }
-
-        /// <summary>
-        /// Sự kiện mở Form Quản Lý Kho Sách
-        /// </summary>
-        private void btnQuanLySach_Click(object sender, EventArgs e)
-        {
-            HighlightActiveButton(sender as Button);
-            OpenChildForm(new FormQuanLySach());
-        }
-
-        /// <summary>
-        /// Hàm hỗ trợ đổi màu nút đang được chọn (active)
-        /// </summary>
-        private void HighlightActiveButton(Button? activeBtn)
-        {
-            if (activeBtn == null) return;
-
-            // Đặt lại màu mặc định cho các nút trong sidebar
-            foreach (Control ctrl in pnlSidebar.Controls)
-            {
-                if (ctrl is Button btn)
-                {
-                    btn.BackColor = System.Drawing.Color.Transparent;
-                }
-            }
-
-            // Đổi màu làm nổi bật nút đang được nhấp chọn
-            activeBtn.BackColor = System.Drawing.Color.FromArgb(15, 118, 110);
-        }
-        private Form? activeForm = null;
-
-        /// <summary>
-        /// Hàm nạp Form con lồng vào Panel hiển thị chính của Dashboard
-        /// </summary>
-        private void OpenChildForm(Form childForm)
-        {
-            // 1. Đóng Form con đang mở trước đó (nếu có)
-            if (activeForm != null)
-            {
-                activeForm.Close();
-            }
-
-            activeForm = childForm;
-
-            // 2. Thiết lập thuộc tính hiển thị lồng trong Panel
-            childForm.TopLevel = false;
-            childForm.FormBorderStyle = FormBorderStyle.None;
-            childForm.Dock = DockStyle.Fill;
-
-            // 3. Nạp Form con vào Panel hiển thị (Lưu ý: Thay 'pnlContent' bằng tên Panel chính bên phải trên Form của bạn nếu tên khác)
-            pnlContent.Controls.Add(childForm);
-            pnlContent.Tag = childForm;
-            childForm.BringToFront();
-            childForm.Show();
-        }
-        private void pnlContent_Paint(object sender, PaintEventArgs e)
-        {
-
         }
     }
 }

@@ -74,9 +74,9 @@ namespace Library.UI
                 if (row.DataBoundItem is DataRowView drv)
                 {
                     int viPham = drv["So_Lan_Vi_Pham"] != DBNull.Value ? Convert.ToInt32(drv["So_Lan_Vi_Pham"]) : 0;
-                    string trangThai = drv["Trang_Thai_The"]?.ToString() ?? "";
+                    string trangThai = drv["Trang_Thai"]?.ToString() ?? "";
 
-                    if (viPham >= 3 || trangThai == "Khóa tạm thời")
+                    if (viPham >= 3 || trangThai == "Khóa tạm thời" || trangThai == "Hết hạn")
                     {
                         row.DefaultCellStyle.BackColor = Color.FromArgb(254, 226, 226);
                         row.DefaultCellStyle.ForeColor = UITheme.Danger;
@@ -112,7 +112,7 @@ namespace Library.UI
             if (dgvDocGia?.CurrentRow?.DataBoundItem is DataRowView drv)
             {
                 string maDG = drv["Ma_Doc_Gia"].ToString() ?? string.Empty;
-                string currentStatus = drv["Trang_Thai_The"]?.ToString() ?? "Hoạt động";
+                string currentStatus = drv["Trang_Thai"]?.ToString() ?? "Hoạt động";
                 bool isKhoa = currentStatus != "Khóa tạm thời";
 
                 string actionName = isKhoa ? "khóa" : "mở khóa";

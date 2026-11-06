@@ -25,9 +25,10 @@ namespace Library.BLL
                 return false;
             }
 
+            dg.Ngay_Cap_The = DateTime.Today;
             dg.Ngay_Het_Han_The = DateTime.Today.AddYears(4);
             dg.Ma_Doc_Gia = _dal.GetNextMaDocGia();
-            dg.Trang_Thai_The = "Hoạt động";
+            dg.Trang_Thai = "Hoạt động";
 
             bool result = _dal.Insert(dg);
             if (result)
