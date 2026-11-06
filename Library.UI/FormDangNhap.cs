@@ -68,6 +68,7 @@ namespace Library.UI
                 // Lưu thông tin phiên làm việc
                 SessionContext.CurrentUser = user;
                 SessionContext.CurrentLibrarian = librarian;
+                SessionContext.LoginTime = DateTime.Now;
 
                 // 3. Điều hướng mở Form theo vai trò
                 if (user.Vai_Tro == "Admin")
@@ -132,6 +133,11 @@ namespace Library.UI
         }
 
         private void pnlLoginArea_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void pnlBanner_Paint(object sender, PaintEventArgs e)
         {
 
         }

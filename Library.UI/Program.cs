@@ -1,4 +1,4 @@
-namespace Library.UI;
+﻿namespace Library.UI;
 
 static class Program
 {

@@ -46,6 +46,7 @@
             pnlBanner.Name = "pnlBanner";
             pnlBanner.Size = new Size(280, 420);
             pnlBanner.TabIndex = 0;
+            pnlBanner.Paint += pnlBanner_Paint;
             // 
             // lblSubTitleApp
             // 
@@ -75,7 +76,7 @@
             lblBrand.ForeColor = Color.FromArgb(56, 189, 248);
             lblBrand.Location = new Point(15, 115);
             lblBrand.Name = "lblBrand";
-            lblBrand.Size = new Size(95, 65);
+            lblBrand.Size = new Size(90, 65);
             lblBrand.TabIndex = 0;
             lblBrand.Text = "📚";
             // 
@@ -190,7 +191,7 @@
             lblHuongDan.ForeColor = Color.FromArgb(100, 116, 139);
             lblHuongDan.Location = new Point(45, 75);
             lblHuongDan.Name = "lblHuongDan";
-            lblHuongDan.Size = new Size(262, 15);
+            lblHuongDan.Size = new Size(261, 15);
             lblHuongDan.TabIndex = 1;
             lblHuongDan.Text = "Đăng nhập tài khoản Quản trị viên hoặc Thủ thư";
             // 
