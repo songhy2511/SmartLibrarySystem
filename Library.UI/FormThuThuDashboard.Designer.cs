@@ -132,7 +132,7 @@ namespace Library.UI
             btnXuLyViPham.Padding = new Padding(20, 0, 0, 0);
             btnXuLyViPham.Size = new Size(240, 50);
             btnXuLyViPham.TabIndex = 4;
-            btnXuLyViPham.Text = "⚠️  Xử Lý Vi Phạm & Phạt";
+            btnXuLyViPham.Text = "⚠️  Xử Lý Vi Phạt";
             btnXuLyViPham.TextAlign = ContentAlignment.MiddleLeft;
             btnXuLyViPham.UseVisualStyleBackColor = true;
             btnXuLyViPham.Click += btnXuLyViPham_Click;

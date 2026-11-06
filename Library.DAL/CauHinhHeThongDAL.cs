@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using Microsoft.Data.SqlClient;
 using Library.DTO;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace Library.DAL
 {
@@ -41,6 +39,12 @@ namespace Library.DAL
 
             object? result = DatabaseHelper.ExecuteScalar(query, parameters);
             return result != null && result != DBNull.Value ? result.ToString()! : giaTriMacDinh;
+        }
+
+        public int LayGiaTriInt(string tenThamSo, int giaTriMacDinh)
+        {
+            string valStr = LayGiaTri(tenThamSo, giaTriMacDinh.ToString());
+            return int.TryParse(valStr, out int giaTri) ? giaTri : giaTriMacDinh;
         }
 
         public bool CapNhatGiaTri(string tenThamSo, string giaTri)

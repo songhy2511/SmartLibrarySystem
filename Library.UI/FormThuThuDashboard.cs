@@ -62,7 +62,6 @@ namespace Library.UI
         {
             if (activeBtn == null) return;
 
-            // Đặt lại màu nền mặc định cho tất cả nút menu
             foreach (Control ctrl in pnlSidebar.Controls)
             {
                 if (ctrl is Button btn && btn != btnDangXuat)
@@ -73,7 +72,6 @@ namespace Library.UI
                 }
             }
 
-            // Đánh dấu nút được chọn
             activeBtn.BackColor = Color.FromArgb(15, 118, 110);
             activeBtn.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             activeBtn.ForeColor = Color.White;
