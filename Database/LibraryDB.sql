@@ -171,6 +171,8 @@ CREATE TABLE [dbo].[Phieu_Muon] (
     [Chi_Nhanh_Ma_So] INT NOT NULL,
     [Ngay_Muon] DATETIME NOT NULL DEFAULT GETDATE(),
     [Ngay_Hen_Tra] DATETIME NOT NULL,
+    [Ngay_Tra] DATETIME NULL,                                     
+    [So_Lan_Gia_Han] INT NOT NULL DEFAULT 0,                     
     [Trang_Thai] NVARCHAR(50) NOT NULL DEFAULT N'Đang mượn'
         CHECK ([Trang_Thai] IN (N'Đang mượn', N'Đã hoàn thành', N'Quá hạn')),
     [Ghi_Chu] NVARCHAR(255) NULL,
@@ -442,4 +444,7 @@ VALUES
 (3, DATEADD(MINUTE, -15, GETDATE()), 'WARNING', N'Cảnh báo quá hạn', N'Hệ thống phát hiện phiếu mượn BR0003 của độc giả Lê Hoàng Phúc quá hạn 6 ngày.', '127.0.0.1'),
 (1, DATEADD(MINUTE, -5, GETDATE()), 'INFO', N'Đồng bộ kho', N'Kiểm tra và nạp bổ sung danh mục 18 đầu sách và bản sao vào hệ thống.', '127.0.0.1');
 GO
+<<<<<<< HEAD
 
+=======
+>>>>>>> b113b6205be9eda87e3a222478d273bf94014b7c

@@ -70,5 +70,11 @@ namespace Library.BLL
 
             return (false, "Lưu tham số thất bại. Vui lòng kiểm tra lại kết nối CSDL!");
         }
+        public string LayGiaTri(string tenCauHinh)
+        {
+            // Logic gọi xuống DAL để lấy giá trị từ bảng Cau_Hinh_He_Thong
+            // Tạm thời nếu chưa có DAL, bạn có thể return ""; để hết lỗi.
+            return "";
+        }
     }
 }   
