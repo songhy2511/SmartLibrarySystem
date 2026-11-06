@@ -54,8 +54,7 @@ namespace Library.UI
                 }
 
                 SessionContext.Clear();
-                this.Hide();
-                new FormDangNhap().Show();
+                this.Close();
             }
         }
 
