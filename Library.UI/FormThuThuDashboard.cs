@@ -123,8 +123,8 @@ namespace Library.UI
 
         private void btnLichTruc_Click(object sender, EventArgs e)
         {
-            HighlightActiveButton(sender as Button, "LỊCH TRỰC & BÀN GIAO CA");
-            MessageBox.Show("Chức năng Lịch Trực Cá Nhân đang được kết nối với ca trực hôm nay của bạn.", "Lịch trực thủ thư", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            HighlightActiveButton(sender as Button, "LỊCH TRỰC CÁ NHÂN & BÀN GIAO CA");
+            OpenChildForm(new FormLichTrucThuThu());
         }
 
         private void btnDoiMatKhau_Click(object sender, EventArgs e)

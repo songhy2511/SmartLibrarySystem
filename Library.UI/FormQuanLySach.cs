@@ -117,10 +117,35 @@ namespace Library.UI
 
         private void btnDeXuatThanhLy_Click(object? sender, EventArgs e)
         {
-            if (dgvSach?.CurrentRow?.DataBoundItem is DataRowView drv)
+            if (dgvSach?.CurrentRow?.DataBoundItem is not DataRowView drv)
             {
-                string maSach = drv["Ma_Sach"].ToString() ?? string.Empty;
-                MessageBox.Show($"Đã ghi nhận đề xuất thanh lý cho đầu sách {maSach}.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Vui lòng chọn 1 đầu sách trong bảng để thanh lý cuốn hỏng!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string maSach = drv["Ma_Sach"].ToString() ?? string.Empty;
+            string tieuDe = drv["Tieu_De"].ToString() ?? string.Empty;
+            int khaDung = Convert.ToInt32(drv["So_Luong_Kha_Dung"]);
+
+            var confirm = MessageBox.Show(
+                $"Bạn có chắc chắn muốn thanh lý 1 cuốn bị hư hỏng thuộc đầu sách:\n\n'{tieuDe}' ({maSach})?\n\n(Hệ thống sẽ giảm 1 tổng số lượng và 1 số lượng khả dụng)",
+                "Xác nhận thanh lý",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (confirm != DialogResult.Yes) return;
+
+            int? currentUserId = SessionContext.CurrentUser?.Ma_So;
+
+            if (_sachBLL.DeXuatThanhLyCuonSach(maSach, tieuDe, khaDung, currentUserId, out string err))
+            {
+                MessageBox.Show("Thanh lý thành công 1 cuốn sách! Số lượng tồn kho đã được cập nhật.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+            }
+            else
+            {
+                MessageBox.Show(err, "Không thể thanh lý", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

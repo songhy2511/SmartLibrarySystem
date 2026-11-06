@@ -90,5 +90,13 @@ namespace Library.BLL
                 ? (true, "Đã xóa ca trực thành công!")
                 : (false, "Không thể xóa ca trực đã bắt đầu hoặc đã kết ca!");
         }
+
+        public List<CaTrucDTO> LayLichTrucThuThu(int thuThuMaSo, DateTime fromDate, DateTime toDate)
+        {
+            if (thuThuMaSo <= 0)
+                return new List<CaTrucDTO>();
+
+            return _caTrucDal.GetByThuThuAndDateRange(thuThuMaSo, fromDate, toDate);
+        }
     }
 }

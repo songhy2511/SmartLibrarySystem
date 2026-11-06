@@ -87,5 +87,35 @@ namespace Library.DAL
             SqlParameter[] pars = { new SqlParameter("@Kw", $"%{keyword}%") };
             return DatabaseHelper.ExecuteQuery(query, pars);
         }
+
+        public bool ThanhLyMotCuonSach(string maSach)
+        {
+            string query = @"
+            BEGIN TRANSACTION;
+            BEGIN TRY
+                -- 1. Giảm 1 tổng số lượng và 1 khả dụng ở bảng Sach
+                UPDATE dbo.Sach 
+                SET Tong_So_Luong = Tong_So_Luong - 1,
+                    So_Luong_Kha_Dung = So_Luong_Kha_Dung - 1
+                WHERE Ma_Sach = @MaSach;
+
+                -- 2. Đổi trạng thái 1 bản sao sẵn sàng thành 'Mất/Thanh lý'
+                UPDATE TOP (1) dbo.Ban_Sao_Sach
+                SET Trang_Thai = N'Mất/Thanh lý',
+                    Tinh_Trang = N'Hư hỏng nặng',
+                    Ghi_Chu = N'Đã thanh lý do hư hỏng'
+                WHERE Sach_Ma_So = (SELECT Ma_So FROM dbo.Sach WHERE Ma_Sach = @MaSach)
+                  AND Trang_Thai = N'Sẵn sàng';
+
+                COMMIT TRANSACTION;
+            END TRY
+            BEGIN CATCH
+                ROLLBACK TRANSACTION;
+                THROW;
+            END CATCH";
+
+            SqlParameter[] pars = { new SqlParameter("@MaSach", maSach) };
+            return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
+        }
     }
 }

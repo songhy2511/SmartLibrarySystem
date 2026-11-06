@@ -94,6 +94,39 @@ namespace Library.BLL
             return result;
         }
 
+        public bool DeXuatThanhLyCuonSach(string maSach, string tieuDe, int khaDung, int? currentUserId, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(maSach))
+            {
+                errorMessage = "Chưa chọn đầu sách cần thanh lý!";
+                return false;
+            }
+
+            if (khaDung <= 0)
+            {
+                errorMessage = $"Đầu sách '{tieuDe}' hiện không còn cuốn nào khả dụng trên kệ (có thể sách đang được mượn hết)!";
+                return false;
+            }
+
+            bool result = _dal.ThanhLyMotCuonSach(maSach);
+            if (result)
+            {
+                SystemLogger.Log(
+                    LogLevel.WARNING,
+                    "Thanh lý tài liệu",
+                    $"Thủ thư đã thanh lý 1 cuốn hư hỏng thuộc đầu sách '{tieuDe}' ({maSach}).",
+                    currentUserId
+                );
+            }
+            else
+            {
+                errorMessage = "Lỗi thực thi trong cơ sở dữ liệu khi thanh lý sách!";
+            }
+
+            return result;
+        }
         public DataTable TimKiemSach(string keyword) => _dal.Search(keyword);
     }
 }
