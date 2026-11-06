@@ -16,10 +16,14 @@
         private void InitializeComponent()
         {
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             pnlMain = new Panel();
-            dgvBaoCao = new DataGridView();
+            tabControlBaoCao = new TabControl();
+            tabDoanhThuCa = new TabPage();
+            dgvDoanhThuCa = new DataGridView();
+            tabTopSach = new TabPage();
+            dgvTopSach = new DataGridView();
+            tabQuayVong = new TabPage();
+            dgvQuayVong = new DataGridView();
             pnlFilterCard = new Panel();
             btnInBaoCao = new Button();
             btnXuatPdf = new Button();
@@ -42,7 +46,13 @@
             lblSubTitle = new Label();
             lblTitle = new Label();
             pnlMain.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvBaoCao).BeginInit();
+            tabControlBaoCao.SuspendLayout();
+            tabDoanhThuCa.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvDoanhThuCa).BeginInit();
+            tabTopSach.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTopSach).BeginInit();
+            tabQuayVong.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvQuayVong).BeginInit();
             pnlFilterCard.SuspendLayout();
             pnlCard2.SuspendLayout();
             pnlCard1.SuspendLayout();
@@ -52,7 +62,7 @@
             // pnlMain
             // 
             pnlMain.BackColor = Color.FromArgb(248, 250, 252);
-            pnlMain.Controls.Add(dgvBaoCao);
+            pnlMain.Controls.Add(tabControlBaoCao);
             pnlMain.Controls.Add(pnlFilterCard);
             pnlMain.Controls.Add(pnlCard2);
             pnlMain.Controls.Add(pnlCard1);
@@ -65,16 +75,40 @@
             pnlMain.Size = new Size(1533, 1108);
             pnlMain.TabIndex = 0;
             // 
-            // dgvBaoCao
+            // tabControlBaoCao
             // 
-            dgvBaoCao.AllowUserToAddRows = false;
-            dgvBaoCao.AllowUserToDeleteRows = false;
-            dgvBaoCao.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            dgvBaoCao.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvBaoCao.BackgroundColor = Color.White;
-            dgvBaoCao.BorderStyle = BorderStyle.None;
-            dgvBaoCao.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            dgvBaoCao.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            tabControlBaoCao.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControlBaoCao.Controls.Add(tabDoanhThuCa);
+            tabControlBaoCao.Controls.Add(tabTopSach);
+            tabControlBaoCao.Controls.Add(tabQuayVong);
+            tabControlBaoCao.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            tabControlBaoCao.Location = new Point(32, 446);
+            tabControlBaoCao.Name = "tabControlBaoCao";
+            tabControlBaoCao.SelectedIndex = 0;
+            tabControlBaoCao.Size = new Size(1469, 615);
+            tabControlBaoCao.TabIndex = 4;
+            tabControlBaoCao.SelectedIndexChanged += tabControlBaoCao_SelectedIndexChanged;
+            // 
+            // tabDoanhThuCa
+            // 
+            tabDoanhThuCa.Controls.Add(dgvDoanhThuCa);
+            tabDoanhThuCa.Location = new Point(4, 32);
+            tabDoanhThuCa.Name = "tabDoanhThuCa";
+            tabDoanhThuCa.Padding = new Padding(10);
+            tabDoanhThuCa.Size = new Size(1461, 579);
+            tabDoanhThuCa.TabIndex = 0;
+            tabDoanhThuCa.Text = " 💵 Doanh Thu Theo Ca Trực ";
+            tabDoanhThuCa.UseVisualStyleBackColor = true;
+            // 
+            // dgvDoanhThuCa
+            // 
+            dgvDoanhThuCa.AllowUserToAddRows = false;
+            dgvDoanhThuCa.AllowUserToDeleteRows = false;
+            dgvDoanhThuCa.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvDoanhThuCa.BackgroundColor = Color.White;
+            dgvDoanhThuCa.BorderStyle = BorderStyle.None;
+            dgvDoanhThuCa.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvDoanhThuCa.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = Color.FromArgb(30, 41, 59);
             dataGridViewCellStyle1.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
@@ -82,37 +116,87 @@
             dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(30, 41, 59);
             dataGridViewCellStyle1.SelectionForeColor = Color.White;
             dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgvBaoCao.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            dgvBaoCao.ColumnHeadersHeight = 44;
-            dgvBaoCao.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.White;
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9.5F);
-            dataGridViewCellStyle2.ForeColor = Color.FromArgb(51, 65, 85);
-            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(238, 242, 255);
-            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(79, 70, 229);
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvBaoCao.DefaultCellStyle = dataGridViewCellStyle2;
-            dgvBaoCao.EnableHeadersVisualStyles = false;
-            dgvBaoCao.GridColor = Color.FromArgb(241, 245, 249);
-            dgvBaoCao.Location = new Point(32, 446);
-            dgvBaoCao.Margin = new Padding(4, 5, 4, 5);
-            dgvBaoCao.Name = "dgvBaoCao";
-            dgvBaoCao.ReadOnly = true;
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = Color.FromArgb(241, 245, 249);
-            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle3.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
-            dgvBaoCao.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
-            dgvBaoCao.RowHeadersVisible = false;
-            dgvBaoCao.RowHeadersWidth = 51;
-            dgvBaoCao.RowTemplate.Height = 40;
-            dgvBaoCao.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvBaoCao.Size = new Size(1469, 615);
-            dgvBaoCao.TabIndex = 4;
+            dgvDoanhThuCa.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvDoanhThuCa.ColumnHeadersHeight = 44;
+            dgvDoanhThuCa.Dock = DockStyle.Fill;
+            dgvDoanhThuCa.EnableHeadersVisualStyles = false;
+            dgvDoanhThuCa.GridColor = Color.FromArgb(241, 245, 249);
+            dgvDoanhThuCa.Location = new Point(10, 10);
+            dgvDoanhThuCa.Name = "dgvDoanhThuCa";
+            dgvDoanhThuCa.ReadOnly = true;
+            dgvDoanhThuCa.RowHeadersVisible = false;
+            dgvDoanhThuCa.RowTemplate.Height = 40;
+            dgvDoanhThuCa.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvDoanhThuCa.Size = new Size(1441, 559);
+            dgvDoanhThuCa.TabIndex = 0;
+            // 
+            // tabTopSach
+            // 
+            tabTopSach.Controls.Add(dgvTopSach);
+            tabTopSach.Location = new Point(4, 32);
+            tabTopSach.Name = "tabTopSach";
+            tabTopSach.Padding = new Padding(10);
+            tabTopSach.Size = new Size(1461, 579);
+            tabTopSach.TabIndex = 1;
+            tabTopSach.Text = " 📚 Top Sách Mượn Nhiều ";
+            tabTopSach.UseVisualStyleBackColor = true;
+            // 
+            // dgvTopSach
+            // 
+            dgvTopSach.AllowUserToAddRows = false;
+            dgvTopSach.AllowUserToDeleteRows = false;
+            dgvTopSach.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvTopSach.BackgroundColor = Color.White;
+            dgvTopSach.BorderStyle = BorderStyle.None;
+            dgvTopSach.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvTopSach.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvTopSach.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvTopSach.ColumnHeadersHeight = 44;
+            dgvTopSach.Dock = DockStyle.Fill;
+            dgvTopSach.EnableHeadersVisualStyles = false;
+            dgvTopSach.GridColor = Color.FromArgb(241, 245, 249);
+            dgvTopSach.Location = new Point(10, 10);
+            dgvTopSach.Name = "dgvTopSach";
+            dgvTopSach.ReadOnly = true;
+            dgvTopSach.RowHeadersVisible = false;
+            dgvTopSach.RowTemplate.Height = 40;
+            dgvTopSach.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvTopSach.Size = new Size(1441, 559);
+            dgvTopSach.TabIndex = 0;
+            // 
+            // tabQuayVong
+            // 
+            tabQuayVong.Controls.Add(dgvQuayVong);
+            tabQuayVong.Location = new Point(4, 32);
+            tabQuayVong.Name = "tabQuayVong";
+            tabQuayVong.Padding = new Padding(10);
+            tabQuayVong.Size = new Size(1461, 579);
+            tabQuayVong.TabIndex = 2;
+            tabQuayVong.Text = " 🔄 Tỷ Lệ Quay Vòng Chi Nhánh ";
+            tabQuayVong.UseVisualStyleBackColor = true;
+            // 
+            // dgvQuayVong
+            // 
+            dgvQuayVong.AllowUserToAddRows = false;
+            dgvQuayVong.AllowUserToDeleteRows = false;
+            dgvQuayVong.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvQuayVong.BackgroundColor = Color.White;
+            dgvQuayVong.BorderStyle = BorderStyle.None;
+            dgvQuayVong.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvQuayVong.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvQuayVong.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvQuayVong.ColumnHeadersHeight = 44;
+            dgvQuayVong.Dock = DockStyle.Fill;
+            dgvQuayVong.EnableHeadersVisualStyles = false;
+            dgvQuayVong.GridColor = Color.FromArgb(241, 245, 249);
+            dgvQuayVong.Location = new Point(10, 10);
+            dgvQuayVong.Name = "dgvQuayVong";
+            dgvQuayVong.ReadOnly = true;
+            dgvQuayVong.RowHeadersVisible = false;
+            dgvQuayVong.RowTemplate.Height = 40;
+            dgvQuayVong.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvQuayVong.Size = new Size(1441, 559);
+            dgvQuayVong.TabIndex = 0;
             // 
             // pnlFilterCard
             // 
@@ -164,7 +248,7 @@
             btnXuatPdf.Name = "btnXuatPdf";
             btnXuatPdf.Size = new Size(160, 49);
             btnXuatPdf.TabIndex = 1;
-            btnXuatPdf.Text = "📄 Xuất pdf";
+            btnXuatPdf.Text = "📄 Xuất PDF";
             btnXuatPdf.UseVisualStyleBackColor = false;
             btnXuatPdf.Click += btnXuatPdf_Click;
             // 
@@ -393,7 +477,7 @@
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new Size(359, 35);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "Báo Cáo Thống Kê Doanh Thu";
+            lblTitle.Text = "Báo Cáo Thống Kê Doanh Thu & Kho Sách";
             // 
             // FormBaoCaoThongKe
             // 
@@ -404,10 +488,16 @@
             Margin = new Padding(4, 5, 4, 5);
             Name = "FormBaoCaoThongKe";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "Báo Cáo & Thống Kê Doanh Thu";
-            Load += FormBaoCaoThongKe_Load_1;
+            Text = "Báo Cáo & Thống Kê Tổng Hợp";
+            Load += FormBaoCaoThongKe_Load;
             pnlMain.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgvBaoCao).EndInit();
+            tabControlBaoCao.ResumeLayout(false);
+            tabDoanhThuCa.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvDoanhThuCa).EndInit();
+            tabTopSach.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvTopSach).EndInit();
+            tabQuayVong.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvQuayVong).EndInit();
             pnlFilterCard.ResumeLayout(false);
             pnlFilterCard.PerformLayout();
             pnlCard2.ResumeLayout(false);
@@ -441,6 +531,12 @@
         private System.Windows.Forms.Button btnXuatFile;
         private System.Windows.Forms.Button btnXuatExcel;
         private System.Windows.Forms.Button btnXuatPdf;
-        private System.Windows.Forms.DataGridView dgvBaoCao;
+        private System.Windows.Forms.TabControl tabControlBaoCao;
+        private System.Windows.Forms.TabPage tabDoanhThuCa;
+        private System.Windows.Forms.DataGridView dgvDoanhThuCa;
+        private System.Windows.Forms.TabPage tabTopSach;
+        private System.Windows.Forms.DataGridView dgvTopSach;
+        private System.Windows.Forms.TabPage tabQuayVong;
+        private System.Windows.Forms.DataGridView dgvQuayVong;
     }
 }

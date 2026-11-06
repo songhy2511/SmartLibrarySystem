@@ -19,7 +19,6 @@ namespace Library.UI
 
         private void FormBaoCaoThongKe_Load(object sender, EventArgs e)
         {
-            // Thiết lập mốc thời gian mặc định 30 ngày gần nhất
             if (dtpTuNgay != null) dtpTuNgay.Value = DateTime.Today.AddDays(-30);
             if (dtpDenNgay != null) dtpDenNgay.Value = DateTime.Today;
 
@@ -27,6 +26,11 @@ namespace Library.UI
         }
 
         private void btnXem_Click(object sender, EventArgs e)
+        {
+            TaiDuLieuBaoCao();
+        }
+
+        private void tabControlBaoCao_SelectedIndexChanged(object sender, EventArgs e)
         {
             TaiDuLieuBaoCao();
         }
@@ -45,17 +49,41 @@ namespace Library.UI
 
                 DateTime tu = dtpTuNgay.Value;
                 DateTime den = dtpDenNgay.Value;
+                DataTable dt = null;
 
-                // 1. Nạp dữ liệu doanh thu theo ca vào DataGridView (dgvBaoCao)
-                DataTable dt = _bll.GetDoanhThuTheoCa(tu, den, null);
-                if (dgvBaoCao != null)
+                // Xác định dữ liệu cần tải dựa theo Tab đang chọn
+                if (tabControlBaoCao.SelectedTab == tabDoanhThuCa)
                 {
-                    dgvBaoCao.DataSource = null;
-                    dgvBaoCao.DataSource = dt;
-                    DinhDangCotGridView();
+                    dt = _bll.GetDoanhThuTheoCa(tu, den, null);
+                    if (dgvDoanhThuCa != null)
+                    {
+                        dgvDoanhThuCa.DataSource = null;
+                        dgvDoanhThuCa.DataSource = dt;
+                        DinhDangCotGridView(dgvDoanhThuCa);
+                    }
+                }
+                else if (tabControlBaoCao.SelectedTab == tabTopSach)
+                {
+                    dt = _bll.GetTopHotBooks(10, tu, den, null);
+                    if (dgvTopSach != null)
+                    {
+                        dgvTopSach.DataSource = null;
+                        dgvTopSach.DataSource = dt;
+                        DinhDangCotGridView(dgvTopSach);
+                    }
+                }
+                else if (tabControlBaoCao.SelectedTab == tabQuayVong)
+                {
+                    dt = _bll.GetQuayVongChiNhanh(tu, den);
+                    if (dgvQuayVong != null)
+                    {
+                        dgvQuayVong.DataSource = null;
+                        dgvQuayVong.DataSource = dt;
+                        DinhDangCotGridView(dgvQuayVong);
+                    }
                 }
 
-                // 2. Nạp chỉ số KPI vào các thẻ card trên giao diện
+                // Cập nhật thông tin KPI chung ở các thẻ Card phía trên
                 BaoCaoKPIDTO kpi = _bll.GetKPISummary(tu, den, null);
 
                 if (lblValTongDoanhThu != null)
@@ -74,18 +102,17 @@ namespace Library.UI
             }
         }
 
-        private void DinhDangCotGridView()
+        private static void DinhDangCotGridView(DataGridView dgv)
         {
-            if (dgvBaoCao == null || dgvBaoCao.Columns.Count == 0) return;
+            if (dgv == null || dgv.Columns.Count == 0) return;
 
-            // 1. Ép style mặc định của Header căn giữa toàn bộ
-            dgvBaoCao.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dgv.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
-            foreach (DataGridViewColumn col in dgvBaoCao.Columns)
+            foreach (DataGridViewColumn col in dgv.Columns)
             {
                 string colName = col.Name.ToLower();
 
-                // 2. Đổi tên tiêu đề cột có dấu cách
+                // Đổi tiêu đề tiếng Việt thân thiện
                 if (colName.Contains("ngaytruc") || colName.Contains("ngay"))
                     col.HeaderText = "Ngày Trực";
                 else if (colName.Contains("tenca"))
@@ -100,43 +127,50 @@ namespace Library.UI
                     col.HeaderText = "Tiền Đã Thu";
                 else if (colName.Contains("tienchuathu"))
                     col.HeaderText = "Tiền Chưa Thu";
+                else if (colName.Contains("masach"))
+                    col.HeaderText = "Mã Sách";
+                else if (colName.Contains("tieude"))
+                    col.HeaderText = "Tên Đầu Sách";
+                else if (colName.Contains("tacgia"))
+                    col.HeaderText = "Tác Giả";
+                else if (colName.Contains("soluotmuon"))
+                    col.HeaderText = "Số Lượt Mượn";
+                else if (colName.Contains("sobansao"))
+                    col.HeaderText = "Tổng Bản Sao";
+                else if (colName.Contains("luotmuon"))
+                    col.HeaderText = "Tổng Lượt Mượn";
+                else if (colName.Contains("tyletquaytong") || colName.Contains("tylequinvong"))
+                    col.HeaderText = "Tỷ Lệ Quay Vòng";
 
-                // 3. Định dạng phân cách hàng nghìn cho số tiền
                 if (colName.Contains("doanhthu") || colName.Contains("tiendathu") || colName.Contains("tienchuathu"))
                 {
                     col.DefaultCellStyle.Format = "N0";
                 }
 
-                // 4. Ép căn giữa cho từng cột và Header
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-                // 5. Bỏ không gian chứa mũi tên Sort Glyph để chữ Header không bị xô sang trái
                 col.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
         }
 
-        // --- XỬ LÝ XUẤT FILE CSV ---
-        private void btnXuatFile_Click(object sender, EventArgs e)
+        private DataGridView GetCurrentActiveDataGridView()
         {
-            ThucHienXuatCsv();
+            if (tabControlBaoCao.SelectedTab == tabDoanhThuCa) return dgvDoanhThuCa;
+            if (tabControlBaoCao.SelectedTab == tabTopSach) return dgvTopSach;
+            if (tabControlBaoCao.SelectedTab == tabQuayVong) return dgvQuayVong;
+            return dgvDoanhThuCa;
         }
 
-        private void btnXuatExcel_Click(object sender, EventArgs e)
-        {
-            ThucHienXuatCsv();
-        }
-
-        private void btnXuatPdf_Click(object sender, EventArgs e)
-        {
-            ThucHienXuatCsv();
-        }
+        private void btnXuatFile_Click(object sender, EventArgs e) => ThucHienXuatCsv();
+        private void btnXuatExcel_Click(object sender, EventArgs e) => ThucHienXuatCsv();
+        private void btnXuatPdf_Click(object sender, EventArgs e) => ThucHienXuatCsv();
 
         private void ThucHienXuatCsv()
         {
             try
             {
-                if (dgvBaoCao == null || dgvBaoCao.Rows.Count == 0)
+                DataGridView activeDgv = GetCurrentActiveDataGridView();
+                if (activeDgv == null || activeDgv.Rows.Count == 0)
                 {
                     MessageBox.Show("Không có dữ liệu để xuất báo cáo!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
@@ -145,12 +179,11 @@ namespace Library.UI
                 using (SaveFileDialog sfd = new SaveFileDialog())
                 {
                     sfd.Filter = "CSV file (*.csv)|*.csv";
-                    sfd.FileName = "BaoCaoDoanhThu_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
+                    sfd.FileName = "BaoCao_" + tabControlBaoCao.SelectedTab.Text.Trim() + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
 
                     if (sfd.ShowDialog() == DialogResult.OK)
                     {
-                        DataTable dt = dgvBaoCao.DataSource as DataTable;
-                        if (dt != null)
+                        if (activeDgv.DataSource is DataTable dt)
                         {
                             int? userId = SessionContext.CurrentUser?.Ma_So;
                             _bll.ExportToCsv(dt, sfd.FileName, userId);
@@ -165,10 +198,10 @@ namespace Library.UI
             }
         }
 
-        // --- XỬ LÝ TÍNH NĂNG IN BÁO CÁO (PRINT PREVIEW) ---
         private void btnInBaoCao_Click(object sender, EventArgs e)
         {
-            if (dgvBaoCao == null || dgvBaoCao.Rows.Count == 0)
+            DataGridView activeDgv = GetCurrentActiveDataGridView();
+            if (activeDgv == null || activeDgv.Rows.Count == 0)
             {
                 MessageBox.Show("Không có dữ liệu để in báo cáo!", "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -182,15 +215,15 @@ namespace Library.UI
                 previewDlg.Document = printDoc;
                 previewDlg.Width = 900;
                 previewDlg.Height = 700;
-                previewDlg.Text = "Xem Trước Bản In Báo Cáo Doanh Thu";
+                previewDlg.Text = "Xem Trước Bản In - " + tabControlBaoCao.SelectedTab.Text;
                 previewDlg.ShowDialog();
             }
         }
 
         private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
         {
-            // Đặt khổ giấy nằm ngang (Landscape)
             e.PageSettings.Landscape = true;
+            DataGridView activeDgv = GetCurrentActiveDataGridView();
 
             Font fontTitle = new Font("Segoe UI", 16, FontStyle.Bold);
             Font fontSub = new Font("Segoe UI", 10, FontStyle.Italic);
@@ -200,13 +233,12 @@ namespace Library.UI
             Brush brush = Brushes.Black;
             Pen penGrid = new Pen(Color.FromArgb(160, 160, 160), 1);
 
-            float startX = 30; // Lề trái
-            float startY = 40; // Lề trên
-            float printableWidth = e.PageBounds.Width - 60; // Tự động lấy toàn bộ chiều rộng trang in ngang (trừ lề trái/phải)
+            float startX = 30;
+            float startY = 40;
+            float printableWidth = e.PageBounds.Width - 60;
             float offsetY = 0;
 
-            // 1. Tiêu đề báo cáo
-            e.Graphics.DrawString("BÁO CÁO THỐNG KÊ DOANH THU THƯ VIỆN", fontTitle, brush, startX, startY + offsetY);
+            e.Graphics.DrawString("BÁO CÁO THỐNG KÊ - " + tabControlBaoCao.SelectedTab.Text.ToUpper(), fontTitle, brush, startX, startY + offsetY);
             offsetY += 32;
 
             string timeStr = $"Khoảng thời gian: {dtpTuNgay.Value:dd/MM/yyyy} - {dtpDenNgay.Value:dd/MM/yyyy}   |   Ngày in: {DateTime.Now:dd/MM/yyyy HH:mm}";
@@ -216,49 +248,41 @@ namespace Library.UI
             e.Graphics.DrawLine(Pens.Black, startX, startY + offsetY, startX + printableWidth, startY + offsetY);
             offsetY += 15;
 
-            // 2. Tính toán độ rộng động cho từng cột dựa vào độ dài dữ liệu thực tế
             int visibleColsCount = 0;
-            foreach (DataGridViewColumn col in dgvBaoCao.Columns)
+            foreach (DataGridViewColumn col in activeDgv.Columns)
             {
                 if (col.Visible) visibleColsCount++;
             }
 
             if (visibleColsCount == 0) return;
 
-            // Mảng trọng số độ rộng cho từng cột (Cột Chi Nhánh và Thủ Thư sẽ được cấp hệ số rộng hơn các cột khác)
             float[] colWidths = new float[visibleColsCount];
             float totalWeight = 0;
-
             int idx = 0;
-            foreach (DataGridViewColumn col in dgvBaoCao.Columns)
+
+            foreach (DataGridViewColumn col in activeDgv.Columns)
             {
                 if (col.Visible)
                 {
                     string name = col.HeaderText.ToLower();
-                    if (name.Contains("chi nhánh") || name.Contains("thủ thư"))
+                    if (name.Contains("chi nhánh") || name.Contains("thủ thư") || name.Contains("đầu sách") || name.Contains("tên"))
                     {
-                        colWidths[idx] = 2.2f; // Cột dài cho tên chi nhánh, thủ thư
-                    }
-                    else if (name.Contains("ngày") || name.Contains("ca"))
-                    {
-                        colWidths[idx] = 1.2f; // Cột ngày tháng, ca trực
+                        colWidths[idx] = 2.2f;
                     }
                     else
                     {
-                        colWidths[idx] = 1.0f; // Các cột số lượng, tiền tệ
+                        colWidths[idx] = 1.0f;
                     }
                     totalWeight += colWidths[idx];
                     idx++;
                 }
             }
 
-            // Quy đổi trọng số thành kích thước Pixel thực tế vừa khít trang in
             for (int i = 0; i < visibleColsCount; i++)
             {
                 colWidths[i] = (colWidths[i] / totalWeight) * printableWidth;
             }
 
-            // 3. Vẽ Tiêu đề cột (Header)
             float currentY = startY + offsetY;
             float headerHeight = 32;
 
@@ -267,33 +291,23 @@ namespace Library.UI
             float currentX = startX;
             int colIndex = 0;
 
-            foreach (DataGridViewColumn col in dgvBaoCao.Columns)
+            foreach (DataGridViewColumn col in activeDgv.Columns)
             {
                 if (col.Visible)
                 {
                     float currentWidth = colWidths[colIndex];
-                    string headerText = col.HeaderText;
-
-                    StringFormat sf = new StringFormat
-                    {
-                        Alignment = StringAlignment.Center,
-                        LineAlignment = StringAlignment.Center,
-                        Trimming = StringTrimming.EllipsisCharacter
-                    };
-
+                    StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
                     RectangleF cellRect = new RectangleF(currentX, currentY, currentWidth, headerHeight);
-                    e.Graphics.DrawString(headerText, fontHeader, brush, cellRect, sf);
+                    e.Graphics.DrawString(col.HeaderText, fontHeader, brush, cellRect, sf);
                     e.Graphics.DrawRectangle(penGrid, currentX, currentY, currentWidth, headerHeight);
-
                     currentX += currentWidth;
                     colIndex++;
                 }
             }
             currentY += headerHeight;
 
-            // 4. Vẽ các dòng dữ liệu (Rows)
             float rowHeight = 28;
-            foreach (DataGridViewRow row in dgvBaoCao.Rows)
+            foreach (DataGridViewRow row in activeDgv.Rows)
             {
                 if (row.IsNewRow) continue;
                 currentX = startX;
@@ -306,23 +320,10 @@ namespace Library.UI
                         float currentWidth = colWidths[colIndex];
                         string val = cell.Value?.ToString() ?? "";
 
-                        // Xóa giờ thừa ngày tháng
-                        if (val.Contains("12:00:00"))
-                        {
-                            val = val.Replace(" 12:00:00 SA", "").Replace(" 12:00:00 CH", "").Replace(" 00:00:00", "");
-                        }
-
-                        StringFormat sf = new StringFormat
-                        {
-                            Alignment = StringAlignment.Center,
-                            LineAlignment = StringAlignment.Center,
-                            Trimming = StringTrimming.Word // Tự động co giãn ngắt từ thông minh, tránh bị cụt chữ
-                        };
-
+                        StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
                         RectangleF cellRect = new RectangleF(currentX, currentY, currentWidth, rowHeight);
                         e.Graphics.DrawString(val, fontRow, brush, cellRect, sf);
                         e.Graphics.DrawRectangle(penGrid, currentX, currentY, currentWidth, rowHeight);
-
                         currentX += currentWidth;
                         colIndex++;
                     }
@@ -336,11 +337,6 @@ namespace Library.UI
                 }
             }
             e.HasMorePages = false;
-        }
-
-        private void FormBaoCaoThongKe_Load_1(object sender, EventArgs e)
-        {
-
         }
     }
 }
