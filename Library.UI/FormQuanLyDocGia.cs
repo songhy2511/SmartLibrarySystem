@@ -149,51 +149,5 @@ namespace Library.UI
         {
             LoadData();
         }
-
-        private void FormQuanLyDocGia_Load(object sender, EventArgs e)
-        {
-
-        }
-        // Cập nhật file Library.UI/FormQuanLyDocGia.cs
-        private void DgvDocGia_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
-        {
-            if (dgvDocGia != null && e.RowIndex >= 0 && e.RowIndex < dgvDocGia.Rows.Count)
-            {
-                DataGridViewRow row = dgvDocGia.Rows[e.RowIndex];
-                if (row.DataBoundItem is DataRowView drv)
-                {
-                    int viPham = drv["So_Lan_Vi_Pham"] != DBNull.Value ? Convert.ToInt32(drv["So_Lan_Vi_Pham"]) : 0;
-                    string trangThai = drv["Trang_Thai_The"]?.ToString() ?? "";
-
-                    if (viPham >= 3 || trangThai == "Khóa tạm thời")
-                    {
-                        row.DefaultCellStyle.BackColor = Color.FromArgb(254, 226, 226);
-                        row.DefaultCellStyle.ForeColor = Color.Crimson;
-                    }
-                }
-            }
-        }
-
-        private void btnXoaDocGia_Click(object? sender, EventArgs e)
-        {
-            if (dgvDocGia?.CurrentRow?.DataBoundItem is DataRowView drv)
-            {
-                string maDG = drv["Ma_Doc_Gia"].ToString() ?? string.Empty;
-                if (MessageBox.Show($"Bạn có chắc chắn muốn xóa độc giả {maDG}?", "Xác nhận",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-                {
-                    int? currentUserId = SessionContext.CurrentUser?.Ma_So;
-                    if (_bll.XoaDocGia(maDG, currentUserId, out string err))
-                    {
-                        MessageBox.Show("Xóa độc giả thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LoadData();
-                    }
-                    else
-                    {
-                        MessageBox.Show(err, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-        }
     }
 }
