@@ -9,15 +9,17 @@ namespace Library.Tests
         [TestMethod]
         public void HashPassword_MatchesSqlSeedData_AdminAccount()
         {
-            // Arrange (Chuẩn bị dữ liệu mẫu từ script LibraryDB.sql)
+            // Arrange (Dữ liệu chuẩn xác của tài khoản Admin từ script LibraryDB.sql)
             string plainPassword = "Admin@123";
-            string salt = "SALT_ADMIN_KEY_2026";
+            string salt = "q3Z8vX1mK9pL2oW5yR7tEw=="; // Chuỗi Base64 chuẩn
+            string expectedHash = "03FC1949AB5D0389D245EAC6834C156273213A780EB92A922CA04EAC0BE8636E";
 
             // Act (Thực thi băm)
             string actualHash = PasswordHasher.HashPassword(plainPassword, salt);
 
-            // Assert (Xác minh hàm băm ra chuỗi Hex 64 ký tự và khớp khi Verify)
+            // Assert (Xác minh mã băm sinh ra đủ 64 ký tự Hex, khớp với CSDL và xác thực thành công)
             Assert.AreEqual(64, actualHash.Length);
+            Assert.AreEqual(expectedHash, actualHash, "Mã băm sinh ra phải khớp với mã băm khởi tạo trong CSDL!");
             bool isMatch = PasswordHasher.VerifyPassword(plainPassword, actualHash, salt);
             Assert.IsTrue(isMatch);
         }

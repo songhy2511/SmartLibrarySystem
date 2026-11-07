@@ -82,9 +82,9 @@ namespace Library.UI
                     cboDocGia.SelectedIndex = 0;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show("Lỗi tải danh mục độc giả: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể tải danh sách độc giả vi phạm. Vui lòng bấm 'Làm mới'!", "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -318,9 +318,9 @@ namespace Library.UI
                 dgvBienBanViPham.AutoGenerateColumns = false;
                 dgvBienBanViPham.DataSource = dt;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show("Lỗi nạp danh sách biên bản: " + ex.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể cập nhật danh sách biên bản vi phạm từ hệ thống!", "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -402,7 +402,7 @@ namespace Library.UI
 
             int thuThuId = KiemTraVaLayMaThuThu();
             if (thuThuId == 0) return;
-            int chiNhanhId = 1;
+            int chiNhanhId = new CaTrucBLL().LayChiNhanhTrucHomNay(thuThuId);
 
             int phieuMuonMaSo = 0;
             int banSaoMaSo = 0;

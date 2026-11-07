@@ -98,9 +98,9 @@ namespace Library.UI
                 dgvCaTruc.DataSource = null;
                 dgvCaTruc.DataSource = list;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Lỗi tải danh sách ca trực: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Không thể tải danh sách ca làm việc trong khoảng thời gian này!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -214,6 +214,12 @@ namespace Library.UI
             var (isSuccess, message) = _caTrucBLL.XoaCaTruc(selected.Ma_So);
             if (isSuccess)
             {
+                SystemLogger.Log(
+                    LogLevel.WARNING,
+                    "Hủy phân ca trực",
+                    $"Quản trị viên đã hủy ca trực #{selected.Ma_So} ({selected.Ten_Ca} ngày {selected.Ngay_Truc:dd/MM/yyyy}) của thủ thư '{selected.Ho_Ten}' tại {selected.Ten_Chi_Nhanh}.",
+                    SessionContext.CurrentUser?.Ma_So
+                );
                 MessageBox.Show(message, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSachCaTruc();
             }

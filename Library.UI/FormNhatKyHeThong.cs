@@ -57,9 +57,9 @@ namespace Library.UI
                 dgvNhatKy.DataSource = null;
                 dgvNhatKy.DataSource = list;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Lỗi nạp nhật ký: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Không thể tải dữ liệu nhật ký hoạt động của hệ thống!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -88,9 +88,9 @@ namespace Library.UI
                     Verb = "open"
                 });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Không thể mở thư mục file log: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Thư mục chứa tệp nhật ký chưa được khởi tạo hoặc không có quyền truy cập!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

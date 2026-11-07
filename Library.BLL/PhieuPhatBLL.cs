@@ -16,7 +16,8 @@ namespace Library.BLL
             }
             catch (Exception ex)
             {
-                return (false, "Lỗi hệ thống khi lập biên bản: " + ex.Message);
+                SystemLogger.Log(LogLevel.ERROR, "Lỗi lập biên bản", ex.Message);
+                return (false, "Không thể lập biên bản vi phạm do lỗi kết nối dữ liệu. Vui lòng thử lại sau!");
             }
         }
 
@@ -29,7 +30,8 @@ namespace Library.BLL
             }
             catch (Exception ex)
             {
-                return (false, "Lỗi hệ thống khi thu tiền: " + ex.Message);
+                SystemLogger.Log(LogLevel.ERROR, "Lỗi thu tiền phạt", ex.Message);
+                return (false, "Giao dịch thu tiền phạt chưa thành công do hệ thống bận. Vui lòng kiểm tra lại ca trực!");
             }
         }
     }

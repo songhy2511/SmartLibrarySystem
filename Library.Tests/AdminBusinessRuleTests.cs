@@ -169,5 +169,94 @@ namespace Library.Tests
         }
 
         #endregion
+
+        #region 5. TEST RÀNG BUỘC ĐỔI MẬT KHẨU & NHÂN SỰ (NGƯỜI DÙNG BLL)
+
+        [TestMethod]
+        [TestCategory("UserManagement")]
+        public void ChuyenTrangThaiTaiKhoan_AdminTuKhoaChinhMinh_ReturnsFailure()
+        {
+            var bll = new NguoiDungBLL();
+            int currentAdminId = 1;
+
+            var (isSuccess, message) = bll.ChuyenTrangThaiTaiKhoan(currentAdminId, currentAdminId);
+
+            Assert.IsFalse(isSuccess);
+            StringAssert.Contains(message, "tự khóa tài khoản Quản trị viên");
+        }
+
+        [TestMethod]
+        [DataRow("MatKhauCu@123", "MatKhauCu@123", "MatKhauCu@123", "trùng với mật khẩu hiện tại")]
+        [DataRow("MatKhauCu@123", "MatKhauMoi@123", "KhacMatKhauMoi@123", "không trùng khớp")]
+        [DataRow("", "MatKhauMoi@123", "MatKhauMoi@123", "nhập mật khẩu hiện tại")]
+        [DataRow("MatKhauCu@123", "", "", "nhập mật khẩu mới")]
+        [TestCategory("UserManagement")]
+        public void DoiMatKhau_DuLieuNhapKhongHopLe_ReturnsFailure(string oldP, string newP, string confirmP, string subError)
+        {
+            var bll = new NguoiDungBLL();
+            var (isSuccess, message) = bll.DoiMatKhau(1, oldP, newP, confirmP);
+
+            Assert.IsFalse(isSuccess);
+            StringAssert.Contains(message, subError);
+        }
+
+        [TestMethod]
+        [DataRow("", "Nguyễn Văn A", "Quầy 1", "email@smartlib.vn", "Tên đăng nhập không được để trống")]
+        [DataRow("admin user", "Nguyễn Văn A", "Quầy 1", "email@smartlib.vn", "chứa khoảng trắng")]
+        [DataRow("thuthumoi", "", "Quầy 1", "email@smartlib.vn", "Họ và tên thủ thư không được để trống")]
+        [DataRow("thuthumoi", "Nguyễn Văn A", "", "email@smartlib.vn", "chọn quầy trực")]
+        [DataRow("thuthumoi", "Nguyễn Văn A", "Quầy 1", "emailsaikhongcoacong", "định dạng")]
+        [TestCategory("UserManagement")]
+        public void ThemThuThu_ThongTinKhongHopLe_ReturnsFailure(string username, string name, string desk, string email, string subError)
+        {
+            var bll = new NguoiDungBLL();
+            var (isSuccess, message, _, _) = bll.ThemThuThu(username, name, "0901234567", email, desk);
+
+            Assert.IsFalse(isSuccess);
+            StringAssert.Contains(message, subError);
+        }
+
+        #endregion
+
+        #region 6. TEST RÀNG BUỘC ĐIỀU PHỐI SÁCH & TRA CỨU NHẬT KÝ
+
+        [TestMethod]
+        [TestCategory("BookManagement")]
+        public void DieuPhoiSach_ChiNhanhDichTrungChiNhanhNguon_ReturnsFailure()
+        {
+            var sachBLL = new SachBLL();
+            int chiNhanhId = 1;
+
+            var (isSuccess, message) = sachBLL.DieuPhoiSach(10, "BC-001", "Sách mẫu", chiNhanhId, chiNhanhId, "Ghi chú", 1);
+
+            Assert.IsFalse(isSuccess);
+            StringAssert.Contains(message, "khác chi nhánh hiện tại");
+        }
+
+        [TestMethod]
+        [TestCategory("BookManagement")]
+        public void DeXuatThanhLyCuonSach_SachHetKhaDung_ReturnsFailure()
+        {
+            var sachBLL = new SachBLL();
+
+            bool isSuccess = sachBLL.DeXuatThanhLyCuonSach("B0001", "Sách mẫu", 0, 1, out string err);
+
+            Assert.IsFalse(isSuccess);
+            StringAssert.Contains(err, "không còn cuốn nào khả dụng");
+        }
+
+        [TestMethod]
+        [TestCategory("SystemAudit")]
+        public void TraCuuNhatKy_TuNgayLonHonDenNgay_ThrowsArgumentException()
+        {
+            var auditBLL = new NhatKyHeThongBLL();
+            DateTime tuNgay = DateTime.Today;
+            DateTime denNgay = DateTime.Today.AddDays(-3);
+
+            Assert.ThrowsExactly<ArgumentException>(() =>
+                auditBLL.TraCuu(tuNgay, denNgay, null, null, null));
+        }
+
+        #endregion
     }
 }

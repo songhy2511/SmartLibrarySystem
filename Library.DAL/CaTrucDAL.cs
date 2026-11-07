@@ -225,11 +225,29 @@ namespace Library.DAL
         WHERE Ma_So = @CaTrucId";
 
             var parameters = new[] {
-        new Microsoft.Data.SqlClient.SqlParameter("@CaTrucId", caTrucId),
-        new Microsoft.Data.SqlClient.SqlParameter("@TienKetCa", tienKetCaThucTe)
-    };
+                new Microsoft.Data.SqlClient.SqlParameter("@CaTrucId", caTrucId),
+                new Microsoft.Data.SqlClient.SqlParameter("@TienKetCa", tienKetCaThucTe)
+            };
 
             return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
+        }
+        /// <summary>
+        /// Lấy mã số chi nhánh mà thủ thư đang trực trong ngày hôm nay
+        /// </summary>
+        public int LayChiNhanhTrucHomNay(int thuThuMaSo)
+        {
+            string query = @"
+        SELECT TOP 1 Chi_Nhanh_Ma_So 
+        FROM dbo.Ca_Truc 
+        WHERE Thu_Thu_Ma_So = @ThuThuMaSo 
+          AND CAST(Ngay_Truc AS DATE) = CAST(GETDATE() AS DATE)
+          AND Trang_Thai <> N'Đã kết ca'
+        ORDER BY Ma_So DESC";
+
+            var parameters = new[] { new Microsoft.Data.SqlClient.SqlParameter("@ThuThuMaSo", thuThuMaSo) };
+            object? result = DatabaseHelper.ExecuteScalar(query, parameters);
+
+            return (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : 1;
         }
     }
 }

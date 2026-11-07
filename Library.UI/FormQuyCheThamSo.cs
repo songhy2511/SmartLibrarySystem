@@ -41,9 +41,9 @@ namespace Library.UI
                 dgvThamSo.DataSource = null;
                 dgvThamSo.DataSource = list;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Lỗi tải tham số hệ thống: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể tải thông tin quy chế hệ thống. Vui lòng thử lại!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -114,7 +114,7 @@ namespace Library.UI
                     SessionContext.CurrentUser?.Ma_So
                 );
 
-                MessageBox.Show($"Lỗi lưu dữ liệu: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lưu quy chế thất bại. Vui lòng kiểm tra lại các giá trị nhập vào!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
