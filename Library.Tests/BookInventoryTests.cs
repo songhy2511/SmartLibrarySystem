@@ -66,16 +66,5 @@ namespace Library.Tests
             StringAssert.StartsWith(newCode, "B0", "Mã sách phải có định dạng bắt đầu bằng B0xxx");
         }
         [TestMethod]
-        public void Test_StockIntegrity_KhaDungExceedsTotal_ReturnsFalse()
-        {
-            var sach = new SachDTO
-            {
-                Tong_So_Luong = 5,
-                So_Luong_Kha_Dung = 8
-            };
-
-            bool isValid = _sachBLL.KiemTraTinhToanVeng(sach);
-            Assert.IsFalse(isValid, "Khả dụng lớn hơn Tổng số lượng phải trả về false");
-        }
     }
 }

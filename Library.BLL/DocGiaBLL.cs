@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Library.DAL;
+using Library.DTO;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Data;
-using Library.DAL;
-using Library.DTO;
 
 namespace Library.BLL
 {
@@ -80,5 +81,60 @@ namespace Library.BLL
         }
 
         public DataTable TimKiemDocGia(string keyword) => _dal.Search(keyword);
+        public class DocGiaBLL
+        {
+            private readonly DocGiaDAL _dal = new DocGiaDAL();
+
+            public string TaoMaDocGiaMoi() => _dal.GetNextMaDocGia();
+
+            public bool ThemDocGia(DocGiaDTO dg, int? nguoiDungMaSo, out string errorMessage)
+            {
+                errorMessage = string.Empty;
+
+                if (string.IsNullOrWhiteSpace(dg.Ho_Ten))
+                {
+                    errorMessage = "Họ tên độc giả không được để trống!";
+                    return false;
+                }
+
+                if (!string.IsNullOrWhiteSpace(dg.So_Dien_Thoai) && !Regex.IsMatch(dg.So_Dien_Thoai, @"^[0-9]{10,11}$"))
+                {
+                    errorMessage = "Số điện thoại không hợp lệ (phải từ 10-11 chữ số)!";
+                    return false;
+                }
+
+                dg.Ngay_Het_Han_The = DateTime.Today.AddYears(4);
+                dg.Ma_Doc_Gia = _dal.GetNextMaDocGia();
+                dg.Trang_Thai_The = "Hoạt động";
+
+                bool result = _dal.Insert(dg);
+                if (result)
+                {
+                    SystemLogger.Log(LogLevel.INFO, "Quản lý Bạn Đọc",
+                        $"Thêm mới độc giả {dg.Ma_Doc_Gia} - {dg.Ho_Ten}", nguoiDungMaSo);
+                }
+                return result;
+            }
+
+            public bool XoaDocGia(string maDocGia, int? nguoiDungMaSo, out string errorMessage)
+            {
+                errorMessage = string.Empty;
+                if (string.IsNullOrWhiteSpace(maDocGia))
+                {
+                    errorMessage = "Mã độc giả không hợp lệ!";
+                    return false;
+                }
+
+                bool result = _dal.Delete(maDocGia);
+                if (result)
+                {
+                    SystemLogger.Log(LogLevel.WARNING, "Quản lý Bạn Đọc",
+                        $"Đã xóa mềm tài khoản độc giả {maDocGia}", nguoiDungMaSo);
+                }
+                return result;
+            }
+
+            public DataTable TimKiemDocGia(string keyword) => _dal.Search(keyword);
+        }
     }
 }
