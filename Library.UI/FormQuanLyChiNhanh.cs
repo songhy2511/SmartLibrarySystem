@@ -107,5 +107,9 @@ namespace Library.UI
                 }
             }
         }
+        private void pnlHeader_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

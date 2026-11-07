@@ -65,7 +65,14 @@ namespace Library.DAL
             };
             return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
         }
-
+        public DataTable Search2(string keyword)
+        {
+            string query = @"SELECT Ma_Doc_Gia, Ho_Ten, Lop, So_Dien_Thoai, Email, Ngay_Tao, Ngay_Het_Han_The, So_Lan_Vi_Pham, Trang_Thai_The 
+                    FROM Doc_Gia 
+                    WHERE Dang_Hoat_Dong = 1 AND (Ma_Doc_Gia LIKE @Kw OR Ho_Ten LIKE @Kw OR So_Dien_Thoai LIKE @Kw)";
+            SqlParameter[] pars = { new SqlParameter("@Kw", $"%{keyword}%") };
+            return DatabaseHelper.ExecuteQuery(query, pars);
+        }
         public DataTable Search(string keyword)
         {
             string query = @"
