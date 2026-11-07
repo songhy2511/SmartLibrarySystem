@@ -142,5 +142,22 @@ namespace Library.UI
         {
 
         }
+        // Trong file Library.UI/FormDangNhap.cs (đoạn xử lý sự kiện btnDangNhap_Click):
+        if (userDTO != null)
+{
+    SessionContext.CurrentUser = userDTO;
+    SessionContext.LoginTime = DateTime.Now; // Gán thời gian đăng nhập thực tế
+
+    this.Hide();
+    if (userDTO.Vai_Tro == "Admin")
+    {
+        new FormAdminDashboard().ShowDialog();
+    }
+    else
+    {
+        new FormThuThuDashboard().ShowDialog();
+}
+this.Close();
+}
     }
 }

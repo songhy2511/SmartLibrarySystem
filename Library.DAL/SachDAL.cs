@@ -125,22 +125,6 @@ namespace Library.DAL
             SqlParameter[] pars = { new SqlParameter("@MaSach", maSach) };
             return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
         }
-        public DataTable Search(string keyword)
-        {
-            string query = @"SELECT Ma_Sach, Tieu_De, Tac_Gia, The_Loai, Nam_Xuat_Ban, Vi_Tri_Ke, Gia_Bia, Tong_So_Luong, So_Luong_Kha_Dung, So_Lan_Muon 
-                    FROM Sach 
-                    WHERE Ma_Sach LIKE @Kw OR Tieu_De LIKE @Kw OR Tac_Gia LIKE @Kw OR The_Loai LIKE @Kw";
-            SqlParameter[] pars = { new SqlParameter("@Kw", $"%{keyword}%") };
-            return DatabaseHelper.ExecuteQuery(query, pars);
-        }
-
-        public bool Delete(string maSach)
-        {
-            string query = "DELETE FROM Sach WHERE Ma_Sach = @Ma";
-            SqlParameter[] pars = { new SqlParameter("@Ma", maSach) };
-            return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
-        }
-
         /// <summary>
         /// Lấy danh sách các bản sao sách đang có sẵn trên kệ tại một chi nhánh cụ thể
         /// </summary>
