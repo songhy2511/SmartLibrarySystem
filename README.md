@@ -1,221 +1,209 @@
-# HƯỚNG DẪN DỰ ÁN & QUY CHUẨN PHÁT TRIỂN PHẦN MỀM
-# SMART LIBRARY SYSTEM (LibraryDB)
+# 📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN THÔNG MINH (SMART LIBRARY MANAGEMENT SYSTEM)
 
-> **Tài liệu nội bộ nhóm phát triển Smart Library System.**  
-> Tất cả thành viên bắt buộc phải đọc kỹ tài liệu này trước khi tạo nhánh hoặc viết code để đảm bảo tính nhất quán về kiến trúc, bảo mật, cơ sở dữ liệu và quy trình Git.
-
----
-
-## 1. TỔNG QUAN HỆ THỐNG & CÔNG NGHỆ
-
-### 1.1. Công nghệ sử dụng
-* **Nền tảng & Ngôn ngữ**: C# WinForms (.NET 8.0 trở lên).
-* **Cơ sở dữ liệu**: Microsoft SQL Server 2019/2022.
-* **Tầng truy cập dữ liệu (DAL)**: ADO.NET thuần qua `Microsoft.Data.SqlClient`. Cam kết sử dụng **100% `SqlParameter`** (tuyệt đối không cộng chuỗi SQL để chống SQL Injection).
-* **Kiểm thử tự động**: MSTest Framework v3.
-* **Giao diện chuẩn hóa**: Bảng màu hiện đại **Deep Slate & Navy** định nghĩa tập trung trong `UITheme.cs`.
-
-### 1.2. Mô hình phân tầng kiến trúc (3-Tier Layered Architecture)
-Hệ thống được tổ chức thành các Project riêng biệt theo nguyên tắc đơn trách nhiệm:
-* **`Library.DTO`**: Chứa các lớp thực thể (Data Transfer Object / POCO), không chứa logic hay truy vấn SQL.
-* **`Library.DAL`**: Thao tác trực tiếp với SQL Server thông qua `DatabaseHelper.cs`. Trả về `DataTable`, `int`, `object` hoặc ánh xạ thành danh sách DTO. Không nhúng logic nghiệp vụ hay gọi giao diện WinForms tại đây.
-* **`Library.BLL`**: Xử lý toàn bộ logic nghiệp vụ, thẩm định dữ liệu đầu vào (Validation), kiểm tra điều kiện biên và kích hoạt cơ chế ghi vết kiểm toán (`SystemLogger`).
-* **`Library.UI`**: Tầng giao diện người dùng WinForms. Nhận/gửi dữ liệu độc quyền qua tầng BLL. Tuyệt đối không viết câu lệnh SQL trong Form.
-* **`Library.Tests`**: Project chứa bộ Unit Test độc lập, kiểm tra logic nghiệp vụ thuần túy không phụ thuộc vào UI hay trạng thái database.
+[![.NET Core](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20Forms-brightgreen.svg)]()
+[![Database](https://img.shields.io/badge/Database-SQL%20Server%202019%2B-red.svg)]()
+[![Tests](https://img.shields.io/badge/Unit%20Tests-54%2F54%20Passed-success.svg)]()
+[![Security](https://img.shields.io/badge/Security-PBKDF2--SHA256%20(100k)-orange.svg)]()
 
 ---
 
-## 2. HƯỚNG DẪN CÀI ĐẶT MÔI TRƯỜNG & CHẠY DỰ ÁN
+## 📌 1. TỔNG QUAN HỆ THỐNG
 
-### 2.1. Cài đặt Cơ sở dữ liệu (`LibraryDB.sql`)
-1. Mở **SQL Server Management Studio (SSMS)** hoặc **Azure Data Studio**.
-2. Mở file kịch bản CSDL chính của dự án: **`LibraryDB.sql`** (nằm tại thư mục gốc của Solution).
-3. Nhấn **Execute (F5)** để khởi tạo Database `LibraryDB` bao gồm toàn bộ bảng, khóa chính, khóa ngoại, ràng buộc và dữ liệu mẫu chuẩn (Seed Data).
+**Smart Library Management System** là giải pháp phần mềm quản trị thư viện phân tán đa chi nhánh, giải quyết các bài toán lưu thông tài liệu, quản lý tài sản, điều phối sách giữa các kho và đối soát dòng tiền giao dịch theo ca làm việc của nhân sự. 
 
-### 2.2. Cấu hình Chuỗi kết nối (Connection String)
-Chuỗi kết nối được quản lý tập trung trong file `Library.DAL/DatabaseHelper.cs`:
+Hệ thống được thiết kế theo mô hình kiến trúc **3 lớp (3-Tier Architecture)**, đáp ứng các tiêu chuẩn bảo mật mật khẩu cấp doanh nghiệp (OWASP/NIST), quản lý kiểm toán độc lập (Dual Audit Logging) và khả năng xuất báo cáo chuyên nghiệp.
+
+---
+
+## 🏗️ 2. KIẾN TRÚC VÀ CÔNG NGHỆ SỬ DỤNG
+
+### 2.1. Ngăn xếp công nghệ (Tech Stack)
+* **Nền tảng phát triển:** C# 12, .NET 8.0 (Windows Desktop Runtime).
+* **Giao diện người dùng (UI):** Windows Forms với cơ chế **Double Buffering** độc quyền triệt tiêu hiện tượng giật/nháy giao diện trên `DataGridView`.
+* **Cơ sở dữ liệu:** Microsoft SQL Server (Collation: `Vietnamese_CI_AS`).
+* **Truy xuất dữ liệu:** ADO.NET (`Microsoft.Data.SqlClient`) với Transaction, Parameterized Queries và Async/Await.
+* **Xử lý tài liệu & Báo cáo:** `ClosedXML` (Xuất file Excel), `QuestPDF` (Biên dịch báo cáo vector PDF), `PrintDocument` (Hệ thống xem trước bản in Print Preview).
+* **Kiểm thử tự động:** `MSTest` với bộ kiểm thử tự động 54 test cases bao phủ toàn diện các ràng buộc nghiệp vụ.
+
+### 2.2. Cấu trúc Solution (3-Tier Architecture)
+
+```text
+SmartLibrarySystem/
+├── Database/
+│   └── LibraryDB.sql                 # Script CSDL hoàn chỉnh: Schema, Stored Procedures & Seed Data
+├── Library.DTO/                       # Data Transfer Objects (Định nghĩa thực thể dữ liệu)
+├── Library.DAL/                       # Data Access Layer (Truy vấn CSDL & Kết nối)
+│   ├── DatabaseHelper.cs              # Bộ điều phối kết nối & thực thi ADO.NET
+│   └── ...                            # Các DAL chuyên trách từng bảng
+├── Library.BLL/                       # Business Logic Layer (Xử lý nghiệp vụ & Bảo mật)
+│   ├── Security/PasswordHasher.cs     # Thuật toán mã hóa PBKDF2 100.000 iterations
+│   ├── SystemLogger.cs                # Cơ chế kiểm toán ghi log kép (Database & File text)
+│   └── ...                            # Các BLL xử lý nghiệp vụ
+├── Library.UI/                        # Presentation Layer (Giao diện WinForms)
+│   ├── FormAdminDashboard.cs          # Không gian làm việc của Quản trị viên
+│   ├── FormThuThuDashboard.cs         # Bàn làm việc tác nghiệp của Thủ thư
+│   └── ...                            # Màn hình chức năng chi tiết
+└── Library.Tests/                     # Bộ kiểm thử đơn vị Unit Tests (MSTest)
+```
+
+---
+
+## ⚙️ 3. TÍNH NĂNG CHI TIẾT CỦA HỆ THỐNG
+
+### 3.1. Phân hệ Quản trị viên (Admin Dashboard)
+1. **Tổng quan hệ thống & Đối soát KPI:** 
+   * Giám sát thời gian thực số lượng bạn đọc hoạt động, tổng đầu sách, số sách đang lưu hành và công nợ phạt chưa thu.
+   * Lưới kiểm soát lưu thông mượn - trả tự động cập nhật theo tuần.
+2. **Quản lý đa chi nhánh:** Cấp phát mã tự động (`CN01`, `CN02`...), quản lý địa điểm và kích hoạt/ngừng hoạt động chi nhánh.
+3. **Quản lý nhân sự & Phân quyền:**
+   * Cấp hồ sơ thủ thư mới, tự sinh mật khẩu ngẫu nhiên đạt chuẩn an toàn thông tin (tối thiểu 1 chữ hoa, 1 chữ thường, 1 số, 1 ký tự đặc biệt) và tự động sao chép vào Clipboard.
+   * Khóa/mở khóa tài khoản thủ thư (có cơ chế chống Admin tự khóa tài khoản chính mình).
+   * Cấp lại mật khẩu tạm thời.
+4. **Phân chia ca làm việc đa chi nhánh:**
+   * Phân bổ ca sáng/chiều, định mức giờ trực và số tiền bàn giao đầu ca.
+   * Ràng buộc nghiệp vụ chống trùng ca: Một ca tại một chi nhánh chỉ phân công 1 người; một thủ thư không thể trực 2 chi nhánh cùng một khung giờ.
+5. **Quy chế & Cấu hình tham số động:**
+   * Tùy chỉnh quy định mượn: Số sách tối đa, số ngày mượn, đơn giá phạt trễ hạn mỗi ngày, thời hạn thẻ.
+   * Thiết lập tỷ lệ đền bù hư hỏng/mất sách (% theo giá bìa tài liệu).
+6. **Nhật ký kiểm toán hệ thống (Audit Logs):**
+   * Theo dõi vết hệ thống với 4 cấp độ: `INFO`, `WARNING`, `ERROR`, `SECURITY`.
+   * Bộ lọc đa chiều theo mốc thời gian, mức độ, loại hành động và từ khóa.
+   * Nút mở trực tiếp thư mục chứa file log văn bản (`.log`).
+7. **Báo cáo tài chính & Thống kê nâng cao:**
+   * Báo cáo đối soát doanh thu tiền phạt theo từng ca trực và tính toán chênh lệch quỹ:
+     $$\text{Chênh lệch quỹ} = \text{Tiền kết ca thực tế} - (\text{Tiền đầu ca} + \text{Tiền phạt thu trong ca})$$
+   * Thống kê Top sách mượn nhiều nhất và tỷ lệ quay vòng bản sao theo từng chi nhánh.
+   * Xuất dữ liệu đa định dạng: **CSV**, **Excel (.xlsx)**, **PDF (.pdf)** và **Xem trước bản in (Print Preview)**.
+
+### 3.2. Phân hệ Thủ thư (Librarian Dashboard)
+1. **Bàn tác nghiệp lưu thông (Mượn - Trả sách):**
+   * Cho mượn sách bằng AutoComplete thông minh (hỗ trợ nhập mã sách, mã vạch hoặc tên sách).
+   * Giám sát hạn trả với trực quan màu sắc: Còn hạn (Xanh), Hạn chót hôm nay (Vàng), Quá hạn (Đỏ kèm số ngày trễ).
+   * Gia hạn sách trực tiếp (+7 ngày), kiểm soát chặt chẽ tối đa 1 lần gia hạn và chặn gia hạn nếu đã quá hạn.
+   * Trả sách một chạm, tự động tính tiền phạt trễ hạn dựa trên số ngày trễ và quy chế hiện hành.
+   * Cập nhật nhanh số điện thoại liên lạc của bạn đọc trực tiếp tại quầy.
+2. **Quản lý kho sách chi nhánh & Điều phối:**
+   * Tra cứu tồn kho chi nhánh theo từng trạng thái: Tổng bản sao, Sẵn sàng, Đang mượn, Hư hỏng/Bảo trì.
+   * Quản lý biểu ghi sách, cập nhật vị trí kệ sách và giá bìa đền bù.
+   * Đề xuất thanh lý bản sao rách nát / hư hỏng nặng (tự động giảm số lượng khả dụng).
+   * Điều phối bản sao sách sẵn sàng luân chuyển sang chi nhánh khác.
+3. **Quản lý hồ sơ Bạn đọc (Độc giả):**
+   * Cấp thẻ bạn đọc mới, tra cứu nhanh thông tin liên lạc.
+   * Khóa/mở khóa thẻ độc giả, gia hạn hiệu lực thẻ thêm năm sử dụng.
+   * Cảnh báo thẻ độc giả có $\ge 3$ lần vi phạm bằng nền màu cảnh báo.
+4. **Lập biên bản vi phạm & Thu nộp phạt:**
+   * Lập biên bản xử lý vi phạm linh hoạt: Quá hạn kéo dài, Làm rách/hỏng nhẹ (30%), Làm hỏng nặng (60%), Làm mất sách (100% giá bìa), Vi phạm khác.
+   * Tự động cập nhật trạng thái tài sản sang `Hư hỏng` hoặc `Mất/Thanh lý` và trừ kho tương ứng.
+   * Thu tiền phạt vi phạm và tự động kết chuyển dòng tiền mặt vào quỹ ca trực hiện tại.
+5. **Lịch trực cá nhân & Bàn giao chốt ca:**
+   * Xem lịch phân công theo tuần hoặc theo tháng.
+   * Chốt ca trực cuối ngày: Bắt buộc kiểm đếm tiền mặt thực nộp, đối chiếu với tiền lý thuyết và ghi nhận chênh lệch trước khi đăng xuất.
+
+---
+
+## 🔒 4. KIẾN TRÚC AN TOÀN & BẢO MẬT
+
+* **Mã hóa mật khẩu:** Mật khẩu được băm chậm thông qua thuật toán **PBKDF2-HMAC-SHA256** với **100.000 vòng lặp** (Iterations) kết hợp cùng chuỗi muối ngẫu nhiên (Salt 128-bit) sinh bằng CSPRNG (`RandomNumberGenerator`).
+* **Chống Timing Attack:** Sử dụng phương thức `CryptographicOperations.FixedTimeEquals` so khớp byte cố định nhằm ngăn ngừa rò rỉ độ dài hoặc thời gian thực thi mã băm.
+* **Kiểm soát phiên làm việc (SessionContext):** Mọi tác vụ nghiệp vụ đều ràng buộc chặt chẽ với ID người dùng thực tế đang đăng nhập, loại bỏ hoàn toàn fallback cứng.
+* **Cơ chế ghi nhật ký kiểm toán kép (Dual Logging):**
+  1. **CSDL SQL Server:** Ghi vào bảng `Nhat_Ky_He_Thong` phục vụ việc truy vấn, lọc và hiển thị trực tiếp cho Admin.
+  2. **File text hệ thống:** Tự động ghi vào thư mục `/Logs/system_audit_yyyyMMdd.log` với khóa luồng `thread-safe lock`, giúp lập trình viên tra cứu độc lập ngay cả khi hệ thống mất kết nối CSDL.
+
+---
+
+## 🚀 5. HƯỚNG DẪN CÀI ĐẶT & CHẠY CHƯƠNG TRÌNH
+
+### 5.1. Yêu cầu môi trường (Prerequisites)
+* Hệ điều hành: Windows 10 / Windows 11 (64-bit).
+* [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (phiên bản `8.0.x` trở lên).
+* **Microsoft SQL Server 2019/2022** hoặc **SQL Server Express**.
+* SQL Server Management Studio (SSMS) hoặc Azure Data Studio.
+* Visual Studio 2022 (khuyến nghị bản 17.8+) với workload *.NET Desktop Development*.
+
+---
+
+### 5.2. Khởi tạo Cơ sở dữ liệu (Database Setup)
+
+1. Mở phần mềm **SQL Server Management Studio (SSMS)** và kết nối vào máy chủ SQL của bạn.
+2. Mở file script: `Database/LibraryDB.sql`.
+3. Nhấn **Execute (F5)** để khởi tạo:
+   * Tạo cơ sở dữ liệu `LibraryDB` với bảng mã tiếng Việt `Vietnamese_CI_AS`.
+   * Khởi tạo 14 bảng dữ liệu, ràng buộc khóa ngoại `FOREIGN KEY` và ràng buộc toàn vẹn `CHECK`.
+   * Biên dịch 2 Stored Procedures: `sp_LapBienBanViPham` và `sp_ThuTienPhat`.
+   * Nạp toàn bộ dữ liệu mẫu (Seed Data) chuẩn xác về ca trực, tài khoản và danh mục sách.
+
+---
+
+### 5.3. Cấu hình Chuỗi kết nối (Connection String)
+
+Mở tập tin **`Library.DAL/DatabaseHelper.cs`**, kiểm tra và cập nhật thuộc tính `ConnectionString` cho phù hợp với máy tính của bạn:
+
 ```csharp
+// Sử dụng Windows Authentication (mặc định)
 public static string ConnectionString { get; set; } =
     "Data Source=.;Initial Catalog=LibraryDB;Integrated Security=True;TrustServerCertificate=True";
-```
-* Nếu máy bạn dùng Named Instance, sửa `Data Source=.` thành `Data Source=.\\SQLEXPRESS` hoặc tên máy tính của bạn.
 
-### 2.3. Danh sách Tài khoản Kiểm thử Mặc định (Seed Data)
-| Tên đăng nhập | Mật khẩu thô | Vai trò | Chuỗi muối (Salt Seed) | Quầy / Chi nhánh |
-| :--- | :--- | :--- | :--- | :--- |
-| **`admin`** | `Admin@123` | Quản trị viên (Admin) | `Salt_Admin_2026_Secure_Key==` | Toàn hệ thống |
-| **`thuthu1`** | `Librarian@123` | Thủ thư (Librarian) | `Salt_TT001_Key_Lib2026==` | TT001 - Quầy 1 (CN01) |
-| **`thuthu2`** | `Librarian@123` | Thủ thư (Librarian) | `Salt_TT002_Key_Lib2026==` | TT002 - Quầy 2 (CN02) |
-
----
-
-## 3. BẢNG PHÂN CÔNG NHIỆM VỤ CHI TIẾT & TIẾN ĐỘ THỰC HIỆN
-
-### 3.1. THÀNH VIÊN 1: PHẠM SONG HỶ (TRƯỞNG NHÓM - ARCHITECTURE & SECURITY)
-* **Nhánh Git phụ trách**: `feature/auth-and-admin-management` *(Đã merge vào `main`)*
-* **Tình trạng tiến độ**: **HOÀN THÀNH 100% (ĐÃ ĐƯỢC BẢO VỆ TRÊN MAIN)**
-* **Chi tiết các hạng mục đã hoàn thành (CÁC THÀNH VIÊN KHÔNG LÀM LẠI)**:
-  1. **Xác thực & Bảo mật Core**:
-     * Xây dựng `PasswordHasher.cs`: Băm SHA-256 kết hợp chuỗi muối 128-bit (Salt), chống tấn công Timing Attack bằng `CryptographicOperations.FixedTimeEquals`, hàm `ValidatePasswordStrength` kiểm tra chuẩn bảo mật.
-     * Xây dựng `SessionContext.cs`: Lưu trạng thái phiên đăng nhập toàn cục (`CurrentUser`, `CurrentLibrarian`, `LoginTime`, cờ phân quyền `IsAdmin`, `IsLibrarian`).
-     * Màn hình `FormDangNhap.cs`: Xác thực đăng nhập 2 vai trò, ghi log cảnh báo `WARNING` nếu thất bại, log `SECURITY` nếu thành công.
-     * Màn hình `FormDoiMatKhau.cs`: Đổi mật khẩu cho cả Admin và Thủ thư, băm lại salt/hash mới, ghi log `SECURITY`.
-     * Quản trị tài khoản nhân sự: Khóa/Mở khóa tài khoản (`Dang_Hoat_Dong = 0/1`), Reset mật khẩu về mặc định `Librarian@123`.
-  2. **Quản trị Nhân sự & Ca trực (Chỉ Admin)**:
-     * Quản lý hồ sơ thủ thư (`Thu_Thu`): Sinh tự động mã `TT0xxx` tăng dần, thêm thủ thư đồng thời tạo tài khoản qua `SqlTransaction` an toàn.
-     * Màn hình `FormQuanLyNhanSu.cs`, `FormThemThuThu.cs`, `FormSuaThuThu.cs`.
-     * Phân ca làm việc (`FormPhanCaTruc.cs` & `CaTrucBLL.cs`): Chặn xếp lịch ngày quá khứ, kiểm tra va chạm trùng ca tại chi nhánh, chặn thủ thư nhận 2 ca trùng giờ khác chi nhánh.
-  3. **Quản trị Chi nhánh & Quy chế**:
-     * Quản lý chi nhánh (`FormQuanLyChiNhanh.cs` & `ChiNhanhBLL.cs`): Tự sinh mã `CNx`, thêm chi nhánh mới.
-     * Quy chế hệ thống (`FormQuyCheThamSo.cs` & `CauHinhHeThongBLL.cs`): Cấu hình 4 tham số động (`So_Sach_Muon_Toi_Da`, `So_Ngay_Muon_Toi_Da`, `Tien_Phat_Moi_Ngay`, `Thoi_Han_The_Thang`).
-  4. **Dashboard Quản trị & Hệ thống Ghi vết Kiểm toán**:
-     * `FormAdminDashboard.cs`: Menu Sidebar theo bảng màu `UITheme`, nạp dynamic form con, hiển thị thông tin phiên.
-     * `FormThuThuDashboard.cs`: Bàn làm việc thủ thư, bảo vệ quyền truy cập, ghi log đăng xuất.
-     * `FormTongQuanHeThong.cs`: Dashboard KPI lưu thông tuần, đối soát quỹ ca trực 7 ngày, quản lý kho sách theo chi nhánh.
-     * Cơ chế Audit Kép `SystemLogger.cs`: Ghi đồng thời vào bảng `Nhat_Ky_He_Thong` và file log quay vòng theo ngày trong thư mục `Logs/`. Màn hình tra cứu `FormNhatKyHeThong.cs`.
-  5. **Unit Test & Cơ sở dữ liệu**:
-     * Soạn thảo và chuẩn hóa toàn bộ file kịch bản **`LibraryDB.sql`**.
-     * Xây dựng bộ test **`AdminBusinessRuleTests.cs`** (26/26 tests passed: Verify chuẩn xác hash seed CSDL, Password strength, logic phân ca, ràng buộc tham số quy chế).
-     * Thiết lập Branch Ruleset bảo vệ nhánh `main` trên GitHub.
-
----
-
-### 3.2. THÀNH VIÊN 2: NGUYỄN VĂN A (CIRCULATION & PENALTIES)
-* **Nhánh Git phụ trách**: `feature/circulation-and-penalties`
-* **Tình trạng tiến độ**: **ĐANG PHÁT TRIỂN**
-* **Phân hệ phụ trách**:
-  1. **Bàn Lưu thông Quầy**:
-     * Thiết kế giao diện `FormBanLuuThong.cs` (Gồm 2 Tab: Mượn Sách & Trả Sách).
-     * Tìm kiếm độc giả qua ComboBox lọc tương đối (`AutoCompleteMode.SuggestAppend`).
-     * Tự động kiểm tra điều kiện mượn: Thẻ độc giả còn hạn, không có sách quá hạn chưa trả, tổng số sách mượn chưa vượt quá tham số `So_Sach_Muon_Toi_Da` (lấy từ `CauHinhHeThongBLL`).
-     * Lập phiếu mượn mới: Tự sinh mã `PM0xxx` (hoặc `BR0xxx`), trừ số lượng tồn kho khả dụng ($So\_Luong\_Kha\_Dung - 1$) và chuyển `Ban_Sao_Sach.Trang_Thai = N'Đang cho mượn'` qua `SqlTransaction`.
-     * Tiếp nhận trả sách: So sánh `Ngay_Tra_Thuc_Te` với `Ngay_Hen_Tra`. Nếu quá hạn, tự động tính tiền phạt trễ hạn:
-       $$\text{Tiền phạt} = (\text{Số ngày trễ}) \times \text{Tien\_Phat\_Moi\_Ngay}$$
-     * Gia hạn thời gian mượn: Kiểm tra sách chưa từng gia hạn, chưa bị quá hạn, không có độc giả khác đặt trước.
-  2. **Xử lý Vi phạm & Bồi thường**:
-     * Giao diện `FormLapBienBanViPham.cs`: Lập biên bản sách bị hư hỏng hoặc làm mất (trừ vĩnh viễn $Tong\_So\_Luong$ và cập nhật trạng thái bản sao).
-     * Thu tiền phạt, lưu vào bảng `Phieu_Phat`, cập nhật tiền mặt ca trực của thủ thư.
-* **File code chính**: `PhieuMuonDTO.cs`, `PhatTienDTO.cs`, `PhieuMuonDAL.cs`, `PhieuMuonBLL.cs`, `FormBanLuuThong.cs`, `FormLapBienBanViPham.cs`.
-* **Bài Test phụ trách**: `CirculationTests.cs` (Kiểm thử công thức tính tiền phạt trễ hạn, kiểm thử logic gia hạn mượn và ràng buộc số sách tối đa).
-
----
-
-### 3.3. THÀNH VIÊN 3: NGUYỄN VĂN B (BOOK INVENTORY & READERS)
-* **Nhánh Git phụ trách**: `feature/book-catalog-and-readers`
-* **Tình trạng tiến độ**: **ĐANG PHÁT TRIỂN**
-* **Phân hệ phụ trách**:
-  1. **Quản lý Bạn đọc**:
-     * Thiết kế giao diện `FormQuanLyDocGia.cs`.
-     * Cấp mới thẻ độc giả, tự sinh mã định dạng `DG0xxx` (Ví dụ: `DG0001`, `DG0002`...).
-     * Mặc định thời hạn thẻ là 4 năm tính từ ngày cấp (`DateTime.Today.AddYears(4)`).
-     * Chức năng khóa thẻ tạm thời, mở khóa hoặc gia hạn thời hạn thẻ.
-     * Cảnh báo vi phạm: Độc giả có $So\_Lan\_Vi\_Pham \ge 3$ phải được hiển thị nổi bật bằng màu đỏ để thủ thư nhận biết ngay lập tức.
-  2. **Quản lý Kho Sách & Vị trí Kệ**:
-     * Thiết kế giao diện `FormQuanLySach.cs`.
-     * Thêm mới đầu sách, tự sinh mã `B0xxx` (Ví dụ: `B0101`, `B0102`...).
-     * Phân bổ vị trí lưu trữ chuẩn hóa theo định dạng: Dãy - Kệ - Tầng (Ví dụ: `Kệ A1-01`, `Kệ B2-03`).
-     * Cập nhật số lượng sách nhập kho, sửa thông tin sách, tìm kiếm đa tiêu chí (Mã sách, Tên sách, Tác giả, Thể loại).
-     * Màn hình đối soát kiểm kê kho thực tế (Stocktaking): Kiểm tra tính toàn vẹn:
-       $$Tong\_So\_Luong = So\_Luong\_Kha\_Dung + Dang\_Muon + Bao\_Tri$$
-       Luôn đảm bảo điều kiện biên:
-       $$0 \le So\_Luong\_Kha\_Dung \le Tong\_So\_Luong$$
-     * Đề xuất xóa/thanh lý đầu sách gửi Admin duyệt.
-* **File code chính**: `DocGiaDTO.cs`, `SachDTO.cs`, `DocGiaDAL.cs`, `SachDAL.cs`, `DocGiaBLL.cs`, `SachBLL.cs`, `FormQuanLySach.cs`, `FormQuanLyDocGia.cs`.
-* **Bài Test phụ trách**: `BookInventoryTests.cs` (Kiểm thử hàm tự sinh mã `B0xxx`, kiểm thử ràng buộc $So\_Luong\_Kha\_Dung \le Tong\_So\_Luong$ và tính toàn vẹn số lượng nhập kho).
-
----
-
-### 3.4. THÀNH VIÊN 4: NGUYỄN VĂN C (AUDIT, REPORTS & QA / TESTING)
-* **Nhánh Git phụ trách**: `feature/reports-audit-and-testing`
-* **Tình trạng tiến độ**: **ĐANG PHÁT TRIỂN**
-* **Phân hệ phụ trách**:
-  1. **Báo cáo Thống kê & Mở rộng Kiểm toán**:
-     * Thiết kế giao diện `FormBaoCaoThongKe.cs` (kết hợp với `FormNhatKyHeThong.cs` đã được xây dựng sẵn bởi Trưởng nhóm).
-     * Tận dụng `SystemLogger.cs` và `NhatKyHeThongBLL.cs` có sẵn để bổ sung các bộ lọc nâng cao.
-     * Dashboard báo cáo chuyên sâu: Top 10 Sách Hot được mượn nhiều nhất, Doanh thu tiền phạt theo từng ca trực, Tỷ lệ quay vòng sách giữa các chi nhánh.
-     * Xuất báo cáo ra định dạng file Excel / CSV (`.csv`).
-  2. **Đảm bảo Chất lượng & Minh chứng Báo cáo**:
-     * Quản lý bộ chạy Unit Test tập trung trong `Library.Tests`, đảm bảo toàn bộ test của 4 thành viên đều xanh (Pass).
-     * Phụ trách chụp ảnh minh chứng kiểm thử và debug (lỗi Breakpoint, màn hình xanh của MSTest, đoạn code fix lỗi) phục vụ Chương 6 Báo cáo.
-     * Tổng hợp và hoàn thiện cấu trúc Báo cáo 7 Chương theo đúng đề cương hướng dẫn của Thầy Đặng Thế Hân.
-* **File code chính**: `BaoCaoDAL.cs`, `BaoCaoBLL.cs`, `FormBaoCaoThongKe.cs` (kế thừa `NhatKyHeThongDTO.cs`, `NhatKyHeThongDAL.cs`, `SystemLogger.cs`).
-* **Bài Test phụ trách**: `AuditLogTests.cs` (Kiểm thử định dạng log timestamp, kiểm thử logic bộ lọc báo cáo thống kê và xuất file).
-
----
-
-## 4. QUY CHUẨN CODE & BẢO MẬT BẮT BUỘC
-
-### 4.1. Quy chuẩn Thao tác Cơ sở dữ liệu (DAL)
-* **Chống SQL Injection**: Bắt buộc dùng `SqlParameter`. Tuyệt đối không dùng kỹ thuật ghép chuỗi:
-  ```csharp
-  // ĐÚNG:
-  string query = "SELECT * FROM Sach WHERE Ma_Sach = @MaSach";
-  SqlParameter[] pars = { new SqlParameter("@MaSach", maSach) };
-  DataTable dt = DatabaseHelper.ExecuteQuery(query, pars);
-
-  // SAI (NGHIÊM CẤM):
-  // string query = "SELECT * FROM Sach WHERE Ma_Sach = '" + maSach + "'";
-  ```
-* **Bắt buộc dùng SqlTransaction khi sửa đổi nhiều bảng**:
-  ```csharp
-  using var conn = DatabaseHelper.GetConnection();
-  conn.Open();
-  using var trans = conn.BeginTransaction();
-  try {
-      // Thực thi các lệnh có cmd.Transaction = trans;
-      trans.Commit();
-  } catch {
-      trans.Rollback();
-      throw;
-  }
-  ```
-
-### 4.2. Quy chuẩn Ghi vết Kiểm toán (`SystemLogger.cs`)
-Bất kỳ nghiệp vụ tạo mới, cập nhật, xóa, cho mượn, trả sách hay xử lý vi phạm đều phải ghi log:
-```csharp
-SystemLogger.Log(
-    LogLevel.INFO, // Hoặc WARNING, ERROR, SECURITY
-    "Cho mượn sách",
-    $"Thủ thư đã lập phiếu mượn PM0012 cho độc giả DG0003 (2 cuốn)",
-    SessionContext.CurrentUser?.Ma_So
-);
+// Hoặc nếu SQL Server có đặt tên Instance riêng (ví dụ SQLEXPRESS):
+// "Data Source=.\\SQLEXPRESS;Initial Catalog=LibraryDB;Integrated Security=True;TrustServerCertificate=True";
 ```
 
-### 4.3. Quy chuẩn Giao diện (`UITheme.cs`)
-Sử dụng các hằng số màu sắc từ `Library.UI.UITheme` để đồng bộ giao diện:
-* Sidebar: `UITheme.SidebarBg` (`#0F172A`)
-* Điểm nhấn / Nút chính: `UITheme.Primary` (`#0284C7`)
-* Nền nội dung: `UITheme.ContentBg` (`#F8FAFC`)
-* Nút Hủy / Xóa: `UITheme.Danger` (`#E11D48`)
-
 ---
 
-## 5. QUY TRÌNH LÀM VIỆC VỚI GIT & GITHUB
+### 5.4. Biên dịch và Khởi chạy ứng dụng
 
-### 5.1. Quy tắc làm việc trên nhánh
-* **Tuyệt đối không push trực tiếp lên nhánh `main`** (Nhánh `main` đã được bật GitHub Ruleset bảo vệ).
-* Mỗi thành viên chỉ làm việc trên đúng nhánh tính năng được phân công:
-  * Thành viên 2: `feature/circulation-and-penalties`
-  * Thành viên 3: `feature/book-catalog-and-readers`
-  * Thành viên 4: `feature/reports-audit-and-testing`
+Mở cửa sổ Terminal (Command Prompt hoặc Developer PowerShell) tại thư mục gốc của dự án `SmartLibrarySystem`:
 
-### 5.2. Các bước cập nhật code hàng ngày
-Trước khi bắt đầu viết code mỗi ngày, hãy kéo code mới nhất từ `main` về nhánh của mình:
 ```bash
-git checkout main
-git pull origin main
-git checkout feature/<nhanh-cua-ban>
-git merge main
+# 1. Khôi phục các thư viện NuGet phụ thuộc
+dotnet restore
+
+# 2. Biên dịch toàn bộ Solution ở chế độ Debug
+dotnet build SmartLibrarySystem.slnx
+
+# 3. Khởi chạy ứng dụng Windows Forms
+dotnet run --project Library.UI
 ```
 
-### 5.3. Chuẩn hóa Commit Message (Conventional Commits)
-* `feat(<module>)`: Thêm tính năng mới (Ví dụ: `feat(readers): add reader registration with 4-year expiry`)
-* `fix(<module>)`: Sửa lỗi (Ví dụ: `fix(circulation): fix fine calculation for overdue days`)
-* `test(<module>)`: Viết thêm unit test (Ví dụ: `test(catalog): add test for auto book code B0xxx`)
+Hoặc bạn có thể mở tệp giải pháp `SmartLibrarySystem.slnx` trực tiếp trong **Visual Studio 2022**, chọn Startup Project là `Library.UI` và nhấn **F5** để chạy.
 
-### 5.4. Quy trình Merge vào nhánh `main`
-1. Đẩy code lên nhánh của mình: `git push origin feature/<nhanh-cua-ban>`.
-2. Truy cập GitHub: `https://github.com/songhy2511/SmartLibrarySystem`.
-3. Nhấn **Compare & pull request**.
-4. Kiểm tra xem có bị xung đột (conflict) không. Nếu có xung đột, giải quyết trước khi merge.
-5. Sau khi kiểm tra hoàn tất, nhấn **Merge pull request** $\rightarrow$ **Confirm merge**.
+---
+
+## 🔑 6. TÀI KHOẢN ĐĂNG NHẬP MẪU (SEED ACCOUNTS)
+
+Dữ liệu mẫu khởi tạo sẵn 3 tài khoản tương ứng với các vai trò trong hệ thống:
+
+| Vai trò | Tên đăng nhập | Mật khẩu mặc định | Hồ sơ nhân sự / Phân công |
+| :--- | :--- | :--- | :--- |
+| **Quản trị viên (Admin)** | `admin` | `Admin@123` | Quản trị toàn hệ thống |
+| **Thủ thư 1 (Librarian)** | `thuthu1` | `Librarian@2026!` | Lê Minh Tuấn (Quầy Mượn - Trả số 1, CN Trung Tâm) |
+| **Thủ thư 2 (Librarian)** | `thuthu2` | `Librarian@2026!` | Nguyễn Thu Hà (Quầy Lưu Thông số 2, CN Trẻ) |
+
+> ⚠️ **Lưu ý:** Các tài khoản đều sử dụng chuẩn băm bảo mật PBKDF2. Khi sao chép mật khẩu, hãy nhập chính xác từng ký tự hoa, thường và ký tự đặc biệt.
+
+---
+
+## 🧪 7. CHẠY KIỂM THỬ TỰ ĐỘNG (UNIT TESTS)
+
+Dự án tích hợp đầy đủ bộ kiểm thử `Library.Tests` bao phủ 100% các quy chế nghiệp vụ quan trọng.
+
+Để chạy kiểm thử từ dòng lệnh:
+
+```bash
+dotnet test
+```
+
+### Danh mục các Test Suite đã triển khai (54/54 Tests Passed):
+* **`AuthTests`:** Kiểm tra thuật toán băm PBKDF2 khớp với seed SQL, tính ngẫu nhiên của Salt, cơ chế so khớp mật khẩu và bộ quy tắc thẩm định độ mạnh mật khẩu.
+* **`AdminBusinessRuleTests`:** Kiểm tra ràng buộc phân ca (chặn ca trong quá khứ, giờ bắt đầu sau giờ kết thúc, thiếu nhân sự), ràng buộc tham số quy chế động, đổi mật khẩu và an toàn tài khoản Admin.
+* **`BookInventoryTests`:** Kiểm tra tính toàn vẹn của số lượng tồn kho (khả dụng $\le$ tổng số lượng, không âm) và định dạng tự sinh mã sách (`B0xxx`).
+* **`CirculationBusinessRuleTests`:** Kiểm thử tính tiền phạt trễ hạn chính xác theo số ngày, chặn gia hạn lần 2 và chặn gia hạn phiếu quá hạn.
+* **`BaoCaoExportTests`:** Kiểm tra logic chặn ngày đảo ngược, tính đúng đắn khi xuất file CSV, Excel (.xlsx), PDF (.pdf) và độ chính xác của số liệu đối soát doanh thu ca trực.
+
+---
+
+## 👥 THÀNH VIÊN NHÓM PHÁT TRIỂN
+
+* **Đồ án:** Công nghệ & Môi trường phát triển phần mềm (.NET 8 WinForms)
+* **Phiên bản:** 2.3 - Hoàn thiện toàn diện nghiệp vụ, bảo mật & kiểm thử.
