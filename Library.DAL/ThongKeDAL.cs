@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using Microsoft.Data.SqlClient;
@@ -71,23 +71,23 @@ namespace Library.DAL
         {
             var list = new List<KhoSachChiNhanhDTO>();
             string query = @"
-        SELECT 
-            s.Ma_So AS Sach_Ma_So, s.Ma_Sach, s.Tieu_De, ISNULL(s.The_Loai, N'Chưa phân loại') AS The_Loai, s.Tac_Gia,
-            COUNT(bss.Ma_So) AS Tong_Ban_Sao,
-            SUM(CASE WHEN bss.Trang_Thai = N'Đang cho mượn' THEN 1 ELSE 0 END) AS Dang_Muon,
-            SUM(CASE WHEN bss.Trang_Thai = N'Sẵn sàng' THEN 1 ELSE 0 END) AS San_Co,
-            SUM(CASE WHEN bss.Trang_Thai IN (N'Hư hỏng', N'Mất/Thanh lý') THEN 1 ELSE 0 END) AS Bao_Tri
-        FROM dbo.Sach s
-        LEFT JOIN dbo.Ban_Sao_Sach bss ON s.Ma_So = bss.Sach_Ma_So AND (@ChiNhanhMaSo = 0 OR bss.Chi_Nhanh_Ma_So = @ChiNhanhMaSo)
-        WHERE (@TuKhoa = '' OR s.Tieu_De LIKE '%' + @TuKhoa + '%' OR s.Ma_Sach LIKE '%' + @TuKhoa + '%' OR s.Tac_Gia LIKE '%' + @TuKhoa + '%')
-          AND (@ChiNhanhMaSo = 0 OR bss.Ma_So IS NOT NULL)
-        GROUP BY s.Ma_So, s.Ma_Sach, s.Tieu_De, s.The_Loai, s.Tac_Gia
-        ORDER BY s.Ma_Sach ASC";
+                SELECT 
+                    s.Ma_So AS Sach_Ma_So, s.Ma_Sach, s.Tieu_De, ISNULL(s.The_Loai, N'Chưa phân loại') AS The_Loai, s.Tac_Gia,
+                    COUNT(bss.Ma_So) AS Tong_Ban_Sao,
+                    SUM(CASE WHEN bss.Trang_Thai = N'Đang cho mượn' THEN 1 ELSE 0 END) AS Dang_Muon,
+                    SUM(CASE WHEN bss.Trang_Thai = N'Sẵn sàng' THEN 1 ELSE 0 END) AS San_Co,
+                    SUM(CASE WHEN bss.Trang_Thai IN (N'Hư hỏng', N'Mất/Thanh lý') THEN 1 ELSE 0 END) AS Bao_Tri
+                FROM dbo.Sach s
+                LEFT JOIN dbo.Ban_Sao_Sach bss ON s.Ma_So = bss.Sach_Ma_So AND (@ChiNhanhMaSo = 0 OR bss.Chi_Nhanh_Ma_So = @ChiNhanhMaSo)
+                WHERE (@TuKhoa = '' OR s.Tieu_De LIKE '%' + @TuKhoa + '%' OR s.Ma_Sach LIKE '%' + @TuKhoa + '%' OR s.Tac_Gia LIKE '%' + @TuKhoa + '%')
+                  AND (@ChiNhanhMaSo = 0 OR bss.Ma_So IS NOT NULL)
+                GROUP BY s.Ma_So, s.Ma_Sach, s.Tieu_De, s.The_Loai, s.Tac_Gia
+                ORDER BY s.Ma_Sach ASC";
 
             SqlParameter[] parameters = {
-        new SqlParameter("@ChiNhanhMaSo", chiNhanhMaSo),
-        new SqlParameter("@TuKhoa", string.IsNullOrWhiteSpace(tuKhoa) ? "" : tuKhoa.Trim())
-    };
+                new SqlParameter("@ChiNhanhMaSo", chiNhanhMaSo),
+                new SqlParameter("@TuKhoa", string.IsNullOrWhiteSpace(tuKhoa) ? "" : tuKhoa.Trim())
+            };
 
             DataTable dt = await DatabaseHelper.ExecuteQueryAsync(query, parameters);
             foreach (DataRow row in dt.Rows)
@@ -111,20 +111,20 @@ namespace Library.DAL
         public async Task<DataTable> LayLuuThongTuanAsync()
         {
             string query = @"
-        DECLARE @HomNay DATE = CAST(GETDATE() AS DATE);
-        DECLARE @DauTuan DATE = DATEADD(DAY, -((DATEPART(WEEKDAY, @HomNay) + @@DATEFIRST + 5) % 7), @HomNay);
-        DECLARE @CuoiTuan DATE = DATEADD(DAY, 7, @DauTuan);
+                DECLARE @HomNay DATE = CAST(GETDATE() AS DATE);
+                DECLARE @DauTuan DATE = DATEADD(DAY, -((DATEPART(WEEKDAY, @HomNay) + @@DATEFIRST + 5) % 7), @HomNay);
+                DECLARE @CuoiTuan DATE = DATEADD(DAY, 7, @DauTuan);
 
-        SELECT
-            pm.Ma_Phieu_Muon, dg.Ho_Ten AS Ho_Ten_Doc_Gia, ISNULL(s.Tieu_De, N'Tài liệu lưu hành') AS Tieu_De_Sach,
-            pm.Ngay_Muon, pm.Ngay_Hen_Tra, pm.Trang_Thai
-        FROM dbo.Phieu_Muon pm
-        INNER JOIN dbo.Doc_Gia dg ON pm.Doc_Gia_Ma_So = dg.Ma_So
-        LEFT JOIN dbo.Chi_Tiet_Phieu_Muon ct ON pm.Ma_So = ct.Phieu_Muon_Ma_So
-        LEFT JOIN dbo.Ban_Sao_Sach bs ON ct.Ban_Sao_Sach_Ma_So = bs.Ma_So
-        LEFT JOIN dbo.Sach s ON bs.Sach_Ma_So = s.Ma_So
-        WHERE pm.Ngay_Muon >= @DauTuan AND pm.Ngay_Muon < @CuoiTuan
-        ORDER BY pm.Ngay_Muon DESC";
+                SELECT 
+                    pm.Ma_Phieu_Muon, dg.Ho_Ten AS Ho_Ten_Doc_Gia, ISNULL(s.Tieu_De, N'Tài liệu lưu hành') AS Tieu_De_Sach,
+                    pm.Ngay_Muon, pm.Ngay_Hen_Tra, pm.Trang_Thai
+                FROM dbo.Phieu_Muon pm
+                INNER JOIN dbo.Doc_Gia dg ON pm.Doc_Gia_Ma_So = dg.Ma_So
+                LEFT JOIN dbo.Chi_Tiet_Phieu_Muon ct ON pm.Ma_So = ct.Phieu_Muon_Ma_So
+                LEFT JOIN dbo.Ban_Sao_Sach bs ON ct.Ban_Sao_Sach_Ma_So = bs.Ma_So
+                LEFT JOIN dbo.Sach s ON bs.Sach_Ma_So = s.Ma_So
+                WHERE pm.Ngay_Muon >= @DauTuan AND pm.Ngay_Muon < @CuoiTuan
+                ORDER BY pm.Ngay_Muon DESC";
 
             return await DatabaseHelper.ExecuteQueryAsync(query);
         }
@@ -142,7 +142,6 @@ namespace Library.DAL
             return (docGia, tienPhat);
         }
 
-        // 👉 5 hàm bổ sung phục vụ trực tiếp các chỉ số Tab 1
         public int LayTongSoDocGia()
         {
             string query = "SELECT COUNT(*) FROM dbo.Doc_Gia WHERE Trang_Thai = N'Hoạt động'";
