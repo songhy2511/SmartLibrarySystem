@@ -165,5 +165,29 @@ namespace Library.BLL
             // Gọi đúng tên hàm TimKiemSachAsync mà bạn vừa đổi ở tầng DAL
             return await _dal.TimKiemSachAsync(tuKhoa);
         }
+        public bool KiemTraTinhToanVeng(SachDTO sach)
+        {
+            return sach.So_Luong_Kha_Dung >= 0 && sach.So_Luong_Kha_Dung <= sach.Tong_So_Luong;
+        }
+
+        public bool ThemSachMoi2(SachDTO sach, int? nguoiDungMaSo, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(sach.Tieu_De))
+            {
+                errorMessage = "Tiêu đề sách không được để trống!";
+                return false;
+            }
+
+            if (!KiemTraTinhToanVeng(sach))
+            {
+                errorMessage = "Số lượng khả dụng không được lớn hơn tổng số lượng!";
+                return false;
+            }
+
+            sach.Ma_Sach = _dal.GetNextMaSach();
+            return _dal.Insert(sach);
+        }
     }
 }
