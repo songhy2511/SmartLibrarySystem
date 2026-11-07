@@ -66,18 +66,8 @@ namespace Library.UI
 
         private int LayChiNhanhTrucHomNay()
         {
-            try
-            {
-                int thuThuMaSo = SessionContext.CurrentLibrarian?.Ma_So ?? 1;
-                string query = "SELECT TOP 1 Chi_Nhanh_Ma_So FROM dbo.Ca_Truc WHERE Thu_Thu_Ma_So = @TTId AND CAST(Ngay_Truc AS DATE) = CAST(GETDATE() AS DATE)";
-                object? res = DatabaseHelper.ExecuteScalar(query, new[] { new Microsoft.Data.SqlClient.SqlParameter("@TTId", thuThuMaSo) });
-                if (res != null && res != DBNull.Value)
-                {
-                    return Convert.ToInt32(res);
-                }
-            }
-            catch { }
-            return 1;
+            if (SessionContext.CurrentLibrarian == null) return 1;
+            return new CaTrucBLL().LayChiNhanhTrucHomNay(SessionContext.CurrentLibrarian.Ma_So);
         }
 
         private async Task TaiDuLieuKhoChiNhanhAsync()

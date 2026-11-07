@@ -100,7 +100,7 @@ namespace Library.BLL
             int.TryParse(maDocGia, out int docGiaId);
             if (docGiaId <= 0) docGiaId = 1;
 
-            string maPhieu = "BR" + DateTime.Now.ToString("yyMMdd") + new Random().Next(100, 999);
+            string maPhieu = _phieuMuonDAL.GetNextMaPhieuMuon();
             DateTime ngayHenHan = ngayMuon.AddDays(LaySoNgayMuonToiDa());
 
             bool success = _phieuMuonDAL.ThucHienMuonSach(maPhieu, docGiaId, thuThuId, chiNhanhId, ngayMuon, ngayHenHan, banSaoMaSo, sachMaSo);

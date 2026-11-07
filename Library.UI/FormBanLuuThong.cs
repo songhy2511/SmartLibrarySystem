@@ -106,9 +106,9 @@ namespace Library.UI
                 cboDocGia.ValueMember = "MaDocGia";
                 cboDocGia.SelectedIndex = 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show("Lỗi tải danh sách độc giả: " + ex.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể tải danh mục bạn đọc. Vui lòng thử tải lại trang!", "Lỗi tải dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -140,9 +140,9 @@ namespace Library.UI
                 dgvSachDangMuon.AutoGenerateColumns = false;
                 dgvSachDangMuon.DataSource = dt;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show("Lỗi nạp sách đang mượn: " + ex.Message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể nạp danh sách sách đang mượn. Vui lòng thử lại!", "Lỗi tải dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -222,11 +222,17 @@ namespace Library.UI
                 int thuThuMaSo = KiemTraVaLayMaThuThu();
                 if (thuThuMaSo == 0) return;
 
-                int chiNhanhMaSo = 1;
+                int chiNhanhMaSo = new CaTrucBLL().LayChiNhanhTrucHomNay(thuThuMaSo);
 
                 string maPhieu = _phieuMuonBLL.LapPhieuMuon(maDocGia, inputSach, ngayMuon, thuThuMaSo, chiNhanhMaSo);
                 if (!string.IsNullOrEmpty(maPhieu))
                 {
+                    SystemLogger.Log(
+                        LogLevel.INFO,
+                        "Cấp mượn tài liệu",
+                        $"Thủ thư đã lập phiếu mượn #{maPhieu} cho độc giả [{maDocGia}], tài liệu: '{inputSach}'.",
+                        SessionContext.CurrentUser?.Ma_So
+                    );
                     MessageBox.Show($"Cấp mượn thành công!\nMã phiếu mượn: {maPhieu}", "Thông báo thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     txtMaSach.Clear();
                     TaiDanhSachDangMuon();
@@ -262,6 +268,12 @@ namespace Library.UI
 
                 if (_phieuMuonBLL.GiaHanPhieu(maPhieu, soLanGiaHan, ngayHenHan))
                 {
+                    SystemLogger.Log(
+                        LogLevel.INFO,
+                        "Gia hạn phiếu mượn",
+                        $"Gia hạn thành công phiếu mượn #{maPhieu} thêm 7 ngày (Lần {soLanGiaHan + 1}).",
+                        SessionContext.CurrentUser?.Ma_So
+                    );
                     MessageBox.Show("Gia hạn thời hạn trả sách thành công thêm 7 ngày!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     TaiDanhSachDangMuon();
                 }
@@ -289,6 +301,12 @@ namespace Library.UI
 
                 if (_phieuMuonBLL.TraSach(maPhieu, ngayTra, ngayHenHan, out decimal tienPhat))
                 {
+                    SystemLogger.Log(
+                    LogLevel.INFO,
+                    "Nhận trả tài liệu",
+                    $"Xác nhận trả sách phiếu #{maPhieu}. " + (tienPhat > 0 ? $"Phát sinh phạt trễ hạn: {tienPhat:N0}đ." : "Trả đúng hạn."),
+                    SessionContext.CurrentUser?.Ma_So
+                );
                     string thongBao = tienPhat > 0
                         ? $"Trả sách hoàn tất!\n⚠️ Sách trả trễ hạn, phát sinh tiền phạt: {tienPhat:N0} VNĐ"
                         : "Xác nhận trả sách đúng hạn thành công!";
@@ -298,9 +316,9 @@ namespace Library.UI
                     CaiDatAutoCompleteTimKiemSach();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show("Lỗi khi trả sách: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể ghi nhận trả sách do lỗi dữ liệu. Vui lòng thử lại!", "Lỗi thao tác", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -313,7 +331,20 @@ namespace Library.UI
             }
 
             var row = dgvSachDangMuon.SelectedRows[0];
-            int docGiaMaSo = Convert.ToInt32(row.Cells["colMaDocGia"].Value != null && int.TryParse(row.Cells["colMaDocGia"].Value.ToString()?.Replace("DG", ""), out int id) ? id : 1);
+
+            // Lấy trực tiếp khóa chính Ma_So (DocGiaMaSo) từ DataRowView thay vì cắt chuỗi mã thẻ
+            int docGiaMaSo = 0;
+            if (row.DataBoundItem is DataRowView drv && drv["DocGiaMaSo"] != DBNull.Value)
+            {
+                docGiaMaSo = Convert.ToInt32(drv["DocGiaMaSo"]);
+            }
+
+            if (docGiaMaSo == 0)
+            {
+                MessageBox.Show("Không thể xác định mã độc giả hợp lệ!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             string tenDocGia = row.Cells["colTenDocGia"].Value?.ToString() ?? "Độc giả";
             string sdtCu = row.Cells["colSoDienThoai"].Value?.ToString() ?? "";
 
@@ -350,6 +381,12 @@ namespace Library.UI
 
                 if (_phieuMuonBLL.CapNhatSoDienThoaiDocGia(docGiaMaSo, sdtMoi))
                 {
+                    SystemLogger.Log(
+                        LogLevel.INFO,
+                        "Cập nhật hồ sơ bạn đọc",
+                        $"Cập nhật số điện thoại liên hệ mới ({sdtMoi}) cho độc giả ID {docGiaMaSo}.",
+                        SessionContext.CurrentUser?.Ma_So
+                    );
                     MessageBox.Show("Cập nhật số điện thoại thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     TaiDanhSachDangMuon();
                 }

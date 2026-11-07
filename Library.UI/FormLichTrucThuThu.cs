@@ -78,8 +78,12 @@ namespace Library.UI
             try
             {
                 // Lấy mã số thủ thư từ phiên đăng nhập (nếu không có thì mặc định thủ thư số 1)
-                int thuThuMaSo = SessionContext.CurrentLibrarian?.Ma_So ?? 1;
-
+                if (SessionContext.CurrentLibrarian == null)
+                {
+                    MessageBox.Show("Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại!", "Lỗi xác thực", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                int thuThuMaSo = SessionContext.CurrentLibrarian.Ma_So;
                 var list = _caTrucBLL.LayLichTrucThuThu(thuThuMaSo, dtpTuNgay.Value, dtpDenNgay.Value);
                 dgvLichTruc.AutoGenerateColumns = false;
                 dgvLichTruc.DataSource = null;

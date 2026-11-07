@@ -68,6 +68,7 @@ namespace Library.UI
                 // Lưu thông tin phiên làm việc
                 SessionContext.CurrentUser = user;
                 SessionContext.CurrentLibrarian = librarian;
+                SessionContext.LoginTime = DateTime.Now;
 
                 // 3. Điều hướng mở Form theo vai trò
                 if (user.Vai_Tro == "Admin")
@@ -97,7 +98,8 @@ namespace Library.UI
                     $"Ngoại lệ khi thực hiện đăng nhập tài khoản '{username}': {ex.Message}"
                 );
 
-                MessageBox.Show($"Lỗi kết nối cơ sở dữ liệu: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể kết nối đến máy chủ cơ sở dữ liệu. Vui lòng kiểm tra đường truyền mạng hoặc liên hệ Quản trị viên!",
+                "Sự cố kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -132,6 +134,11 @@ namespace Library.UI
         }
 
         private void pnlLoginArea_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void pnlBanner_Paint(object sender, PaintEventArgs e)
         {
 
         }

@@ -21,9 +21,9 @@ namespace Library.UI
                 txtMaThuThu.Text = _nguoiDungBLL.LayMaThuThuTiepTheo();
                 cboQuayPhuTrach.SelectedIndex = 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Lỗi sinh mã thủ thư: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Không thể tạo mã thủ thư tự động. Vui lòng thử lại sau!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -45,6 +45,12 @@ namespace Library.UI
 
             if (isSuccess)
             {
+                SystemLogger.Log(
+                    LogLevel.SECURITY,
+                    "Thêm mới nhân sự",
+                    $"Tạo tài khoản thủ thư mới '{username}' (Mã: {maThuThu}, Họ tên: {fullName}, Quầy: {counter}).",
+                    SessionContext.CurrentUser?.Ma_So
+                );
                 // Tự động sao chép mật khẩu tạm vào Clipboard
                 Clipboard.SetText(matKhauKhoiTao);
 
