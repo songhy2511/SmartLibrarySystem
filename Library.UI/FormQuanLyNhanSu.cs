@@ -8,6 +8,10 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Lưới nhân sự của Admin: tìm theo mã, tên, tài khoản, điện thoại;
+    /// sửa hồ sơ, khóa/mở, cấp lại mật khẩu tạm, thêm thủ thư mới.
+    /// </summary>
     public partial class FormQuanLyNhanSu : Form
     {
         private readonly NguoiDungBLL _nguoiDungBLL = new NguoiDungBLL();
@@ -44,6 +48,7 @@ namespace Library.UI
             dgvNhanSu.DataSource = danhSach;
         }
 
+        /// <summary>Lọc trên danh sách đã tải, không gọi lại SQL mỗi lần gõ.</summary>
         private void txtTimKiem_TextChanged(object sender, EventArgs e)
         {
             string keyword = txtTimKiem.Text.Trim().ToLower();
@@ -98,6 +103,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Đảo trạng thái tài khoản. Admin không tự khóa được chính mình (BLL từ chối).</summary>
         private void btnKhoaMoKhoa_Click(object sender, EventArgs e)
         {
             var selected = LayNhanSuDangChon();
@@ -134,6 +140,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Cấp mật khẩu tạm, copy vào clipboard. Nhật ký chỉ ghi "đã cấp", không ghi chuỗi mật khẩu.</summary>
         private void btnResetMatKhau_Click(object sender, EventArgs e)
         {
             var selected = LayNhanSuDangChon();

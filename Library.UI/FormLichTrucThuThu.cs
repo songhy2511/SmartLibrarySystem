@@ -9,6 +9,9 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Lịch của đúng thủ thư đang đăng nhập. Xem theo tuần (Thứ Hai–Chủ nhật), theo tháng, hoặc tự chọn khoảng ngày.
+    /// </summary>
     public partial class FormLichTrucThuThu : Form
     {
         private readonly CaTrucBLL _caTrucBLL = new CaTrucBLL();
@@ -27,6 +30,10 @@ namespace Library.UI
             dgvLichTruc.EnableDoubleBuffered(true);
         }
 
+        /// <summary>
+        /// Tuần và tháng tự tính khoảng ngày rồi ẩn bộ lọc thủ công.
+        /// Chế độ tùy chọn thì hiện hai ô ngày và nút Lọc.
+        /// </summary>
         private void CapNhatKhoangThoiGian()
         {
             if (cboCheDoXem.SelectedIndex == 0) // Xem theo Tuần
@@ -73,6 +80,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Nạp lịch vào lưới và viết một dòng tóm tắt ca của hôm nay, nếu có.</summary>
         private void TaiLichTruc()
         {
             try

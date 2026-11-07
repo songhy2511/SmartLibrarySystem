@@ -10,6 +10,7 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>Trang chủ Admin: bốn thẻ KPI và lưới mượn-trả trong tuần hiện tại, tính từ thứ Hai.</summary>
     public partial class FormTongQuanHeThong : Form
     {
         private readonly ThongKeBLL _thongKeBLL = new ThongKeBLL();

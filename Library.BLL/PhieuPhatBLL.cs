@@ -3,10 +3,18 @@ using Library.DAL;
 
 namespace Library.BLL
 {
+    /// <summary>
+    /// Biên bản vi phạm và thu phạt. Việc ghi nhiều bảng (biên bản, trạng thái bản sao, quỹ ca)
+    /// nằm trong stored procedure ở DAL, nên lớp này chỉ bọc kết quả thành (thành công, thông báo).
+    /// </summary>
     public class PhieuPhatBLL
     {
         private readonly PhieuPhatDAL _dal = new PhieuPhatDAL();
 
+        /// <summary>
+        /// Gọi sp_LapBienBanViPham. loaiViPham quyết định bản sao chuyển sang Hư hỏng hay Mất/Thanh lý.
+        /// phieuMuonMaSo có thể null khi vi phạm không gắn một phiếu mượn cụ thể.
+        /// </summary>
         public (bool IsSuccess, string Message) LapBienBanToanDien(int? phieuMuonMaSo, int docGiaMaSo, int thuThuId, int chiNhanhId, decimal soTien, string lyDo, string loaiViPham, int banSaoMaSo)
         {
             try
@@ -21,6 +29,7 @@ namespace Library.BLL
             }
         }
 
+        /// <summary>Gọi sp_ThuTienPhat: đánh dấu đã thu và cộng số tiền vào quỹ ca trực hiện tại của thủ thư.</summary>
         public (bool IsSuccess, string Message) ThuTienPhatGiaoDich(int maBienBan, int thuThuId, decimal soTien)
         {
             try

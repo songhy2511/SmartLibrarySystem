@@ -4,6 +4,7 @@ using System.Data;
 
 namespace Library.DAL
 {
+    /// <summary>Đọc và cập nhật từng dòng Ten_Tham_So / Gia_Tri. LayGiaTri trả chuỗi mặc định nếu chưa có dòng.</summary>
     public class CauHinhHeThongDAL
     {
         public List<CauHinhHeThongDTO> GetAll()

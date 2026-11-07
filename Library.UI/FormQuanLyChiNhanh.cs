@@ -5,6 +5,7 @@ using Library.BLL;
 
 namespace Library.UI
 {
+    /// <summary>Admin thêm chi nhánh. Mã CN sinh tự động, form chỉ nhận tên, địa chỉ, điện thoại.</summary>
     public partial class FormQuanLyChiNhanh : Form
     {
         private readonly ChiNhanhBLL _chiNhanhBLL = new ChiNhanhBLL();

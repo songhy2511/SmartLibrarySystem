@@ -4,11 +4,20 @@ using Library.BLL.Security;
 
 namespace Library.BLL
 {
+    /// <summary>
+    /// Nghiệp vụ tài khoản. Form chỉ gọi lớp này, không tự so mật khẩu hay tự sửa SQL.
+    /// Kết quả trả về dạng bộ (thành công?, thông báo, dữ liệu kèm theo) để form hiện MessageBox.
+    /// </summary>
     public class NguoiDungBLL
     {
-        private readonly NguoiDungDAL _userDal = new NguoiDungDAL();
-        private readonly ThuThuDAL _thuThuDal = new ThuThuDAL();
+        private readonly NguoiDungDAL _userDal = new NguoiDungDAL(); // Đọc/ghi bảng Nguoi_Dung
+        private readonly ThuThuDAL _thuThuDal = new ThuThuDAL();     // Đọc/ghi hồ sơ bảng Thu_Thu
 
+        /// <summary>
+        /// Xác thực đăng nhập theo thứ tự: có tài khoản, chưa bị khóa, mật khẩu khớp bản băm.
+        /// Sai tên hoặc sai mật khẩu trả cùng một câu, để người ngoài không dò được tài khoản nào tồn tại.
+        /// Nếu là Librarian thì nạp thêm hồ sơ thủ thư; Admin thì Librarian = null.
+        /// </summary>
         public (bool IsSuccess, string Message, NguoiDungDTO? User, ThuThuDTO? Librarian) DangNhap(string username, string password)
         {
             // 1. Kiểm tra tài khoản tồn tại trong CSDL
@@ -24,7 +33,7 @@ namespace Library.BLL
                 return (false, "Tài khoản của bạn đã bị khóa bởi Quản trị viên!", null, null);
             }
 
-            // 3. Xác thực mã băm SHA-256 + Salt
+            // 3. So mật khẩu người nhập với bản băm PBKDF2 lưu trong CSDL (không so chuỗi thô)
             bool isPasswordCorrect = PasswordHasher.VerifyPassword(password, user.Mat_Khau_Ma_Hoa, user.Chuoi_Muoi);
             if (!isPasswordCorrect)
             {
@@ -41,6 +50,11 @@ namespace Library.BLL
             return (true, "Đăng nhập thành công!", user, librarian);
         }
 
+        /// <summary>
+        /// Đổi mật khẩu của chính người đang đăng nhập.
+        /// Bắt buộc: mật khẩu cũ đúng, mật khẩu mới đủ mạnh, xác nhận khớp, và khác mật khẩu cũ.
+        /// Lưu bản băm mới kèm muối mới; không lưu mật khẩu gốc.
+        /// </summary>
         public (bool IsSuccess, string Message) DoiMatKhau(int maSo, string matKhauCu, string matKhauMoi, string xacNhanMatKhau)
         {
             if (string.IsNullOrWhiteSpace(matKhauCu))
@@ -67,8 +81,8 @@ namespace Library.BLL
             if (!isOldPasswordValid)
                 return (false, "Mật khẩu hiện tại không chính xác!");
 
-            string newSalt = PasswordHasher.GenerateSalt();
-            string newHash = PasswordHasher.HashPassword(matKhauMoi, newSalt);
+            string newSalt = PasswordHasher.GenerateSalt();                 // Muối ngẫu nhiên mới, không tái dùng muối cũ
+            string newHash = PasswordHasher.HashPassword(matKhauMoi, newSalt); // Bản băm sẽ ghi xuống CSDL
 
             bool isUpdated = _userDal.CapNhatMatKhau(maSo, newHash, newSalt);
             if (isUpdated)
@@ -81,13 +95,16 @@ namespace Library.BLL
             return (false, "Cập nhật mật khẩu thất bại. Vui lòng thử lại!");
         }
 
-        // Lấy danh sách toàn bộ nhân sự thủ thư
+        /// <summary>Danh sách thủ thư kèm tên đăng nhập và cờ đang hoạt động, dùng cho lưới nhân sự.</summary>
         public List<ThuThuDTO> LayDanhSachNhanSu()
         {
             return _thuThuDal.GetAll();
         }
 
-        // Khóa hoặc mở khóa tài khoản
+        /// <summary>
+        /// Đảo cờ Dang_Hoat_Dong. Tài khoản đang mở thì khóa, đang khóa thì mở.
+        /// currentAdminId dùng để chặn Admin tự khóa chính mình (sẽ không đăng nhập lại được).
+        /// </summary>
         public (bool IsSuccess, string Message) ChuyenTrangThaiTaiKhoan(int maNguoiDung, int currentAdminId)
         {
             if (maNguoiDung == currentAdminId)
@@ -101,7 +118,7 @@ namespace Library.BLL
                 return (false, "Không tìm thấy thông tin tài khoản người dùng!");
             }
 
-            bool trangThaiMoi = !user.Dang_Hoat_Dong;
+            bool trangThaiMoi = !user.Dang_Hoat_Dong; // Đảo trạng thái hiện tại
             bool isUpdated = _userDal.CapNhatTrangThaiHoatDong(maNguoiDung, trangThaiMoi);
 
             if (isUpdated)
@@ -113,6 +130,10 @@ namespace Library.BLL
             return (false, "Cập nhật trạng thái tài khoản thất bại. Vui lòng thử lại!");
         }
 
+        /// <summary>
+        /// Admin cấp mật khẩu tạm 10 ký tự. Chuỗi gốc chỉ trả về cho form hiện một lần và copy clipboard.
+        /// CSDL chỉ lưu bản băm. Hàm không ghi mật khẩu vào nhật ký.
+        /// </summary>
         public (bool IsSuccess, string Message, string MatKhauTam) ResetMatKhauTamThoi(int maNguoiDung)
         {
             var user = _userDal.GetById(maNguoiDung);
@@ -134,6 +155,7 @@ namespace Library.BLL
             return (false, "Reset mật khẩu thất bại. Vui lòng kiểm tra lại kết nối CSDL!", string.Empty);
         }
 
+        /// <summary>Sửa họ tên, điện thoại, email, quầy. Không đổi tên đăng nhập hay mật khẩu ở hàm này.</summary>
         public (bool IsSuccess, string Message) CapNhatThongTinThuThu(ThuThuDTO thuThu)
         {
             if (string.IsNullOrWhiteSpace(thuThu.Ho_Ten))
@@ -160,13 +182,16 @@ namespace Library.BLL
             return (false, "Cập nhật dữ liệu thất bại. Vui lòng kiểm tra lại kết nối!");
         }
 
-        // Lấy mã thủ thư gợi ý tiếp theo
+        /// <summary>Mã hiển thị kế tiếp dạng TT001, TT002... chỉ để hiện sẵn trên form thêm mới.</summary>
         public string LayMaThuThuTiepTheo()
         {
             return _thuThuDal.GetNextMaThuThu();
         }
 
-        // Xử lý tạo mới thủ thư và cấp tài khoản mặc định
+        /// <summary>
+        /// Tạo cùng lúc một dòng Nguoi_Dung (vai trò Librarian) và một dòng Thu_Thu.
+        /// Mật khẩu khởi tạo sinh ngẫu nhiên, băm xong mới ghi. Trả mật khẩu gốc để Admin đưa cho nhân viên.
+        /// </summary>
         public (bool IsSuccess, string Message, string MaThuThu, string MatKhauKhoiTao) ThemThuThu(
             string tenDangNhap,
             string hoTen,

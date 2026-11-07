@@ -8,6 +8,7 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>Chuyển một bản sao đang "Sẵn sàng" từ chi nhánh này sang chi nhánh khác. Không chuyển sang chính chi nhánh nguồn.</summary>
     public partial class FormDieuPhoiSach : Form
     {
         private readonly SachBLL _sachBLL = new SachBLL();

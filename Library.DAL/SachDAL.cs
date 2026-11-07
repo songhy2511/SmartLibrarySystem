@@ -5,8 +5,10 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>Đầu sách Sach và bản sao Ban_Sao_Sach: mã kế tiếp, thêm/sửa/xóa, chuyển chi nhánh, thanh lý một cuốn.</summary>
     public class SachDAL
     {
+        /// <summary>Lấy phần số sau chữ B, cộng 1, rồi ghép lại thành B0001. ISNULL xử lý lúc bảng còn trống.</summary>
         public string GetNextMaSach()
         {
             string query = "SELECT ISNULL(MAX(CAST(SUBSTRING(Ma_Sach, 2, 10) AS INT)), 0) + 1 FROM dbo.Sach";

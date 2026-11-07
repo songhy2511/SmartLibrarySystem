@@ -2,6 +2,10 @@
 
 namespace Library.DTO
 {
+    /// <summary>
+    /// Đầu sách (một nhan đề), không phải từng cuốn vật lý.
+    /// Tong_So_Luong là mọi bản; So_Luong_Kha_Dung là bản còn trên kệ. Bản đang mượn = tổng − khả dụng.
+    /// </summary>
     public class SachDTO
     {
         public int Ma_So { get; set; }

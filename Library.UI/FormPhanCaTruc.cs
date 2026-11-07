@@ -7,6 +7,7 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>Admin phân ca sáng/chiều: chọn thủ thư, chi nhánh, ngày, giờ và tiền đầu ca. Không phân ngày quá khứ.</summary>
     public partial class FormPhanCaTruc : Form
     {
         private readonly CaTrucBLL _caTrucBLL = new CaTrucBLL();

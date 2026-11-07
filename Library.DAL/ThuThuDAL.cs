@@ -5,6 +5,10 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>
+    /// Hồ sơ Thu_Thu. ThemThuThu ghi cả tài khoản lẫn hồ sơ trong một transaction
+    /// để không tạo được user mà thiếu dòng thủ thư.
+    /// </summary>
     public class ThuThuDAL
     {
         public ThuThuDTO? GetByNguoiDungMaSo(int nguoiDungMaSo)

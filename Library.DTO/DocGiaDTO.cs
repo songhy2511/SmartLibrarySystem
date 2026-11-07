@@ -2,6 +2,7 @@
 
 namespace Library.DTO
 {
+    /// <summary>Thẻ bạn đọc. So_Lan_Vi_Pham tăng khi lập biên bản; form tô cảnh báo khi số này từ 3 trở lên.</summary>
     public class DocGiaDTO
     {
         public int Ma_So { get; set; }
@@ -13,6 +14,6 @@ namespace Library.DTO
         public DateTime Ngay_Cap_The { get; set; } = DateTime.Now;
         public DateTime Ngay_Het_Han_The { get; set; } = DateTime.Today.AddYears(4);
         public int So_Lan_Vi_Pham { get; set; } = 0;
-        public string Trang_Thai { get; set; } = "Hoạt động"; // 'Hoạt động', 'Khóa tạm thời', 'Hết hạn'
+        public string Trang_Thai { get; set; } = "Hoạt động"; // "Hoạt động", "Khóa tạm thời", "Hết hạn". Chỉ "Hoạt động" mới được cho mượn ở quầy.
     }
 }

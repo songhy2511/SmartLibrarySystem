@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Library.DTO
 {
+    /// <summary>Phiếu mượn một cuốn. NgayTra null khi chưa trả. SoLanGiaHan tối đa 1.</summary>
     public class PhieuMuonDTO
     {
         public string MaPhieu { get; set; } = string.Empty;

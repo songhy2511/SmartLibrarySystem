@@ -5,27 +5,40 @@ using Library.DTO;
 
 namespace Library.BLL
 {
+    /// <summary>
+    /// Phân ca (Admin) và chốt ca (Thủ thư).
+    /// Hai ràng buộc khi phân công: một ca tại một chi nhánh chỉ một người;
+    /// một thủ thư không được nhận cùng tên ca ở hai chi nhánh trong một ngày.
+    /// </summary>
     public class CaTrucBLL
     {
         private readonly CaTrucDAL _caTrucDal = new CaTrucDAL();
         private readonly ThuThuDAL _thuThuDal = new ThuThuDAL();
         private readonly ChiNhanhDAL _chiNhanhDal = new ChiNhanhDAL();
 
+        /// <summary>Chỉ thủ thư chưa bị khóa, để combobox phân ca không hiện tài khoản đã khóa.</summary>
         public List<ThuThuDTO> LayDanhSachThuThuDangHoatDong()
         {
             return _thuThuDal.GetAll().FindAll(x => x.Dang_Hoat_Dong);
         }
 
+        /// <summary>Chỉ chi nhánh còn hoạt động.</summary>
         public List<ChiNhanhDTO> LayDanhSachChiNhanhDangHoatDong()
         {
             return _chiNhanhDal.GetAll().FindAll(x => x.Dang_Hoat_Dong);
         }
 
+        /// <summary>Lịch mọi thủ thư trong khoảng ngày, dùng cho màn phân ca của Admin.</summary>
         public List<CaTrucDTO> LayDanhSachCaTruc(DateTime fromDate, DateTime toDate)
         {
             return _caTrucDal.GetByDateRange(fromDate, toDate);
         }
 
+        /// <summary>
+        /// Tạo một ca. Từ chối ngày quá khứ, giờ bắt đầu không trước giờ kết thúc,
+        /// ca đã có người, hoặc thủ thư đã có cùng tên ca ở chi nhánh khác.
+        /// Tiền đầu ca là số tiền mặt bàn giao khi vào ca, dùng lúc đối soát cuối ca.
+        /// </summary>
         public (bool IsSuccess, string Message) PhanCaTruc(
             int thuThuMaSo,
             int chiNhanhMaSo,
@@ -71,7 +84,7 @@ namespace Library.BLL
                 Gio_Bat_Dau = gioBatDau,
                 Gio_Ket_Thuc = gioKetThuc,
                 Tien_Dau_Ca = tienDauCa,
-                Trang_Thai = "Chưa bắt đầu",
+                Trang_Thai = "Chưa bắt đầu", // Ca mới chưa ai vào trực; chốt ca sẽ đổi trạng thái ở DAL
                 Ghi_Chu = ghiChu
             };
 
@@ -84,6 +97,7 @@ namespace Library.BLL
             return (false, "Lỗi lưu ca trực vào cơ sở dữ liệu!");
         }
 
+        /// <summary>Xóa ca chưa bắt đầu. DAL trả false nếu ca đã trực hoặc đã kết.</summary>
         public (bool IsSuccess, string Message) XoaCaTruc(int maSoCaTruc)
         {
             return _caTrucDal.XoaCaTruc(maSoCaTruc)
@@ -91,6 +105,7 @@ namespace Library.BLL
                 : (false, "Không thể xóa ca trực đã bắt đầu hoặc đã kết ca!");
         }
 
+        /// <summary>Lịch của một thủ thư, dùng cho màn lịch cá nhân.</summary>
         public List<CaTrucDTO> LayLichTrucThuThu(int thuThuMaSo, DateTime fromDate, DateTime toDate)
         {
             if (thuThuMaSo <= 0)
@@ -99,11 +114,16 @@ namespace Library.BLL
             return _caTrucDal.GetByThuThuAndDateRange(thuThuMaSo, fromDate, toDate);
         }
 
+        /// <summary>
+        /// Ca hôm nay của thủ thư chưa chốt. HasShift = false thì đăng xuất không cần đếm tiền.
+        /// TienThuPhat là tiền phạt đã thu trong ca, cộng với tiền đầu ca thành quỹ lý thuyết.
+        /// </summary>
         public (bool HasShift, int CaTrucId, string TenCa, decimal TienDauCa, decimal TienThuPhat) LayCaTrucHienTai(int thuThuMaSo)
         {
             return _caTrucDal.LayCaTrucHienTai(thuThuMaSo);
         }
 
+        /// <summary>Ghi số tiền mặt thủ thư đếm được. Chênh lệch = thực tế − (đầu ca + phạt đã thu), tính ở form.</summary>
         public (bool IsSuccess, string Message) ChotCaTruc(int caTrucId, decimal tienKetCaThucTe)
         {
             try
@@ -120,6 +140,7 @@ namespace Library.BLL
             }
         }
 
+        /// <summary>Mã chi nhánh trên lịch hôm nay, để phiếu mượn gắn đúng kho. Không có lịch thì trả 1.</summary>
         public int LayChiNhanhTrucHomNay(int thuThuMaSo)
         {
             if (thuThuMaSo <= 0) return 1;

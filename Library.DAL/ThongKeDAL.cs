@@ -6,6 +6,7 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>Câu thống kê cho trang tổng quan: KPI, lưu thông tuần, đối soát ca, kho theo chi nhánh.</summary>
     public partial class ThongKeDAL
     {
         // 1. Thống kê số lượt mượn và trả sách trong tuần của mỗi chi nhánh

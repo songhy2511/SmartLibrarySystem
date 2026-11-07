@@ -5,15 +5,21 @@ using Library.BLL;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Khung làm việc của Thủ thư. Cùng kiểu nhúng form con như Admin, nhưng menu là nghiệp vụ quầy:
+    /// bạn đọc, kho sách, mượn-trả, biên bản phạt, lịch trực.
+    /// Khác Admin: trước khi đăng xuất, nếu còn ca chưa chốt thì bắt mở FormChotCaTruc.
+    /// </summary>
     public partial class FormThuThuDashboard : Form
     {
-        private Form? activeForm = null;
+        private Form? activeForm = null; // Form con đang hiển thị trong pnlContent
 
         public FormThuThuDashboard()
         {
             InitializeComponent();
         }
 
+        /// <summary>Chặn người không phải thủ thư, hiện tên + quầy, rồi mở sẵn bàn mượn-trả.</summary>
         private void FormThuThuDashboard_Load(object sender, EventArgs e)
         {
             SetupSidebarHoverEffects();
@@ -33,6 +39,7 @@ namespace Library.UI
             btnBanLuuThong.PerformClick();
         }
 
+        /// <summary>Đổi màu nền khi rê chuột: nút chức năng màu teal, nút đăng xuất màu đỏ.</summary>
         private void SetupSidebarHoverEffects()
         {
             Color hoverColor = Color.FromArgb(15, 118, 110);
@@ -58,6 +65,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Tô đậm nút đang chọn và ghi tiêu đề trang lên thanh trên.</summary>
         private void HighlightActiveButton(Button? activeBtn, string pageTitle)
         {
             if (activeBtn == null) return;
@@ -78,6 +86,7 @@ namespace Library.UI
             lblPageTitle.Text = pageTitle;
         }
 
+        /// <summary>Đóng màn con cũ rồi nhúng màn mới vào pnlContent (không viền, chiếm hết panel).</summary>
         private void OpenChildForm(Form childForm)
         {
             if (activeForm != null)
@@ -97,36 +106,42 @@ namespace Library.UI
             childForm.Show();
         }
 
+        /// <summary>Cấp thẻ, khóa thẻ, gia hạn thẻ bạn đọc.</summary>
         private void btnQuanLyDocGia_Click(object sender, EventArgs e)
         {
             HighlightActiveButton(sender as Button, "QUẢN LÝ BẠN ĐỌC & HỒ SƠ ĐỘC GIẢ");
             OpenChildForm(new FormQuanLyDocGia());
         }
 
+        /// <summary>Tra kho chi nhánh, sửa vị trí kệ, đề xuất thanh lý bản sao hỏng.</summary>
         private void btnQuanLySach_Click(object sender, EventArgs e)
         {
             HighlightActiveButton(sender as Button, "QUẢN LÝ KHO SÁCH CHI NHÁNH & DANH MỤC BIỂU GHI");
             OpenChildForm(new FormQuanLySach());
         }
 
+        /// <summary>Màn chính của quầy: lập phiếu mượn, gia hạn, nhận trả, sửa số điện thoại.</summary>
         private void btnBanLuuThong_Click(object sender, EventArgs e)
         {
             HighlightActiveButton(sender as Button, "BÀN TÁC NGHIỆP LƯU THÔNG (MƯỢN - TRẢ SÁCH)");
             OpenChildForm(new FormBanLuuThong());
         }
 
+        /// <summary>Lập biên bản rách/hỏng/mất và thu tiền phạt vào quỹ ca.</summary>
         private void btnXuLyViPham_Click(object sender, EventArgs e)
         {
             HighlightActiveButton(sender as Button, "QUẢN LÝ VI PHẠM & XỬ LÝ PHẠT");
             OpenChildForm(new FormLapBienBanViPham());
         }
 
+        /// <summary>Xem lịch phân công của chính thủ thư đang đăng nhập (tuần hoặc tháng).</summary>
         private void btnLichTruc_Click(object sender, EventArgs e)
         {
             HighlightActiveButton(sender as Button, "LỊCH TRỰC CÁ NHÂN & BÀN GIAO CA");
             OpenChildForm(new FormLichTrucThuThu());
         }
 
+        /// <summary>Mở cùng form báo cáo mà Admin dùng, dạng hộp thoại.</summary>
         private void btnBaoCaoThongKe_Click(object sender, EventArgs e)
         {
             HighlightActiveButton(sender as Button, "BÁO CÁO & THỐNG KÊ");
@@ -143,6 +158,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Thủ thư tự đổi mật khẩu; phải nhập đúng mật khẩu cũ.</summary>
         private void btnDoiMatKhau_Click(object sender, EventArgs e)
         {
             HighlightActiveButton(sender as Button, "ĐỔI MẬT KHẨU");
@@ -150,6 +166,10 @@ namespace Library.UI
             form.ShowDialog(this);
         }
 
+        /// <summary>
+        /// Đăng xuất có kiểm quỹ. Nếu CaTrucBLL báo còn ca chưa chốt thì phải hoàn tất FormChotCaTruc
+        /// (DialogResult.OK) rồi mới được thoát. Hủy form chốt ca thì ở lại dashboard.
+        /// </summary>
         private void btnDangXuat_Click(object sender, EventArgs e)
         {
             // Bắt lỗi mất session
@@ -194,6 +214,7 @@ namespace Library.UI
             this.Close();
         }
 
+        /// <summary>Bấm X khi còn phiên thì thoát app. Đăng xuất đã Clear() phiên nên không vào nhánh này.</summary>
         private void FormThuThuDashboard_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing && SessionContext.CurrentUser != null)

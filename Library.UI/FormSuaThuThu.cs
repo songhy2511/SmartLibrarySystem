@@ -5,6 +5,7 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>Sửa họ tên, điện thoại, email, quầy. Mã thủ thư và tên đăng nhập chỉ để xem.</summary>
     public partial class FormSuaThuThu : Form
     {
         private readonly NguoiDungBLL _nguoiDungBLL = new NguoiDungBLL();

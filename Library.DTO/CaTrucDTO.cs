@@ -2,11 +2,12 @@
 
 namespace Library.DTO
 {
+    /// <summary>Một ca làm việc. Tien_Dau_Ca là tiền nhận khi vào ca; Tien_Ket_Ca null nghĩa là chưa chốt.</summary>
     public class CaTrucDTO
     {
         public int Ma_So { get; set; }
         public int Thu_Thu_Ma_So { get; set; }
-        public int Chi_Nhanh_Ma_So { get; set; } // Mắt xích chi nhánh mới
+        public int Chi_Nhanh_Ma_So { get; set; } // Ca luôn thuộc một chi nhánh; dùng để chống trùng người trong cùng ca
         public DateTime Ngay_Truc { get; set; }
         public string Ten_Ca { get; set; } = "Ca Sáng";
         public TimeSpan Gio_Bat_Dau { get; set; }

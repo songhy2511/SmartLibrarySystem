@@ -5,6 +5,10 @@ using Library.DTO;
 
 namespace Library.BLL
 {
+    /// <summary>
+    /// Đọc và ghi các tham số quy chế trong bảng Cau_Hinh_He_Thong.
+    /// Mỗi hằng KEY đúng bằng cột Ten_Tham_So trong SQL. Nếu dòng chưa có, hàm đọc trả số mặc định.
+    /// </summary>
     public class CauHinhHeThongBLL
     {
         private readonly CauHinhHeThongDAL _dal = new CauHinhHeThongDAL();
@@ -20,6 +24,7 @@ namespace Library.BLL
         public const string KEY_TY_LE_PHAT_HONG = "Ty_Le_Phat_Hong";
         public const string KEY_TY_LE_PHAT_MAT = "Ty_Le_Phat_Mat";
 
+        /// <summary>Mọi dòng cấu hình, dùng khi form cần nạp lại toàn bộ.</summary>
         public List<CauHinhHeThongDTO> LayDanhSachCauHinh()
         {
             return _dal.GetAll();
@@ -60,6 +65,7 @@ namespace Library.BLL
         {
             return decimal.TryParse(_dal.LayGiaTri(KEY_TY_LE_PHAT_MAT, "100"), out decimal val) ? val : 100m;
         }
+        /// <summary>Giữ chữ ký cũ: lưu 4 tham số mượn-trả và giữ nguyên 3 tỷ lệ đền bù đang có trong CSDL.</summary>
         public (bool IsSuccess, string Message) LuuQuyChe(
     int soSachMuon,
     int soNgayMuon,
@@ -78,6 +84,11 @@ namespace Library.BLL
             );
         }
 
+        /// <summary>
+        /// Ghi cả 7 tham số. Phạm vi cho phép: sách 1–50, ngày mượn 1–180, phạt không âm,
+        /// hạn thẻ 1–60 tháng, tỷ lệ rách/hỏng 0–200%, mất 0–500%.
+        /// Cả 7 lệnh cập nhật phải thành công thì mới báo lưu được.
+        /// </summary>
         public (bool IsSuccess, string Message) LuuQuyCheToanDien(
             int soSachMuon,
             int soNgayMuon,

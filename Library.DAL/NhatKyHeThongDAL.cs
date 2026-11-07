@@ -6,6 +6,7 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>Ghi và lọc bảng Nhat_Ky_He_Thong. Bộ lọc mức/hành động rỗng nghĩa là không siết điều kiện đó.</summary>
     public class NhatKyHeThongDAL
     {
         public List<NhatKyHeThongDTO> LayDanhSachNhatKy(DateTime tuNgay, DateTime denNgay, string? mucDo, string? hanhDong, string? tuKhoa)

@@ -6,6 +6,7 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>Bảng Ca_Truc: lịch theo ngày, kiểm tra trùng ca, lấy ca chưa chốt hôm nay, ghi tiền kết ca.</summary>
     public class CaTrucDAL
     {
         public List<CaTrucDTO> GetByDateRange(DateTime fromDate, DateTime toDate)

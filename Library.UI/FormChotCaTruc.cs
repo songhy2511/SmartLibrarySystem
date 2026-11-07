@@ -5,6 +5,10 @@ using Library.BLL;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Đếm tiền cuối ca trước khi thủ thư đăng xuất.
+    /// Quỹ lý thuyết = tiền đầu ca + tiền phạt đã thu. Chênh lệch = tiền đếm được − quỹ lý thuyết.
+    /// </summary>
     public partial class FormChotCaTruc : Form
     {
         private readonly int _caTrucId;
@@ -15,7 +19,7 @@ namespace Library.UI
             InitializeComponent();
 
             _caTrucId = caTrucId;
-            _tienLyThuyet = tienDauCa + tienThuPhat;
+            _tienLyThuyet = tienDauCa + tienThuPhat; // Số tiền quỹ phải có nếu không thừa, không thiếu
 
             lblTenCa.Text = $"Ca đang trực: {tenCa}";
             lblTienDauCaVal.Text = $"{tienDauCa:N0} đ";
@@ -32,6 +36,7 @@ namespace Library.UI
             TinhChenhLech();
         }
 
+        /// <summary>Cập nhật nhãn: khớp quỹ (xanh), thiếu (đỏ), dư (xanh dương).</summary>
         private void TinhChenhLech()
         {
             decimal thucTe = nudThucTeVal.Value;
@@ -54,6 +59,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Ghi tiền thực tế xuống ca rồi đóng form với DialogResult.OK để dashboard tiếp tục đăng xuất.</summary>
         private void btnChotCa_Click(object sender, EventArgs e)
         {
             var confirm = MessageBox.Show(

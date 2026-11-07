@@ -5,6 +5,10 @@ using Microsoft.Data.SqlClient;
 
 namespace Library.DAL
 {
+    /// <summary>
+    /// Câu SELECT báo cáo. Hằng ChonCa nối mỗi phiếu phạt với đúng ca của thủ thư trong ngày,
+    /// để tiền thu được cộng vào quỹ ca chứ không bị tính trùng.
+    /// </summary>
     public class BaoCaoDAL
     {
         // Subquery chọn đúng ca trực của thủ thư thu tiền / lập phiếu tại chi nhánh trong ngày

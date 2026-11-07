@@ -5,6 +5,11 @@ using System.Text.RegularExpressions;
 
 namespace Library.BLL.Security
 {
+    /// <summary>
+    /// Băm mật khẩu bằng PBKDF2-HMAC-SHA256, 100.000 vòng.
+    /// Không dùng để mã hóa hai chiều: từ bản băm không lấy lại được mật khẩu gốc.
+    /// Muối (salt) khác nhau với từng tài khoản nên hai người cùng mật khẩu vẫn ra hai chuỗi khác nhau.
+    /// </summary>
     public static class PasswordHasher
     {
         private const int DefaultSaltSize = 16;        // 128-bit Salt
@@ -12,6 +17,7 @@ namespace Library.BLL.Security
         private const int Iterations = 100_000;        // 100.000 vòng lặp theo chuẩn OWASP/NIST
         private static readonly HashAlgorithmName Algorithm = HashAlgorithmName.SHA256;
 
+        /// <summary>Sinh muối ngẫu nhiên 16 byte rồi đổi sang Base64 để lưu cột Chuoi_Muoi.</summary>
         public static string GenerateSalt(int size = DefaultSaltSize)
         {
             byte[] saltBytes = RandomNumberGenerator.GetBytes(size);
@@ -39,7 +45,7 @@ namespace Library.BLL.Security
                 HashByteSize
             );
 
-            return Convert.ToHexString(hashBytes); // Trả về 64 ký tự Hex in hoa
+            return Convert.ToHexString(hashBytes); // 32 byte = 64 ký tự hex in hoa, đúng độ dài cột mật khẩu
         }
 
         /// <summary>
@@ -56,6 +62,7 @@ namespace Library.BLL.Security
                 byte[] computedBytes = Convert.FromHexString(computedHash);
                 byte[] storedBytes = Convert.FromHexString(storedHash);
 
+                // So từng byte trong thời gian cố định, tránh kẻ tấn công đoán mật khẩu qua độ nhanh/chậm
                 return CryptographicOperations.FixedTimeEquals(computedBytes, storedBytes);
             }
             catch
@@ -97,6 +104,10 @@ namespace Library.BLL.Security
             return new string(randomChars);
         }
 
+        /// <summary>
+        /// Mật khẩu hợp lệ khi đủ 6 ký tự và có cả hoa, thường, số, ký tự đặc biệt.
+        /// Trả câu lỗi đầu tiên gặp phải để form hiện đúng một lý do.
+        /// </summary>
         public static (bool IsValid, string ErrorMessage) ValidatePasswordStrength(string password)
         {
             if (string.IsNullOrWhiteSpace(password))

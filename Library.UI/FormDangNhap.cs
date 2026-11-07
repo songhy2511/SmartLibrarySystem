@@ -5,20 +5,29 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Màn hình đầu tiên. Kiểm tra tên đăng nhập/mật khẩu rồi mở đúng dashboard theo vai trò.
+    /// Form này không đóng hẳn: nó ẩn đi khi dashboard mở, rồi hiện lại sau khi người dùng đăng xuất.
+    /// </summary>
     public partial class FormDangNhap : Form
     {
         private readonly NguoiDungBLL _nguoiDungBLL = new NguoiDungBLL();
 
         public FormDangNhap()
         {
-            InitializeComponent();
+            InitializeComponent(); // Dựng nút, ô nhập từ file Designer
         }
 
+        /// <summary>Nút Đăng nhập chỉ chuyển việc sang hàm dùng chung, vì phím Enter cũng gọi cùng hàm đó.</summary>
         private void btnDangNhap_Click(object sender, EventArgs e)
         {
             ThucHienDangNhap();
         }
 
+        /// <summary>
+        /// Kiểm tra ô trống, gọi BLL xác thực, ghi nhật ký, lưu phiên, rồi mở Admin hoặc Thủ thư.
+        /// ShowDialog chặn form này cho đến khi dashboard đóng; lúc đó form đăng nhập hiện lại.
+        /// </summary>
         private void ThucHienDangNhap()
         {
             string username = txtTenDangNhap.Text.Trim();
@@ -70,7 +79,7 @@ namespace Library.UI
                 SessionContext.CurrentLibrarian = librarian;
                 SessionContext.LoginTime = DateTime.Now;
 
-                // 3. Điều hướng mở Form theo vai trò
+                // 3. Admin vào bảng điều khiển quản trị; mọi vai trò còn lại (Librarian) vào bàn thủ thư
                 if (user.Vai_Tro == "Admin")
                 {
                     FormAdminDashboard adminDashboard = new FormAdminDashboard();
@@ -103,11 +112,13 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Bỏ dấu chấm mật khẩu khi người dùng tick "Hiện mật khẩu".</summary>
         private void chkHienMatKhau_CheckedChanged(object sender, EventArgs e)
         {
             txtMatKhau.UseSystemPasswordChar = !chkHienMatKhau.Checked;
         }
 
+        /// <summary>Hỏi rồi thoát cả chương trình (không chỉ đóng form).</summary>
         private void btnThoat_Click(object sender, EventArgs e)
         {
             var result = MessageBox.Show("Bạn có muốn thoát chương trình?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -117,6 +128,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Enter ở ô tên đăng nhập sẽ nhảy xuống ô mật khẩu.</summary>
         private void txtTenDangNhap_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -125,6 +137,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Enter ở ô mật khẩu thực hiện đăng nhập, giống bấm nút.</summary>
         private void txtMatKhau_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)

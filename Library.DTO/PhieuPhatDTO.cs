@@ -2,6 +2,7 @@
 
 namespace Library.DTO
 {
+    /// <summary>Biên bản phạt. Da_Thanh_Toan false thì còn nằm trong công nợ chưa thu trên KPI.</summary>
     public class PhieuPhatDTO
     {
         public int Ma_So { get; set; }
