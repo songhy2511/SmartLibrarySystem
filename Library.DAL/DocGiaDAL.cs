@@ -84,5 +84,11 @@ namespace Library.DAL
             SqlParameter[] pars = { new SqlParameter("@Kw", $"%{keyword}%") };
             return DatabaseHelper.ExecuteQuery(query, pars);
         }
+        public bool Delete2(string maDocGia)
+        {
+            string query = "UPDATE Doc_Gia SET Dang_Hoat_Dong = 0, Trang_Thai_The = N'Khóa tạm thời' WHERE Ma_Doc_Gia = @Ma";
+            SqlParameter[] pars = { new SqlParameter("@Ma", maDocGia) };
+            return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
+        }
     }
 }
