@@ -249,5 +249,89 @@ namespace Library.DAL
 
             return (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : 1;
         }
+
+        // Kiểm tra trùng ca khi sửa (loại trừ chính ca đang cập nhật)
+        public bool KiemTraTrungLichKhiSua(int maSoCa, int thuThuMaSo, int chiNhanhMaSo, DateTime ngayTruc, string tenCa, out string thongBaoLoi)
+        {
+            thongBaoLoi = string.Empty;
+
+            // 1. Chi nhánh đó trong ca đã có người khác trực chưa
+            string query1 = @"SELECT TOP 1 tt.Ho_Ten 
+                      FROM Ca_Truc ct
+                      INNER JOIN Thu_Thu tt ON ct.Thu_Thu_Ma_So = tt.Ma_So
+                      WHERE ct.Chi_Nhanh_Ma_So = @ChiNhanhMaSo 
+                        AND CAST(ct.Ngay_Truc AS DATE) = @NgayTruc 
+                        AND ct.Ten_Ca = @TenCa
+                        AND ct.Ma_So <> @MaSo";
+
+            SqlParameter[] pars1 = {
+        new SqlParameter("@ChiNhanhMaSo", chiNhanhMaSo),
+        new SqlParameter("@NgayTruc", ngayTruc.Date),
+        new SqlParameter("@TenCa", tenCa),
+        new SqlParameter("@MaSo", maSoCa)
+    };
+
+            object? res1 = DatabaseHelper.ExecuteScalar(query1, pars1);
+            if (res1 != null)
+            {
+                thongBaoLoi = $"Chi nhánh này đã có thủ thư '{res1}' phân công trực '{tenCa}' vào ngày {ngayTruc:dd/MM/yyyy}!";
+                return true;
+            }
+
+            // 2. Thủ thư này đã có lịch ở chi nhánh khác cùng ca chưa
+            string query2 = @"SELECT TOP 1 cn.Ten_Chi_Nhanh 
+                      FROM Ca_Truc ct
+                      INNER JOIN Chi_Nhanh cn ON ct.Chi_Nhanh_Ma_So = cn.Ma_So
+                      WHERE ct.Thu_Thu_Ma_So = @ThuThuMaSo 
+                        AND CAST(ct.Ngay_Truc AS DATE) = @NgayTruc 
+                        AND ct.Ten_Ca = @TenCa
+                        AND ct.Ma_So <> @MaSo";
+
+            SqlParameter[] pars2 = {
+        new SqlParameter("@ThuThuMaSo", thuThuMaSo),
+        new SqlParameter("@NgayTruc", ngayTruc.Date),
+        new SqlParameter("@TenCa", tenCa),
+        new SqlParameter("@MaSo", maSoCa)
+    };
+
+            object? res2 = DatabaseHelper.ExecuteScalar(query2, pars2);
+            if (res2 != null)
+            {
+                thongBaoLoi = $"Thủ thư đã có lịch trực '{tenCa}' ngày {ngayTruc:dd/MM/yyyy} tại chi nhánh '{res2}'!";
+                return true;
+            }
+
+            return false;
+        }
+
+        // Cập nhật thông tin ca trực vào CSDL
+        public bool CapNhatCaTruc(CaTrucDTO caTruc)
+        {
+            string query = @"
+        UPDATE Ca_Truc 
+        SET Thu_Thu_Ma_So = @ThuThuMaSo,
+            Chi_Nhanh_Ma_So = @ChiNhanhMaSo,
+            Ngay_Truc = @NgayTruc,
+            Ten_Ca = @TenCa,
+            Gio_Bat_Dau = @GioBatDau,
+            Gio_Ket_Thuc = @GioKetThuc,
+            Tien_Dau_Ca = @TienDauCa,
+            Ghi_Chu = @GhiChu
+        WHERE Ma_So = @MaSo AND Trang_Thai = N'Chưa bắt đầu'";
+
+            SqlParameter[] parameters = {
+        new SqlParameter("@MaSo", caTruc.Ma_So),
+        new SqlParameter("@ThuThuMaSo", caTruc.Thu_Thu_Ma_So),
+        new SqlParameter("@ChiNhanhMaSo", caTruc.Chi_Nhanh_Ma_So),
+        new SqlParameter("@NgayTruc", caTruc.Ngay_Truc.Date),
+        new SqlParameter("@TenCa", caTruc.Ten_Ca),
+        new SqlParameter("@GioBatDau", caTruc.Gio_Bat_Dau),
+        new SqlParameter("@GioKetThuc", caTruc.Gio_Ket_Thuc),
+        new SqlParameter("@TienDauCa", caTruc.Tien_Dau_Ca),
+        new SqlParameter("@GhiChu", (object?)caTruc.Ghi_Chu ?? DBNull.Value)
+    };
+
+            return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
+        }
     }
 }

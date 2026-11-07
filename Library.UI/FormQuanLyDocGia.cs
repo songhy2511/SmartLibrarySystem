@@ -15,6 +15,7 @@ namespace Library.UI
     public partial class FormQuanLyDocGia : Form
     {
         private readonly DocGiaBLL _bll = new DocGiaBLL();
+        private Button btnCapNhatDocGia = new Button();
 
         public FormQuanLyDocGia()
         {
@@ -30,6 +31,55 @@ namespace Library.UI
             {
                 dgvDocGia.CellFormatting += DgvDocGia_CellFormatting;
                 dgvDocGia.EnableDoubleBuffered(true);
+
+                dgvDocGia.CellClick += dgvDocGia_CellClick;
+            }
+            // Đặt nút Cập Nhật nằm cạnh nút Xóa Độc Giả
+            if (btnXoaDocGia != null)
+            {
+                btnCapNhatDocGia.Text = "Cập Nhật Độc Giả";
+                btnCapNhatDocGia.Font = btnThemDocGia != null ? btnThemDocGia.Font : new Font("Segoe UI", 9F);
+                btnCapNhatDocGia.BackColor = Color.FromArgb(16, 149, 117); // Xanh Emerald nổi bật
+                btnCapNhatDocGia.ForeColor = Color.White;
+                btnCapNhatDocGia.FlatStyle = FlatStyle.Flat;
+                btnCapNhatDocGia.FlatAppearance.BorderSize = 0;
+                btnCapNhatDocGia.Size = btnXoaDocGia.Size;
+                btnCapNhatDocGia.Location = new Point(btnXoaDocGia.Right + 12, btnXoaDocGia.Top);
+                btnCapNhatDocGia.Cursor = Cursors.Hand;
+                btnCapNhatDocGia.Click += btnCapNhatDocGia_Click;
+
+                this.Controls.Add(btnCapNhatDocGia);
+                btnCapNhatDocGia.BringToFront();
+            }
+        }
+
+        private void btnCapNhatDocGia_Click(object? sender, EventArgs e)
+        {
+            if (dgvDocGia?.CurrentRow?.DataBoundItem is not DataRowView drv)
+            {
+                MessageBox.Show("Vui lòng chọn một độc giả từ danh sách để cập nhật!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string maDG = drv["Ma_Doc_Gia"]?.ToString() ?? string.Empty;
+            var dg = new DocGiaDTO
+            {
+                Ma_Doc_Gia = maDG,
+                Ho_Ten = txtHoTen?.Text.Trim() ?? string.Empty,
+                So_Dien_Thoai = txtSDT?.Text.Trim(),
+                Email = txtEmail?.Text.Trim()
+            };
+
+            int? currentUserId = SessionContext.CurrentUser?.Ma_So;
+
+            if (_bll.CapNhatDocGia(dg, currentUserId, out string err))
+            {
+                MessageBox.Show($"Cập nhật thông tin độc giả {maDG} thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadData();
+            }
+            else
+            {
+                MessageBox.Show(err, "Cảnh báo cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         private void btnXoaDocGia_Click(object? sender, EventArgs e)
@@ -58,6 +108,16 @@ namespace Library.UI
             {
                 MessageBox.Show("Vui lòng chọn 1 độc giả trong danh sách để xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+        }
+
+        private void dgvDocGia_CellClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (dgvDocGia == null || e.RowIndex < 0 || e.RowIndex >= dgvDocGia.Rows.Count) return;
+            if (dgvDocGia.Rows[e.RowIndex].DataBoundItem is not DataRowView drv) return;
+
+            if (txtHoTen != null) txtHoTen.Text = drv["Ho_Ten"]?.ToString() ?? string.Empty;
+            if (txtSDT != null) txtSDT.Text = drv["So_Dien_Thoai"] != DBNull.Value ? drv["So_Dien_Thoai"].ToString() : string.Empty;
+            if (txtEmail != null) txtEmail.Text = drv["Email"] != DBNull.Value ? drv["Email"].ToString() : string.Empty;
         }
         private void LoadData()
         {

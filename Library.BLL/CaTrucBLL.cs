@@ -125,5 +125,58 @@ namespace Library.BLL
             if (thuThuMaSo <= 0) return 1;
             return _caTrucDal.LayChiNhanhTrucHomNay(thuThuMaSo);
         }
+
+        public (bool IsSuccess, string Message) CapNhatCaTruc(
+    int maSoCa,
+    int thuThuMaSo,
+    int chiNhanhMaSo,
+    DateTime ngayTruc,
+    string tenCa,
+    TimeSpan gioBatDau,
+    TimeSpan gioKetThuc,
+    decimal tienDauCa,
+    string? ghiChu)
+        {
+            if (maSoCa <= 0)
+                return (false, "Vui lòng chọn ca trực cần cập nhật từ danh sách!");
+
+            if (thuThuMaSo <= 0)
+                return (false, "Vui lòng chọn nhân sự thủ thư!");
+
+            if (chiNhanhMaSo <= 0)
+                return (false, "Vui lòng chọn chi nhánh làm việc!");
+
+            if (ngayTruc.Date < DateTime.Today)
+                return (false, "Không thể chuyển ca làm việc về một ngày trong quá khứ!");
+
+            if (gioBatDau >= gioKetThuc)
+                return (false, "Giờ bắt đầu ca trực phải trước giờ kết thúc!");
+
+            if (_caTrucDal.KiemTraTrungLichKhiSua(maSoCa, thuThuMaSo, chiNhanhMaSo, ngayTruc, tenCa, out string thongBaoLoi))
+            {
+                return (false, thongBaoLoi);
+            }
+
+            var caTruc = new CaTrucDTO
+            {
+                Ma_So = maSoCa,
+                Thu_Thu_Ma_So = thuThuMaSo,
+                Chi_Nhanh_Ma_So = chiNhanhMaSo,
+                Ngay_Truc = ngayTruc.Date,
+                Ten_Ca = tenCa,
+                Gio_Bat_Dau = gioBatDau,
+                Gio_Ket_Thuc = gioKetThuc,
+                Tien_Dau_Ca = tienDauCa,
+                Ghi_Chu = ghiChu
+            };
+
+            bool isUpdated = _caTrucDal.CapNhatCaTruc(caTruc);
+            if (isUpdated)
+            {
+                return (true, "Cập nhật phân công ca trực thành công!");
+            }
+
+            return (false, "Không thể sửa ca trực đã bắt đầu hoặc đã kết ca!");
+        }
     }
 }

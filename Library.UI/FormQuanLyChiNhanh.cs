@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Library.BLL;
+using Library.DTO;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
-using Library.BLL;
 
 namespace Library.UI
 {
@@ -22,6 +23,7 @@ namespace Library.UI
         {
             TaiDuLieu();
             dgvChiNhanh.EnableDoubleBuffered(true);
+            dgvChiNhanh.CellClick += dgvChiNhanh_CellClick;
         }
         private void TaiDuLieu()
         {
@@ -37,6 +39,16 @@ namespace Library.UI
             {
                 MessageBox.Show($"Không thể tải danh sách chi nhánh thư viện!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        private void dgvChiNhanh_CellClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= dgvChiNhanh.Rows.Count) return;
+            if (dgvChiNhanh.Rows[e.RowIndex].DataBoundItem is not ChiNhanhDTO cn) return;
+
+            txtMaChiNhanh.Text = cn.Ma_Chi_Nhanh;
+            txtTenChiNhanh.Text = cn.Ten_Chi_Nhanh;
+            txtDiaChi.Text = cn.Dia_Chi;
+            txtSoDienThoai.Text = cn.So_Dien_Thoai ?? string.Empty;
         }
 
         private void btnThem_Click(object sender, EventArgs e)

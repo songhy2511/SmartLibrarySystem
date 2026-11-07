@@ -33,6 +33,7 @@ namespace Library.UI
             await TaiDuLieuKhoChiNhanhAsync();
             await LoadDataAsync();
             _isInitialized = true;
+            dgvSach.CellClick += dgvSach_CellClick;
         }
 
         private void NapDanhSachChiNhanh()
@@ -289,11 +290,12 @@ namespace Library.UI
         {
             if (dgvSach != null && e.RowIndex >= 0 && dgvSach.Rows[e.RowIndex].DataBoundItem is DataRowView drv)
             {
-                if (txtTenSach != null) txtTenSach.Text = drv["Tieu_De"].ToString();
-                if (txtTacGia != null) txtTacGia.Text = drv["Tac_Gia"].ToString();
-                if (txtTheLoai != null) txtTheLoai.Text = drv["The_Loai"].ToString();
-                if (txtViTri != null) txtViTri.Text = drv["Vi_Tri_Ke"].ToString();
-                if (nudTongSoLuong != null) nudTongSoLuong.Value = Convert.ToDecimal(drv["Tong_So_Luong"]);
+                if (txtTenSach != null) txtTenSach.Text = drv["Tieu_De"]?.ToString() ?? string.Empty;
+                if (txtTacGia != null) txtTacGia.Text = drv["Tac_Gia"]?.ToString() ?? string.Empty;
+                if (txtTheLoai != null) txtTheLoai.Text = drv["The_Loai"]?.ToString() ?? string.Empty;
+                if (txtViTri != null) txtViTri.Text = drv["Vi_Tri_Ke"]?.ToString() ?? string.Empty;
+                if (nudTongSoLuong != null && drv["Tong_So_Luong"] != DBNull.Value)
+                    nudTongSoLuong.Value = Convert.ToDecimal(drv["Tong_So_Luong"]);
             }
         }
 

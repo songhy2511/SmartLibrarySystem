@@ -46,6 +46,25 @@ namespace Library.DAL
             return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
         }
 
+        public bool Update(DocGiaDTO dg)
+        {
+            string query = @"
+        UPDATE dbo.Doc_Gia 
+        SET Ho_Ten = @Ten, 
+            So_Dien_Thoai = @SDT, 
+            Email = @Email 
+        WHERE Ma_Doc_Gia = @Ma";
+
+            SqlParameter[] pars = {
+        new SqlParameter("@Ten", dg.Ho_Ten),
+        new SqlParameter("@SDT", (object?)dg.So_Dien_Thoai ?? DBNull.Value),
+        new SqlParameter("@Email", (object?)dg.Email ?? DBNull.Value),
+        new SqlParameter("@Ma", dg.Ma_Doc_Gia)
+    };
+
+            return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
+        }
+
         public bool UpdateTrangThaiThe(string maDocGia, string trangThaiMoi)
         {
             string query = "UPDATE dbo.Doc_Gia SET Trang_Thai = @TrangThai WHERE Ma_Doc_Gia = @Ma";

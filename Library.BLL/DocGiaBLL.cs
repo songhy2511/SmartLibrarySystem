@@ -56,6 +56,46 @@ namespace Library.BLL
             }
             return result;
         }
+
+        public bool CapNhatDocGia(DocGiaDTO dg, int? nguoiDungMaSo, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(dg.Ma_Doc_Gia))
+            {
+                errorMessage = "Vui lòng chọn độc giả cần cập nhật từ danh sách!";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(dg.Ho_Ten))
+            {
+                errorMessage = "Họ và tên độc giả không được để trống!";
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(dg.Email) && !dg.Email.Contains('@'))
+            {
+                errorMessage = "Địa chỉ email không đúng định dạng!";
+                return false;
+            }
+
+            bool result = _dal.Update(dg);
+            if (result)
+            {
+                SystemLogger.Log(
+                    LogLevel.INFO,
+                    "Quản lý Bạn Đọc",
+                    $"Cập nhật thông tin độc giả [{dg.Ma_Doc_Gia}] - {dg.Ho_Ten} (SĐT: {dg.So_Dien_Thoai ?? "--"}, Email: {dg.Email ?? "--"}).",
+                    nguoiDungMaSo
+                );
+            }
+            else
+            {
+                errorMessage = "Cập nhật dữ liệu thất bại. Vui lòng kiểm tra lại kết nối!";
+            }
+
+            return result;
+        }
         public bool ThayDoiTrangThaiKhoa(string maDocGia, bool isKhoa, int? nguoiDungMaSo)
         {
             string trangThaiMoi = isKhoa ? "Khóa tạm thời" : "Hoạt động";

@@ -12,6 +12,8 @@ namespace Library.UI
         private readonly CaTrucBLL _caTrucBLL = new CaTrucBLL();
         private List<ThuThuDTO> _danhSachThuThu = new List<ThuThuDTO>();
         private List<ChiNhanhDTO> _danhSachChiNhanh = new List<ChiNhanhDTO>();
+        private int _maCaDangChon = 0;
+        private Button btnCapNhatCa = new Button();
 
         public FormPhanCaTruc()
         {
@@ -33,6 +35,45 @@ namespace Library.UI
             TaiDanhSachThuThu();
             TaiDanhSachCaTruc();
             dgvCaTruc.EnableDoubleBuffered(true);
+            dgvCaTruc.CellClick += dgvCaTruc_CellClick;
+
+            // Đặt nút Lưu Ca sang nửa bên trái (Rộng: 140px)
+            btnLuuCa.Width = 140;
+            btnLuuCa.Text = "➕ PHÂN CA";
+
+            // Cấu hình nút Cập Nhật nằm cạnh nút Lưu Ca (bên phải, Rộng: 142px)
+            btnCapNhatCa.Text = "💾 CẬP NHẬT";
+            btnCapNhatCa.Font = btnLuuCa.Font;
+            btnCapNhatCa.BackColor = Color.FromArgb(16, 149, 117); // Màu xanh ngọc Emerald
+            btnCapNhatCa.ForeColor = Color.White;
+            btnCapNhatCa.FlatStyle = FlatStyle.Flat;
+            btnCapNhatCa.FlatAppearance.BorderSize = 0;
+            btnCapNhatCa.Location = new Point(btnLuuCa.Right + 8, btnLuuCa.Top);
+            btnCapNhatCa.Size = new Size(142, btnLuuCa.Height);
+            btnCapNhatCa.Click += btnCapNhatCa_Click;
+
+            pnlInput.Controls.Add(btnCapNhatCa);
+        }
+
+        private void dgvCaTruc_CellClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= dgvCaTruc.Rows.Count) return;
+            if (dgvCaTruc.Rows[e.RowIndex].DataBoundItem is not CaTrucDTO ca) return;
+
+            dtpNgayTruc.Value = ca.Ngay_Truc;
+            cboChiNhanh.SelectedValue = ca.Chi_Nhanh_Ma_So;
+            cboThuThu.SelectedValue = ca.Thu_Thu_Ma_So;
+
+            if (ca.Ten_Ca.Contains("Chiều"))
+                cboTenCa.SelectedIndex = 1;
+            else
+                cboTenCa.SelectedIndex = 0;
+
+            dtpGioBatDau.Value = DateTime.Today.Add(ca.Gio_Bat_Dau);
+            dtpGioKetThuc.Value = DateTime.Today.Add(ca.Gio_Ket_Thuc);
+            nudTienDauCa.Value = ca.Tien_Dau_Ca;
+            txtGhiChu.Text = ca.Ghi_Chu ?? string.Empty;
+            _maCaDangChon = ca.Ma_So;
         }
 
         private void TaiDanhSachChiNhanh()
@@ -59,6 +100,59 @@ namespace Library.UI
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi tải danh sách chi nhánh: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnCapNhatCa_Click(object? sender, EventArgs e)
+        {
+            if (_maCaDangChon == 0)
+            {
+                MessageBox.Show("Vui lòng chọn một ca trực từ bảng danh sách bên phải để cập nhật!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (cboChiNhanh.SelectedValue == null || cboThuThu.SelectedValue == null)
+            {
+                MessageBox.Show("Thông tin chi nhánh hoặc nhân sự không hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int chiNhanhMaSo = Convert.ToInt32(cboChiNhanh.SelectedValue);
+            int thuThuMaSo = Convert.ToInt32(cboThuThu.SelectedValue);
+            DateTime ngayTruc = dtpNgayTruc.Value.Date;
+            string tenCa = cboTenCa.SelectedIndex == 0 ? "Ca Sáng" : "Ca Chiều";
+            TimeSpan gioBatDau = dtpGioBatDau.Value.TimeOfDay;
+            TimeSpan gioKetThuc = dtpGioKetThuc.Value.TimeOfDay;
+            decimal tienDauCa = nudTienDauCa.Value;
+            string ghiChu = txtGhiChu.Text.Trim();
+
+            var (isSuccess, message) = _caTrucBLL.CapNhatCaTruc(
+                _maCaDangChon,
+                thuThuMaSo,
+                chiNhanhMaSo,
+                ngayTruc,
+                tenCa,
+                gioBatDau,
+                gioKetThuc,
+                tienDauCa,
+                ghiChu
+            );
+
+            if (isSuccess)
+            {
+                SystemLogger.Log(
+                    LogLevel.INFO,
+                    "Cập nhật ca trực",
+                    $"Quản trị viên đã cập nhật ca trực #{_maCaDangChon} ({tenCa} ngày {ngayTruc:dd/MM/yyyy}) của thủ thư '{cboThuThu.Text}'.",
+                    SessionContext.CurrentUser?.Ma_So
+                );
+
+                MessageBox.Show(message, "Thông báo thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                TaiDanhSachCaTruc();
+            }
+            else
+            {
+                MessageBox.Show(message, "Cảnh báo cập nhật", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
