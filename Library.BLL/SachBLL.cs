@@ -165,29 +165,25 @@ namespace Library.BLL
             // Gọi đúng tên hàm TimKiemSachAsync mà bạn vừa đổi ở tầng DAL
             return await _dal.TimKiemSachAsync(tuKhoa);
         }
-        public bool KiemTraTinhToanVeng(SachDTO sach)
-        {
-            return sach.So_Luong_Kha_Dung >= 0 && sach.So_Luong_Kha_Dung <= sach.Tong_So_Luong;
-        }
-
-        public bool ThemSachMoi2(SachDTO sach, int? nguoiDungMaSo, out string errorMessage)
+        public bool XoaSach(string maSach, int? nguoiDungMaSo, out string errorMessage)
         {
             errorMessage = string.Empty;
 
-            if (string.IsNullOrWhiteSpace(sach.Tieu_De))
+            DataTable dt = _dal.Search(maSach);
+            if (dt.Rows.Count > 0)
             {
-                errorMessage = "Tiêu đề sách không được để trống!";
-                return false;
+                DataRow dr = dt.Rows[0];
+                int tong = Convert.ToInt32(dr["Tong_So_Luong"]);
+                int khaDung = Convert.ToInt32(dr["So_Luong_Kha_Dung"]);
+
+                if (khaDung < tong)
+                {
+                    errorMessage = $"Không thể xóa sách '{maSach}' vì còn {tong - khaDung} cuốn đang cho mượn!";
+                    return false;
+                }
             }
 
-            if (!KiemTraTinhToanVeng(sach))
-            {
-                errorMessage = "Số lượng khả dụng không được lớn hơn tổng số lượng!";
-                return false;
-            }
-
-            sach.Ma_Sach = _dal.GetNextMaSach();
-            return _dal.Insert(sach);
+            return _dal.Delete(maSach);
         }
     }
 }
