@@ -165,25 +165,5 @@ namespace Library.BLL
             // Gọi đúng tên hàm TimKiemSachAsync mà bạn vừa đổi ở tầng DAL
             return await _dal.TimKiemSachAsync(tuKhoa);
         }
-        public bool XoaSach(string maSach, int? nguoiDungMaSo, out string errorMessage)
-        {
-            errorMessage = string.Empty;
-
-            DataTable dt = _dal.Search(maSach);
-            if (dt.Rows.Count > 0)
-            {
-                DataRow dr = dt.Rows[0];
-                int tong = Convert.ToInt32(dr["Tong_So_Luong"]);
-                int khaDung = Convert.ToInt32(dr["So_Luong_Kha_Dung"]);
-
-                if (khaDung < tong)
-                {
-                    errorMessage = $"Không thể xóa sách '{maSach}' vì còn {tong - khaDung} cuốn đang cho mượn!";
-                    return false;
-                }
-            }
-
-            return _dal.Delete(maSach);
-        }
     }
 }

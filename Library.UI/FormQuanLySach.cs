@@ -309,5 +309,33 @@ namespace Library.UI
             }
         }
         #endregion
+        private void btnXoaSach_Click(object? sender, EventArgs e)
+        {
+            if (dgvSach?.CurrentRow?.DataBoundItem is DataRowView drv)
+            {
+                string maSach = drv["Ma_Sach"].ToString() ?? string.Empty;
+                string tieuDe = drv["Tieu_De"].ToString() ?? string.Empty;
+
+                if (MessageBox.Show($"Bạn có chắc chắn muốn xóa đầu sách '{tieuDe}'?", "Xác nhận",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                {
+                    int? currentUserId = SessionContext.CurrentUser?.Ma_So;
+                    if (_sachBLL.XoaSach(maSach, currentUserId, out string err))
+                    {
+                        MessageBox.Show("Xóa đầu sách thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LoadData();
+                    }
+                    else
+                    {
+                        MessageBox.Show(err, "Không thể xóa sách", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void pnlHeader_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }
