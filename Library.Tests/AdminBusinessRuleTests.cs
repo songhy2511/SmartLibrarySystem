@@ -1,7 +1,8 @@
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Library.BLL;
 using Library.BLL.Security;
+using Library.DTO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Library.Tests
 {
@@ -17,10 +18,24 @@ namespace Library.Tests
             _caTrucBLL = new CaTrucBLL();
             _cauHinhBLL = new CauHinhHeThongBLL();
         }
+        namespace Library.Tests
+    {
+        [TestClass]
+        public class AdminBusinessRuleTests
+        {
+            [TestMethod]
+            public void Test_DefaultReaderCardExpiry_IsFourYearsFromToday()
+            {
+                var dg = new DocGiaDTO();
+                int expectedYear = DateTime.Today.AddYears(4).Year;
+                Assert.AreEqual(expectedYear, dg.Ngay_Het_Han_The.Year, "Thời hạn thẻ độc giả mặc định phải là 4 năm kể từ ngày tạo");
+            }
+        }
+    }
 
-        #region 1. TEST XÁC THỰC TƯƠNG THÍCH CHUẨN VỚI SCRIPT SQL SEED
+    #region 1. TEST XÁC THỰC TƯƠNG THÍCH CHUẨN VỚI SCRIPT SQL SEED
 
-        [TestMethod]
+    [TestMethod]
         [TestCategory("Authentication")]
         public void VerifyPassword_Pbkdf2_SeedAdminMatchesCorrectHash()
         {
