@@ -21,6 +21,7 @@ namespace Library.UI
         private void FormQuanLyNhanSu_Load(object sender, EventArgs e)
         {
             TaiDuLieu();
+            dgvNhanSu.EnableDoubleBuffered(true);
         }
 
         private void TaiDuLieu()

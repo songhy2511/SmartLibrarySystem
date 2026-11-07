@@ -17,23 +17,24 @@
 
         private void InitializeComponent()
         {
-            pnlSidebar = new Panel();
-            btnDangXuat = new Button();
-            btnDoiMatKhau = new Button();
-            btnNhatKy = new Button();
-            btnQuyChe = new Button();
-            btnCaTruc = new Button();
-            btnChiNhanh = new Button();
-            btnNhanSu = new Button();
-            btnTongQuan = new Button();
-            pnlLogo = new Panel();
-            lblBadgeRole = new Label();
-            lblLogoTitle = new Label();
-            pnlTopBar = new Panel();
-            lblSessionInfo = new Label();
-            lblCurrentPageTitle = new Label();
-            pnlContent = new Panel();
-            lblWelcome = new Label();
+            pnlSidebar = new System.Windows.Forms.Panel();
+            btnDangXuat = new System.Windows.Forms.Button();
+            btnDoiMatKhau = new System.Windows.Forms.Button();
+            btnBaoCao = new System.Windows.Forms.Button();
+            btnNhatKy = new System.Windows.Forms.Button();
+            btnQuyChe = new System.Windows.Forms.Button();
+            btnCaTruc = new System.Windows.Forms.Button();
+            btnChiNhanh = new System.Windows.Forms.Button();
+            btnNhanSu = new System.Windows.Forms.Button();
+            btnTongQuan = new System.Windows.Forms.Button();
+            pnlLogo = new System.Windows.Forms.Panel();
+            lblBadgeRole = new System.Windows.Forms.Label();
+            lblLogoTitle = new System.Windows.Forms.Label();
+            pnlTopBar = new System.Windows.Forms.Panel();
+            lblSessionInfo = new System.Windows.Forms.Label();
+            lblCurrentPageTitle = new System.Windows.Forms.Label();
+            pnlContent = new System.Windows.Forms.Panel();
+            lblWelcome = new System.Windows.Forms.Label();
             pnlSidebar.SuspendLayout();
             pnlLogo.SuspendLayout();
             pnlTopBar.SuspendLayout();
@@ -45,6 +46,7 @@
             pnlSidebar.BackColor = Color.FromArgb(15, 23, 42);
             pnlSidebar.Controls.Add(btnDangXuat);
             pnlSidebar.Controls.Add(btnDoiMatKhau);
+            pnlSidebar.Controls.Add(btnBaoCao);
             pnlSidebar.Controls.Add(btnNhatKy);
             pnlSidebar.Controls.Add(btnQuyChe);
             pnlSidebar.Controls.Add(btnCaTruc);
@@ -72,7 +74,7 @@
             btnDangXuat.Margin = new Padding(3, 4, 3, 4);
             btnDangXuat.Name = "btnDangXuat";
             btnDangXuat.Size = new Size(263, 60);
-            btnDangXuat.TabIndex = 8;
+            btnDangXuat.TabIndex = 9;
             btnDangXuat.Text = "🚪 Đăng Xuất";
             btnDangXuat.UseVisualStyleBackColor = false;
             btnDangXuat.Click += btnDangXuat_Click;
@@ -91,11 +93,31 @@
             btnDoiMatKhau.Name = "btnDoiMatKhau";
             btnDoiMatKhau.Padding = new Padding(18, 0, 0, 0);
             btnDoiMatKhau.Size = new Size(263, 60);
-            btnDoiMatKhau.TabIndex = 7;
+            btnDoiMatKhau.TabIndex = 8;
             btnDoiMatKhau.Text = "🔑 Đổi Mật Khẩu";
             btnDoiMatKhau.TextAlign = ContentAlignment.MiddleLeft;
             btnDoiMatKhau.UseVisualStyleBackColor = false;
             btnDoiMatKhau.Click += btnDoiMatKhau_Click;
+            // 
+            // btnBaoCao
+            // 
+            btnBaoCao.BackColor = Color.FromArgb(15, 23, 42);
+            btnBaoCao.Cursor = Cursors.Hand;
+            btnBaoCao.Dock = DockStyle.Top;
+            btnBaoCao.FlatAppearance.BorderSize = 0;
+            btnBaoCao.FlatStyle = FlatStyle.Flat;
+            btnBaoCao.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
+            btnBaoCao.ForeColor = Color.FromArgb(203, 213, 225);
+            btnBaoCao.Location = new Point(0, 427);
+            btnBaoCao.Margin = new Padding(3, 4, 3, 4);
+            btnBaoCao.Name = "btnBaoCao";
+            btnBaoCao.Padding = new Padding(18, 0, 0, 0);
+            btnBaoCao.Size = new Size(263, 60);
+            btnBaoCao.TabIndex = 7;
+            btnBaoCao.Text = "📊 Báo Cáo Thống Kê";
+            btnBaoCao.TextAlign = ContentAlignment.MiddleLeft;
+            btnBaoCao.UseVisualStyleBackColor = false;
+            btnBaoCao.Click += btnBaoCao_Click;
             // 
             // btnNhatKy
             // 
@@ -106,7 +128,7 @@
             btnNhatKy.FlatStyle = FlatStyle.Flat;
             btnNhatKy.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
             btnNhatKy.ForeColor = Color.FromArgb(203, 213, 225);
-            btnNhatKy.Location = new Point(0, 427);
+            btnNhatKy.Location = new Point(0, 367);
             btnNhatKy.Margin = new Padding(3, 4, 3, 4);
             btnNhatKy.Name = "btnNhatKy";
             btnNhatKy.Padding = new Padding(18, 0, 0, 0);
@@ -126,7 +148,7 @@
             btnQuyChe.FlatStyle = FlatStyle.Flat;
             btnQuyChe.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
             btnQuyChe.ForeColor = Color.FromArgb(203, 213, 225);
-            btnQuyChe.Location = new Point(0, 367);
+            btnQuyChe.Location = new Point(0, 307);
             btnQuyChe.Margin = new Padding(3, 4, 3, 4);
             btnQuyChe.Name = "btnQuyChe";
             btnQuyChe.Padding = new Padding(18, 0, 0, 0);
@@ -146,7 +168,7 @@
             btnCaTruc.FlatStyle = FlatStyle.Flat;
             btnCaTruc.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
             btnCaTruc.ForeColor = Color.FromArgb(203, 213, 225);
-            btnCaTruc.Location = new Point(0, 307);
+            btnCaTruc.Location = new Point(0, 247);
             btnCaTruc.Margin = new Padding(3, 4, 3, 4);
             btnCaTruc.Name = "btnCaTruc";
             btnCaTruc.Padding = new Padding(18, 0, 0, 0);
@@ -166,7 +188,7 @@
             btnChiNhanh.FlatStyle = FlatStyle.Flat;
             btnChiNhanh.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
             btnChiNhanh.ForeColor = Color.FromArgb(203, 213, 225);
-            btnChiNhanh.Location = new Point(0, 247);
+            btnChiNhanh.Location = new Point(0, 187);
             btnChiNhanh.Margin = new Padding(3, 4, 3, 4);
             btnChiNhanh.Name = "btnChiNhanh";
             btnChiNhanh.Padding = new Padding(18, 0, 0, 0);
@@ -186,7 +208,7 @@
             btnNhanSu.FlatStyle = FlatStyle.Flat;
             btnNhanSu.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
             btnNhanSu.ForeColor = Color.FromArgb(203, 213, 225);
-            btnNhanSu.Location = new Point(0, 187);
+            btnNhanSu.Location = new Point(0, 127);
             btnNhanSu.Margin = new Padding(3, 4, 3, 4);
             btnNhanSu.Name = "btnNhanSu";
             btnNhanSu.Padding = new Padding(18, 0, 0, 0);
@@ -206,7 +228,7 @@
             btnTongQuan.FlatStyle = FlatStyle.Flat;
             btnTongQuan.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
             btnTongQuan.ForeColor = Color.FromArgb(203, 213, 225);
-            btnTongQuan.Location = new Point(0, 127);
+            btnTongQuan.Location = new Point(0, 67);
             btnTongQuan.Margin = new Padding(3, 4, 3, 4);
             btnTongQuan.Name = "btnTongQuan";
             btnTongQuan.Padding = new Padding(18, 0, 0, 0);
@@ -226,7 +248,7 @@
             pnlLogo.Location = new Point(0, 0);
             pnlLogo.Margin = new Padding(3, 4, 3, 4);
             pnlLogo.Name = "pnlLogo";
-            pnlLogo.Size = new Size(263, 127);
+            pnlLogo.Size = new Size(263, 67);
             pnlLogo.TabIndex = 0;
             // 
             // lblBadgeRole
@@ -235,10 +257,9 @@
             lblBadgeRole.BackColor = Color.FromArgb(2, 132, 199);
             lblBadgeRole.Font = new Font("Segoe UI", 7.5F, FontStyle.Bold);
             lblBadgeRole.ForeColor = Color.White;
-            lblBadgeRole.Location = new Point(21, 73);
+            lblBadgeRole.Location = new Point(145, 26);
             lblBadgeRole.Name = "lblBadgeRole";
-            lblBadgeRole.Padding = new Padding(5, 3, 5, 3);
-            lblBadgeRole.Size = new Size(124, 23);
+            lblBadgeRole.Size = new Size(100, 17);
             lblBadgeRole.TabIndex = 1;
             lblBadgeRole.Text = "ADMINISTRATOR";
             // 
@@ -247,11 +268,11 @@
             lblLogoTitle.AutoSize = true;
             lblLogoTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblLogoTitle.ForeColor = Color.White;
-            lblLogoTitle.Location = new Point(18, 29);
+            lblLogoTitle.Location = new Point(18, 20);
             lblLogoTitle.Name = "lblLogoTitle";
-            lblLogoTitle.Size = new Size(168, 28);
+            lblLogoTitle.Size = new Size(111, 28);
             lblLogoTitle.TabIndex = 0;
-            lblLogoTitle.Text = "SMART LIBRARY";
+            lblLogoTitle.Text = "SMART LIB";
             // 
             // pnlTopBar
             // 
@@ -348,6 +369,7 @@
         private System.Windows.Forms.Button btnCaTruc;
         private System.Windows.Forms.Button btnQuyChe;
         private System.Windows.Forms.Button btnNhatKy;
+        private System.Windows.Forms.Button btnBaoCao;
         private System.Windows.Forms.Button btnDoiMatKhau;
         private System.Windows.Forms.Button btnDangXuat;
         private System.Windows.Forms.Panel pnlTopBar;

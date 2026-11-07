@@ -52,6 +52,7 @@ namespace Library.UI
             dgvSachDangMuon.DefaultCellStyle.Font = new Font("Segoe UI", 9f);
             dgvSachDangMuon.DefaultCellStyle.SelectionBackColor = Color.FromArgb(204, 251, 241);
             dgvSachDangMuon.DefaultCellStyle.SelectionForeColor = Color.Black;
+            dgvSachDangMuon.EnableDoubleBuffered(true);
         }
 
         private void CaiDatAutoCompleteTimKiemSach()
@@ -187,6 +188,16 @@ namespace Library.UI
             }
         }
 
+        private int KiemTraVaLayMaThuThu()
+        {
+            if (SessionContext.CurrentLibrarian == null)
+            {
+                MessageBox.Show("Phiên làm việc đã hết hạn hoặc mất kết nối tài khoản. Vui lòng đăng nhập lại để tiếp tục!", "Lỗi xác thực", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return 0;
+            }
+            return SessionContext.CurrentLibrarian.Ma_So;
+        }
+
         private void btnLapPhieuMuon_Click(object sender, EventArgs e)
         {
             try
@@ -208,7 +219,9 @@ namespace Library.UI
 
                 string maDocGia = cboDocGia.SelectedValue.ToString()!;
                 DateTime ngayMuon = dtpNgayMuon.Value;
-                int thuThuMaSo = SessionContext.CurrentLibrarian?.Ma_So ?? 1;
+                int thuThuMaSo = KiemTraVaLayMaThuThu();
+                if (thuThuMaSo == 0) return;
+
                 int chiNhanhMaSo = 1;
 
                 string maPhieu = _phieuMuonBLL.LapPhieuMuon(maDocGia, inputSach, ngayMuon, thuThuMaSo, chiNhanhMaSo);

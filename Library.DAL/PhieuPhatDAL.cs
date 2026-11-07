@@ -1,65 +1,38 @@
 ﻿using System;
-using System.Data;
 using Microsoft.Data.SqlClient;
-using Library.DTO;
 
 namespace Library.DAL
 {
     public class PhieuPhatDAL
     {
-        public DataTable LayDanhSachPhieuPhat()
+        public void LapBienBanToanDien(int? phieuMuonMaSo, int docGiaMaSo, int thuThuId, int chiNhanhId, decimal soTien, string lyDo, string loaiViPham, int banSaoMaSo)
         {
-            string query = @"
-                SELECT 
-                    pp.Ma_So AS MaBienBan,
-                    dg.Ma_Doc_Gia AS MaDocGia,
-                    dg.Ho_Ten AS TenDocGia,
-                    pp.Ly_Do AS LyDoViPham,
-                    pp.So_Tien_Phat AS SoTienPhat,
-                    pp.Ngay_Lap AS NgayLap,
-                    pp.Trang_Thai AS TrangThai,
-                    tt.Ho_Ten AS CanBoLap
-                FROM dbo.Phieu_Phat pp
-                INNER JOIN dbo.Doc_Gia dg ON pp.Doc_Gia_Ma_So = dg.Ma_So
-                INNER JOIN dbo.Thu_Thu tt ON pp.Thu_Thu_Ma_So = tt.Ma_So
-                ORDER BY pp.Ngay_Lap DESC";
+            string query = "EXEC dbo.sp_LapBienBanViPham @PhieuMuonMaSo, @DocGiaMaSo, @ThuThuMaSo, @ChiNhanhMaSo, @SoTienPhat, @LyDo, @LoaiViPham, @BanSaoMaSo";
 
-            return DatabaseHelper.ExecuteQuery(query);
-        }
-
-        public bool ThemPhieuPhat(PhieuPhatDTO dto)
-        {
-            string query = @"
-                INSERT INTO dbo.Phieu_Phat 
-                (Phieu_Muon_Ma_So, Doc_Gia_Ma_So, Thu_Thu_Ma_So, Chi_Nhanh_Ma_So, So_Tien_Phat, Ly_Do, Ngay_Lap, Trang_Thai, Da_Thanh_Toan)
-                VALUES 
-                (@PhieuMuonId, @DocGiaId, @ThuThuId, @ChiNhanhId, @SoTien, @LyDo, @NgayLap, @TrangThai, @DaThanhToan)";
-
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@PhieuMuonId", (object?)dto.Phieu_Muon_Ma_So ?? DBNull.Value),
-                new SqlParameter("@DocGiaId", dto.Doc_Gia_Ma_So),
-                new SqlParameter("@ThuThuId", dto.Thu_Thu_Ma_So),
-                new SqlParameter("@ChiNhanhId", (object?)dto.Chi_Nhanh_Ma_So ?? DBNull.Value),
-                new SqlParameter("@SoTien", dto.So_Tien_Phat),
-                new SqlParameter("@LyDo", dto.Ly_Do),
-                new SqlParameter("@NgayLap", dto.Ngay_Lap),
-                new SqlParameter("@TrangThai", dto.Trang_Thai),
-                new SqlParameter("@DaThanhToan", dto.Da_Thanh_Toan)
+            var pars = new[] {
+                new SqlParameter("@PhieuMuonMaSo", phieuMuonMaSo.HasValue && phieuMuonMaSo > 0 ? (object)phieuMuonMaSo.Value : DBNull.Value),
+                new SqlParameter("@DocGiaMaSo", docGiaMaSo),
+                new SqlParameter("@ThuThuMaSo", thuThuId),
+                new SqlParameter("@ChiNhanhMaSo", chiNhanhId),
+                new SqlParameter("@SoTienPhat", soTien),
+                new SqlParameter("@LyDo", lyDo),
+                new SqlParameter("@LoaiViPham", loaiViPham),
+                new SqlParameter("@BanSaoMaSo", banSaoMaSo)
             };
 
-            return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
+            DatabaseHelper.ExecuteNonQuery(query, pars);
         }
 
-        public DataTable LayDocGiaTheoMa(string maDocGia)
+        public void ThuTienPhatGiaoDich(int maBienBan, int thuThuId, decimal soTien)
         {
-            string query = "SELECT Ma_So, Ma_Doc_Gia, Ho_Ten FROM dbo.Doc_Gia WHERE Ma_Doc_Gia = @MaDG OR Ma_So = TRY_CAST(@MaDG AS INT)";
+            string query = "EXEC dbo.sp_ThuTienPhat @MaBienBan, @ThuThuMaSo, @SoTien";
+            var pars = new[] {
+                new SqlParameter("@MaBienBan", maBienBan),
+                new SqlParameter("@ThuThuMaSo", thuThuId),
+                new SqlParameter("@SoTien", soTien)
+            };
 
-            // Bọc tham số vào trong một mảng new SqlParameter[]
-            return DatabaseHelper.ExecuteQuery(query, new SqlParameter[]
-            {
-        new SqlParameter("@MaDG", maDocGia)
-            });
+            DatabaseHelper.ExecuteNonQuery(query, pars);
         }
     }
 }

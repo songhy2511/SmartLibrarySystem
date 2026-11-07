@@ -79,6 +79,16 @@ namespace Library.UI
             }
         }
 
+        private int KiemTraVaLayMaAdmin()
+        {
+            if (SessionContext.CurrentUser == null)
+            {
+                MessageBox.Show("Phiên làm việc Quản trị viên đã hết hạn!", "Lỗi bảo mật", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return 0;
+            }
+            return SessionContext.CurrentUser.Ma_So;
+        }
+
         private void btnXacNhan_Click(object sender, EventArgs e)
         {
             if (cboBanSao.SelectedValue == null)
@@ -108,7 +118,9 @@ namespace Library.UI
 
             if (confirm != DialogResult.Yes) return;
 
-            int? adminId = SessionContext.CurrentUser?.Ma_So;
+            int adminId = KiemTraVaLayMaAdmin();
+            if (adminId == 0) return;
+
             var (isSuccess, message) = _sachBLL.DieuPhoiSach(
                 banSaoMaSo,
                 maVach,
@@ -116,7 +128,7 @@ namespace Library.UI
                 _chiNhanhHienTaiId,
                 chiNhanhDichId,
                 ghiChu,
-                adminId
+                adminId 
             );
 
             if (isSuccess)

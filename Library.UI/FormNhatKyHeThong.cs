@@ -24,6 +24,7 @@ namespace Library.UI
 
             NapBoLoc();
             TaiDanhSachNhatKy();
+            dgvNhatKy.EnableDoubleBuffered(true);
         }
 
         private void NapBoLoc()
@@ -128,6 +129,11 @@ namespace Library.UI
                 }
                 e.FormattingApplied = true;
             }
+        }
+
+        private void pnlHeader_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

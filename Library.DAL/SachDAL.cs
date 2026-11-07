@@ -75,17 +75,25 @@ namespace Library.DAL
             return DatabaseHelper.ExecuteNonQuery(query, pars) > 0;
         }
 
-        public DataTable Search(string keyword)
+        public async Task<DataTable> TimKiemSachAsync(string tuKhoa)
         {
-            // Loại bỏ hoàn toàn cột Gia_Bia gây lỗi
             string query = @"
-                SELECT Ma_Sach, Tieu_De, Tac_Gia, The_Loai, Nam_Xuat_Ban, Vi_Tri_Ke, Tong_So_Luong, So_Luong_Kha_Dung, So_Lan_Muon, Tinh_Trang
-                FROM dbo.Sach 
-                WHERE Ma_Sach LIKE @Kw OR Tieu_De LIKE @Kw OR Tac_Gia LIKE @Kw OR The_Loai LIKE @Kw
-                ORDER BY Ma_So DESC";
+        SELECT 
+            Ma_So, Ma_Sach, Tieu_De, Tac_Gia, The_Loai,
+            Nam_Xuat_Ban, Nha_Xuat_Ban, Tong_So_Luong, 
+            So_Luong_Kha_Dung, So_Lan_Muon, Vi_Tri_Ke 
+        FROM dbo.Sach 
+        WHERE Tieu_De LIKE '%' + @TuKhoa + '%' 
+           OR Tac_Gia LIKE '%' + @TuKhoa + '%' 
+           OR Ma_Sach LIKE '%' + @TuKhoa + '%' 
+           OR The_Loai LIKE '%' + @TuKhoa + '%'
+        ORDER BY Ma_Sach ASC";
 
-            SqlParameter[] pars = { new SqlParameter("@Kw", $"%{keyword}%") };
-            return DatabaseHelper.ExecuteQuery(query, pars);
+            SqlParameter[] parameters = {
+        new SqlParameter("@TuKhoa", string.IsNullOrWhiteSpace(tuKhoa) ? "" : tuKhoa.Trim())
+    };
+
+            return await DatabaseHelper.ExecuteQueryAsync(query, parameters);
         }
 
         public bool ThanhLyMotCuonSach(string maSach)

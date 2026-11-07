@@ -29,6 +29,7 @@ namespace Library.UI
             if (dgvDocGia != null)
             {
                 dgvDocGia.CellFormatting += DgvDocGia_CellFormatting;
+                dgvDocGia.EnableDoubleBuffered(true);
             }
         }
         private void btnXoaDocGia_Click(object? sender, EventArgs e)

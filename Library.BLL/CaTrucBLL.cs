@@ -98,5 +98,25 @@ namespace Library.BLL
 
             return _caTrucDal.GetByThuThuAndDateRange(thuThuMaSo, fromDate, toDate);
         }
+
+        public (bool HasShift, int CaTrucId, string TenCa, decimal TienDauCa, decimal TienThuPhat) LayCaTrucHienTai(int thuThuMaSo)
+        {
+            return _caTrucDal.LayCaTrucHienTai(thuThuMaSo);
+        }
+
+        public (bool IsSuccess, string Message) ChotCaTruc(int caTrucId, decimal tienKetCaThucTe)
+        {
+            try
+            {
+                bool result = _caTrucDal.ChotCaTruc(caTrucId, tienKetCaThucTe);
+                if (result)
+                    return (true, "Chốt ca và đối soát quỹ thành công!");
+                return (false, "Không tìm thấy ca trực hoặc ca trực đã được chốt từ trước.");
+            }
+            catch (Exception ex)
+            {
+                return (false, "Lỗi khi chốt ca: " + ex.Message);
+            }
+        }
     }
 }

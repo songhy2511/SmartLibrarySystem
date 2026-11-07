@@ -22,6 +22,7 @@ namespace Library.UI
         {
             pnlSidebar = new Panel();
             btnDangXuat = new Button();
+            btnBaoCaoThongKe = new Button();
             btnDoiMatKhau = new Button();
             btnLichTruc = new Button();
             btnXuLyViPham = new Button();
@@ -46,6 +47,7 @@ namespace Library.UI
             // 
             pnlSidebar.BackColor = Color.FromArgb(19, 78, 74);
             pnlSidebar.Controls.Add(btnDangXuat);
+            pnlSidebar.Controls.Add(btnBaoCaoThongKe);
             pnlSidebar.Controls.Add(btnDoiMatKhau);
             pnlSidebar.Controls.Add(btnLichTruc);
             pnlSidebar.Controls.Add(btnXuLyViPham);
@@ -62,6 +64,7 @@ namespace Library.UI
             // btnDangXuat
             // 
             btnDangXuat.BackColor = Color.FromArgb(185, 28, 28);
+            btnDangXuat.Cursor = Cursors.Hand;
             btnDangXuat.Dock = DockStyle.Bottom;
             btnDangXuat.FlatAppearance.BorderSize = 0;
             btnDangXuat.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 38, 38);
@@ -77,12 +80,30 @@ namespace Library.UI
             btnDangXuat.UseVisualStyleBackColor = false;
             btnDangXuat.Click += btnDangXuat_Click;
             // 
+            // btnBaoCaoThongKe
+            // 
+            btnBaoCaoThongKe.Cursor = Cursors.Hand;
+            btnBaoCaoThongKe.Dock = DockStyle.Top;
+            btnBaoCaoThongKe.FlatAppearance.BorderSize = 0;
+            btnBaoCaoThongKe.FlatStyle = FlatStyle.Flat;
+            btnBaoCaoThongKe.Font = new Font("Segoe UI", 10F);
+            btnBaoCaoThongKe.ForeColor = Color.FromArgb(204, 251, 241);
+            btnBaoCaoThongKe.ImageAlign = ContentAlignment.MiddleLeft;
+            btnBaoCaoThongKe.Location = new Point(0, 405);
+            btnBaoCaoThongKe.Name = "btnBaoCaoThongKe";
+            btnBaoCaoThongKe.Padding = new Padding(20, 0, 0, 0);
+            btnBaoCaoThongKe.Size = new Size(240, 50);
+            btnBaoCaoThongKe.TabIndex = 6;
+            btnBaoCaoThongKe.Text = "📊  Báo Cáo & Thống Kê";
+            btnBaoCaoThongKe.TextAlign = ContentAlignment.MiddleLeft;
+            btnBaoCaoThongKe.UseVisualStyleBackColor = true;
+            btnBaoCaoThongKe.Click += btnBaoCaoThongKe_Click;
+            // 
             // btnDoiMatKhau
             // 
+            btnDoiMatKhau.Cursor = Cursors.Hand;
             btnDoiMatKhau.Dock = DockStyle.Top;
             btnDoiMatKhau.FlatAppearance.BorderSize = 0;
-            btnDoiMatKhau.FlatAppearance.MouseOverBackColor = Color.FromArgb(15, 118, 110);
-            btnDoiMatKhau.FlatAppearance.MouseDownBackColor = Color.FromArgb(13, 148, 136);
             btnDoiMatKhau.FlatStyle = FlatStyle.Flat;
             btnDoiMatKhau.Font = new Font("Segoe UI", 10F);
             btnDoiMatKhau.ForeColor = Color.FromArgb(204, 251, 241);
@@ -91,7 +112,7 @@ namespace Library.UI
             btnDoiMatKhau.Name = "btnDoiMatKhau";
             btnDoiMatKhau.Padding = new Padding(20, 0, 0, 0);
             btnDoiMatKhau.Size = new Size(240, 50);
-            btnDoiMatKhau.TabIndex = 6;
+            btnDoiMatKhau.TabIndex = 5;
             btnDoiMatKhau.Text = "🔑  Đổi Mật Khẩu";
             btnDoiMatKhau.TextAlign = ContentAlignment.MiddleLeft;
             btnDoiMatKhau.UseVisualStyleBackColor = true;
@@ -99,10 +120,9 @@ namespace Library.UI
             // 
             // btnLichTruc
             // 
+            btnLichTruc.Cursor = Cursors.Hand;
             btnLichTruc.Dock = DockStyle.Top;
             btnLichTruc.FlatAppearance.BorderSize = 0;
-            btnLichTruc.FlatAppearance.MouseOverBackColor = Color.FromArgb(15, 118, 110);
-            btnLichTruc.FlatAppearance.MouseDownBackColor = Color.FromArgb(13, 148, 136);
             btnLichTruc.FlatStyle = FlatStyle.Flat;
             btnLichTruc.Font = new Font("Segoe UI", 10F);
             btnLichTruc.ForeColor = Color.FromArgb(204, 251, 241);
@@ -111,7 +131,7 @@ namespace Library.UI
             btnLichTruc.Name = "btnLichTruc";
             btnLichTruc.Padding = new Padding(20, 0, 0, 0);
             btnLichTruc.Size = new Size(240, 50);
-            btnLichTruc.TabIndex = 5;
+            btnLichTruc.TabIndex = 4;
             btnLichTruc.Text = "📅  Lịch Trực Của Tôi";
             btnLichTruc.TextAlign = ContentAlignment.MiddleLeft;
             btnLichTruc.UseVisualStyleBackColor = true;
@@ -119,10 +139,9 @@ namespace Library.UI
             // 
             // btnXuLyViPham
             // 
+            btnXuLyViPham.Cursor = Cursors.Hand;
             btnXuLyViPham.Dock = DockStyle.Top;
             btnXuLyViPham.FlatAppearance.BorderSize = 0;
-            btnXuLyViPham.FlatAppearance.MouseOverBackColor = Color.FromArgb(15, 118, 110);
-            btnXuLyViPham.FlatAppearance.MouseDownBackColor = Color.FromArgb(13, 148, 136);
             btnXuLyViPham.FlatStyle = FlatStyle.Flat;
             btnXuLyViPham.Font = new Font("Segoe UI", 10F);
             btnXuLyViPham.ForeColor = Color.FromArgb(204, 251, 241);
@@ -131,7 +150,7 @@ namespace Library.UI
             btnXuLyViPham.Name = "btnXuLyViPham";
             btnXuLyViPham.Padding = new Padding(20, 0, 0, 0);
             btnXuLyViPham.Size = new Size(240, 50);
-            btnXuLyViPham.TabIndex = 4;
+            btnXuLyViPham.TabIndex = 3;
             btnXuLyViPham.Text = "⚠️  Xử Lý Vi Phạt";
             btnXuLyViPham.TextAlign = ContentAlignment.MiddleLeft;
             btnXuLyViPham.UseVisualStyleBackColor = true;
@@ -139,10 +158,9 @@ namespace Library.UI
             // 
             // btnBanLuuThong
             // 
+            btnBanLuuThong.Cursor = Cursors.Hand;
             btnBanLuuThong.Dock = DockStyle.Top;
             btnBanLuuThong.FlatAppearance.BorderSize = 0;
-            btnBanLuuThong.FlatAppearance.MouseOverBackColor = Color.FromArgb(15, 118, 110);
-            btnBanLuuThong.FlatAppearance.MouseDownBackColor = Color.FromArgb(13, 148, 136);
             btnBanLuuThong.FlatStyle = FlatStyle.Flat;
             btnBanLuuThong.Font = new Font("Segoe UI", 10F);
             btnBanLuuThong.ForeColor = Color.FromArgb(204, 251, 241);
@@ -151,7 +169,7 @@ namespace Library.UI
             btnBanLuuThong.Name = "btnBanLuuThong";
             btnBanLuuThong.Padding = new Padding(20, 0, 0, 0);
             btnBanLuuThong.Size = new Size(240, 50);
-            btnBanLuuThong.TabIndex = 3;
+            btnBanLuuThong.TabIndex = 2;
             btnBanLuuThong.Text = "🔄  Bàn Lưu Thông (Mượn/Trả)";
             btnBanLuuThong.TextAlign = ContentAlignment.MiddleLeft;
             btnBanLuuThong.UseVisualStyleBackColor = true;
@@ -159,10 +177,9 @@ namespace Library.UI
             // 
             // btnQuanLySach
             // 
+            btnQuanLySach.Cursor = Cursors.Hand;
             btnQuanLySach.Dock = DockStyle.Top;
             btnQuanLySach.FlatAppearance.BorderSize = 0;
-            btnQuanLySach.FlatAppearance.MouseOverBackColor = Color.FromArgb(15, 118, 110);
-            btnQuanLySach.FlatAppearance.MouseDownBackColor = Color.FromArgb(13, 148, 136);
             btnQuanLySach.FlatStyle = FlatStyle.Flat;
             btnQuanLySach.Font = new Font("Segoe UI", 10F);
             btnQuanLySach.ForeColor = Color.FromArgb(204, 251, 241);
@@ -171,7 +188,7 @@ namespace Library.UI
             btnQuanLySach.Name = "btnQuanLySach";
             btnQuanLySach.Padding = new Padding(20, 0, 0, 0);
             btnQuanLySach.Size = new Size(240, 50);
-            btnQuanLySach.TabIndex = 2;
+            btnQuanLySach.TabIndex = 1;
             btnQuanLySach.Text = "📚  Quản Lý Kho Sách";
             btnQuanLySach.TextAlign = ContentAlignment.MiddleLeft;
             btnQuanLySach.UseVisualStyleBackColor = true;
@@ -179,10 +196,9 @@ namespace Library.UI
             // 
             // btnQuanLyDocGia
             // 
+            btnQuanLyDocGia.Cursor = Cursors.Hand;
             btnQuanLyDocGia.Dock = DockStyle.Top;
             btnQuanLyDocGia.FlatAppearance.BorderSize = 0;
-            btnQuanLyDocGia.FlatAppearance.MouseOverBackColor = Color.FromArgb(15, 118, 110);
-            btnQuanLyDocGia.FlatAppearance.MouseDownBackColor = Color.FromArgb(13, 148, 136);
             btnQuanLyDocGia.FlatStyle = FlatStyle.Flat;
             btnQuanLyDocGia.Font = new Font("Segoe UI", 10F);
             btnQuanLyDocGia.ForeColor = Color.FromArgb(204, 251, 241);
@@ -191,7 +207,7 @@ namespace Library.UI
             btnQuanLyDocGia.Name = "btnQuanLyDocGia";
             btnQuanLyDocGia.Padding = new Padding(20, 0, 0, 0);
             btnQuanLyDocGia.Size = new Size(240, 50);
-            btnQuanLyDocGia.TabIndex = 1;
+            btnQuanLyDocGia.TabIndex = 0;
             btnQuanLyDocGia.Text = "🪪  Quản Lý Độc Giả";
             btnQuanLyDocGia.TextAlign = ContentAlignment.MiddleLeft;
             btnQuanLyDocGia.UseVisualStyleBackColor = true;
@@ -324,6 +340,7 @@ namespace Library.UI
         private Button btnXuLyViPham;
         private Button btnLichTruc;
         private Button btnDoiMatKhau;
+        private Button btnBaoCaoThongKe;
         private Button btnDangXuat;
         private Panel pnlHeader;
         private Label lblPageTitle;

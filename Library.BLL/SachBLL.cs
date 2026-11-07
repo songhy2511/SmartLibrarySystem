@@ -98,7 +98,7 @@ namespace Library.BLL
         {
             errorMessage = string.Empty;
 
-            DataTable dt = _dal.Search(maSach);
+            DataTable dt = _dal.TimKiemSachAsync(maSach).Result;
             if (dt.Rows.Count > 0)
             {
                 DataRow dr = dt.Rows[0];
@@ -112,6 +112,8 @@ namespace Library.BLL
                     return false;
                 }
             }
+
+
 
             bool result = _dal.Delete(maSach);
             if (result)
@@ -155,8 +157,13 @@ namespace Library.BLL
 
             return result;
         }
-        public DataTable TimKiemSach(string keyword) => _dal.Search(keyword);
-
-
+        /// <summary>
+        /// Chuyển tiếp truy vấn tìm kiếm sách bất đồng bộ từ giao diện xuống DAL
+        /// </summary>
+        public async Task<DataTable> TimKiemSachAsync(string tuKhoa)
+        {
+            // Gọi đúng tên hàm TimKiemSachAsync mà bạn vừa đổi ở tầng DAL
+            return await _dal.TimKiemSachAsync(tuKhoa);
+        }
     }
 }
