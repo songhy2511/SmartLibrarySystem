@@ -127,8 +127,25 @@ namespace Library.UI
             OpenChildForm(new FormLichTrucThuThu());
         }
 
+        private void btnBaoCaoThongKe_Click(object sender, EventArgs e)
+        {
+            HighlightActiveButton(sender as Button, "BÁO CÁO & THỐNG KÊ");
+            try
+            {
+                using (var form = new FormBaoCaoThongKe())
+                {
+                    form.ShowDialog(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Không thể mở màn hình báo cáo: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void btnDoiMatKhau_Click(object sender, EventArgs e)
         {
+            HighlightActiveButton(sender as Button, "ĐỔI MẬT KHẨU");
             using var form = new FormDoiMatKhau();
             form.ShowDialog(this);
         }

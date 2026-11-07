@@ -1,8 +1,8 @@
 -- ============================================================================
 -- DỰ ÁN: SMART LIBRARY MANAGEMENT SYSTEM
 -- TẬP TIN: LibraryDB.sql
--- MÔ TẢ: Khởi tạo toàn bộ Database, thiết lập bảng và nạp dữ liệu mẫu hoàn chỉnh
--- PHIÊN BẢN: 2.1 (Tích hợp Giá Bìa, Tỷ lệ đền bù vi phạm & Cấu hình tham số động)
+-- MÔ TẢ: Khởi tạo toàn bộ Database, thiết lập bảng, nạp seed data và Stored Procedures
+-- PHIÊN BẢN: 2.3 (Tích hợp Stored Procedures xử lý vi phạm & quỹ đối soát)
 -- ============================================================================
 
 USE [master];
@@ -157,7 +157,7 @@ CREATE TABLE [dbo].[Doc_Gia] (
     [Dia_Chi] NVARCHAR(255) NULL,
     [Ngay_Cap_The] DATE NOT NULL DEFAULT GETDATE(),
     [Ngay_Het_Han_The] DATE NOT NULL,
-    [Trang_Thai] NVARCHAR(50) NOT NULL DEFAULT N'Hoạt động'
+    [Trang_Thai] NVARCHAR(50) NOT NULL DEFAULT N'Hoạt động' 
         CHECK ([Trang_Thai] IN (N'Hoạt động', N'Khóa tạm thời', N'Hết hạn')),
     [So_Lan_Vi_Pham] INT NOT NULL DEFAULT 0
 );
@@ -174,7 +174,7 @@ CREATE TABLE [dbo].[Phieu_Muon] (
     [Ngay_Hen_Tra] DATETIME NOT NULL,
     [Ngay_Tra] DATETIME NULL,                                     
     [So_Lan_Gia_Han] INT NOT NULL DEFAULT 0,                     
-    [Trang_Thai] NVARCHAR(50) NOT NULL DEFAULT N'Đang mượn'
+    [Trang_Thai] NVARCHAR(50) NOT NULL DEFAULT N'Đang mượn' 
         CHECK ([Trang_Thai] IN (N'Đang mượn', N'Đã hoàn thành', N'Quá hạn')),
     [Ghi_Chu] NVARCHAR(255) NULL,
     [Ngay_Tao] DATETIME NOT NULL DEFAULT GETDATE(),
@@ -212,7 +212,7 @@ CREATE TABLE [dbo].[Phieu_Phat] (
     [So_Tien_Phat] DECIMAL(18,2) NOT NULL,
     [Ly_Do] NVARCHAR(255) NOT NULL,
     [Ngay_Lap] DATETIME NOT NULL DEFAULT GETDATE(),
-    [Trang_Thai] NVARCHAR(50) NOT NULL DEFAULT N'Chưa thu'
+    [Trang_Thai] NVARCHAR(50) NOT NULL DEFAULT N'Chưa thu' 
         CHECK ([Trang_Thai] IN (N'Chưa thu', N'Đã thu')),
     [Da_Thanh_Toan] BIT NOT NULL DEFAULT 0,
     [Ngay_Tao] DATETIME NOT NULL DEFAULT GETDATE(),
@@ -257,7 +257,96 @@ CREATE TABLE [dbo].[Nhat_Ky_He_Thong] (
 GO
 
 -- ============================================================================
--- PHẦN II: NẠP DỮ LIỆU KHỞI TẠO (SEED DATA)
+-- PHẦN II: STORED PROCEDURES (XỬ LÝ GIAO DỊCH & QUY TRÌNH HỆ THỐNG)
+-- ============================================================================
+
+-- SP 1: Lập biên bản vi phạm và tự động xử lý tài sản
+CREATE OR ALTER PROCEDURE dbo.sp_LapBienBanViPham
+    @PhieuMuonMaSo INT = NULL,
+    @DocGiaMaSo INT,
+    @ThuThuMaSo INT,
+    @ChiNhanhMaSo INT,
+    @SoTienPhat DECIMAL(18,2),
+    @LyDo NVARCHAR(255),
+    @LoaiViPham NVARCHAR(100),
+    @BanSaoMaSo INT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- 1. Tạo bản ghi phiếu phạt
+        INSERT INTO dbo.Phieu_Phat 
+        (Phieu_Muon_Ma_So, Doc_Gia_Ma_So, Thu_Thu_Ma_So, Chi_Nhanh_Ma_So, So_Tien_Phat, Ly_Do, Ngay_Lap, Trang_Thai, Da_Thanh_Toan)
+        VALUES 
+        (@PhieuMuonMaSo, @DocGiaMaSo, @ThuThuMaSo, @ChiNhanhMaSo, @SoTienPhat, @LyDo, GETDATE(), N'Chưa thu', 0);
+
+        -- 2. Tăng số lần vi phạm của độc giả
+        UPDATE dbo.Doc_Gia 
+        SET So_Lan_Vi_Pham = ISNULL(So_Lan_Vi_Pham, 0) + 1 
+        WHERE Ma_So = @DocGiaMaSo;
+
+        -- 3. Xử lý trạng thái tài sản nếu làm mất hoặc hư hỏng nặng
+        IF @LoaiViPham LIKE N'%mất%' AND @BanSaoMaSo > 0
+        BEGIN
+            UPDATE dbo.Ban_Sao_Sach 
+            SET Trang_Thai = N'Mất/Thanh lý', Tinh_Trang = N'Đã mất', Ghi_Chu = N'Bạn đọc làm mất, đã lập biên bản bồi thường'
+            WHERE Ma_So = @BanSaoMaSo;
+
+            UPDATE dbo.Sach 
+            SET Tong_So_Luong = CASE WHEN Tong_So_Luong > 0 THEN Tong_So_Luong - 1 ELSE 0 END 
+            WHERE Ma_So = (SELECT Sach_Ma_So FROM dbo.Ban_Sao_Sach WHERE Ma_So = @BanSaoMaSo);
+        END
+        ELSE IF @LoaiViPham LIKE N'%hỏng nặng%' AND @BanSaoMaSo > 0
+        BEGIN
+            UPDATE dbo.Ban_Sao_Sach 
+            SET Trang_Thai = N'Hư hỏng', Tinh_Trang = N'Hư hỏng nặng', Ghi_Chu = N'Bị hỏng nặng, đã lập biên bản đền bù 60%'
+            WHERE Ma_So = @BanSaoMaSo;
+        END
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END
+GO
+
+-- SP 2: Thu tiền phạt và ghi nhận quỹ đối soát ca trực
+CREATE OR ALTER PROCEDURE dbo.sp_ThuTienPhat
+    @MaBienBan INT,
+    @ThuThuMaSo INT,
+    @SoTien DECIMAL(18,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        UPDATE dbo.Phieu_Phat 
+        SET Trang_Thai = N'Đã thu', Da_Thanh_Toan = 1 
+        WHERE Ma_So = @MaBienBan;
+
+        INSERT INTO dbo.Phat_Tien 
+        (Phieu_Phat_Ma_So, Thu_Thu_Ma_So, So_Tien_Thu, Ngay_Thu, Hinh_Thuc_Thanh_Toan)
+        VALUES 
+        (@MaBienBan, @ThuThuMaSo, @SoTien, GETDATE(), N'Tiền mặt');
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END
+GO
+
+-- ============================================================================
+-- PHẦN III: NẠP DỮ LIỆU KHỞI TẠO (SEED DATA)
 -- ============================================================================
 
 -- A. Quy chế hệ thống mặc định (Đầy đủ 7 tham số quy chế động)
@@ -314,28 +403,21 @@ GO
 INSERT INTO [dbo].[Sach] 
 ([Ma_Sach], [Tieu_De], [Tac_Gia], [The_Loai_Ma_So], [The_Loai], [Nam_Xuat_Ban], [Nha_Xuat_Ban], [Gia_Bia], [Tong_So_Luong], [So_Luong_Kha_Dung], [So_Lan_Muon], [Vi_Tri_Day], [Vi_Tri_Ke], [Vi_Tri_Tang], [Tinh_Trang])
 VALUES
--- CNTT
 ('B0001', N'Clean Code - Mã Sạch', N'Robert C. Martin', 1, N'Công nghệ thông tin', 2020, N'NXB Thông Tin & Truyền Thông', 120000, 5, 4, 15, N'Dãy A', N'Kệ 01', N'Tầng 2', N'Bình thường'),
 ('B0002', N'Design Patterns Explained', N'Alan Shalloway', 1, N'Công nghệ thông tin', 2019, N'NXB Khoa Học & Kỹ Thuật', 150000, 3, 3, 8, N'Dãy A', N'Kệ 02', N'Tầng 2', N'Bình thường'),
 ('B0005', N'Lập trình C# 12 và .NET 8', N'Mark J. Price', 1, N'Công nghệ thông tin', 2024, N'NXB Thông Tin & Truyền Thông', 180000, 8, 7, 15, N'Dãy A', N'Kệ 01', N'Tầng 2', N'Bình thường'),
 ('B0006', N'Refactoring - Cải tiến mã hiện có', N'Martin Fowler', 1, N'Công nghệ thông tin', 2021, N'NXB Khoa Học & Kỹ Thuật', 160000, 5, 4, 18, N'Dãy A', N'Kệ 02', N'Tầng 2', N'Bảo trì'),
 ('B0007', N'Designing Data-Intensive Applications', N'Martin Kleppmann', 1, N'Công nghệ thông tin', 2023, N'NXB Bách Khoa', 135000, 6, 6, 9, N'Dãy A', N'Kệ 03', N'Tầng 2', N'Bình thường'),
 ('B0008', N'Nhập môn Trí tuệ nhân tạo & ML', N'Stuart Russell', 1, N'Công nghệ thông tin', 2022, N'NXB Đại Học Quốc Gia', 210000, 7, 5, 22, N'Dãy A', N'Kệ 04', N'Tầng 2', N'Bình thường'),
-
--- Kinh tế & Quản trị
 ('B0009', N'Khởi nghiệp tinh gọn (The Lean Startup)', N'Eric Ries', 2, N'Kinh tế & Quản trị', 2020, N'NXB Trẻ', 110000, 10, 8, 34, N'Dãy B', N'Kệ 01', N'Tầng 1', N'Bình thường'),
 ('B0010', N'Nhà đầu tư thông minh', N'Benjamin Graham', 2, N'Kinh tế & Quản trị', 2021, N'NXB Lao Động Xã Hội', 125000, 8, 6, 27, N'Dãy B', N'Kệ 02', N'Tầng 1', N'Bình thường'),
 ('B0011', N'Kinh tế học hài hước (Freakonomics)', N'Steven D. Levitt', 2, N'Kinh tế & Quản trị', 2019, N'NXB Thế Giới', 95000, 5, 5, 12, N'Dãy B', N'Kệ 03', N'Tầng 1', N'Bình thường'),
-
--- Văn học nghệ thuật
 ('B0003', N'Đắc Nhân Tâm', N'Dale Carnegie', 3, N'Văn học nghệ thuật', 2021, N'NXB Tổng Hợp TP.HCM', 95000, 10, 9, 45, N'Dãy C', N'Kệ 01', N'Tầng 1', N'Bình thường'),
 ('B0004', N'Kính Vạn Hoa', N'Nguyễn Nhật Ánh', 3, N'Văn học nghệ thuật', 2022, N'NXB Kim Đồng', 85000, 6, 5, 20, N'Dãy C', N'Kệ 02', N'Tầng 1', N'Bình thường'),
 ('B0012', N'Mắt Biếc', N'Nguyễn Nhật Ánh', 3, N'Văn học nghệ thuật', 2021, N'NXB Trẻ', 90000, 12, 10, 52, N'Dãy C', N'Kệ 01', N'Tầng 1', N'Bình thường'),
 ('B0013', N'Cho Tôi Xin Một Vé Đi Tuổi Thơ', N'Nguyễn Nhật Ánh', 3, N'Văn học nghệ thuật', 2022, N'NXB Trẻ', 85000, 9, 7, 41, N'Dãy C', N'Kệ 01', N'Tầng 1', N'Bình thường'),
 ('B0014', N'Rừng Na Uy', N'Haruki Murakami', 3, N'Văn học nghệ thuật', 2020, N'NXB Hội Nhà Văn', 115000, 6, 5, 30, N'Dãy C', N'Kệ 02', N'Tầng 1', N'Bình thường'),
 ('B0015', N'Nhà Giả Kim (The Alchemist)', N'Paulo Coelho', 3, N'Văn học nghệ thuật', 2023, N'NXB Phụ Nữ', 75000, 15, 12, 85, N'Dãy C', N'Kệ 03', N'Tầng 1', N'Bình thường'),
-
--- Khoa học xã hội & Tâm lý
 ('B0016', N'Tư Duy Nhanh Và Chậm', N'Daniel Kahneman', 4, N'Khoa học xã hội', 2021, N'NXB Thế Giới', 145000, 8, 7, 39, N'Dãy D', N'Kệ 01', N'Tầng 3', N'Bình thường'),
 ('B0017', N'Tâm Lý Học Tội Phạm', N'Stanton E. Samenow', 4, N'Khoa học xã hội', 2022, N'NXB Công An Nhân Dân', 105000, 5, 4, 16, N'Dãy D', N'Kệ 02', N'Tầng 3', N'Bình thường'),
 ('B0018', N'Sapiens: Lược Sử Loài Người', N'Yuval Noah Harari', 4, N'Khoa học xã hội', 2023, N'NXB Tri Thức', 175000, 10, 8, 64, N'Dãy D', N'Kệ 03', N'Tầng 3', N'Bình thường');
@@ -378,11 +460,11 @@ VALUES
 ('DG0011', N'Lê Quốc Cường', '0932114477', 'cuong.le@yahoo.com', N'Tân Phú, TP. Hồ Chí Minh', '2023-09-12', '2027-09-12', N'Khóa tạm thời', 4);
 GO
 
--- H. Dữ liệu Phân ca trực và Quản lý tiền mặt
+-- H. Dữ liệu Phân ca trực và Quản lý tiền mặt (Đảm bảo có ca hôm qua của thủ thư 1)
 INSERT INTO [dbo].[Ca_Truc]
 ([Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [Ngay_Truc], [Ten_Ca], [Gio_Bat_Dau], [Gio_Ket_Thuc], [Tien_Mat_Dau_Ca], [Tien_Mat_Cuoi_Ca], [Tien_Dau_Ca], [Tien_Ket_Ca], [Trang_Thai], [Ghi_Chu], [Ngay_Tao])
 VALUES
--- Ca hôm qua
+-- Ca hôm qua (Ca Sáng: 07:30 - 12:00 của Thủ thư 1 tại Chi nhánh 1)
 (1, 1, DATEADD(DAY, -1, CAST(GETDATE() AS DATE)), N'Ca Sáng (07:30 - 12:00)', '07:30', '12:00', 500000, 560000, 500000, 560000, N'Đã hoàn thành', N'Bàn giao đủ tiền mặt và biên lai', DATEADD(DAY, -2, GETDATE())),
 (2, 1, DATEADD(DAY, -1, CAST(GETDATE() AS DATE)), N'Ca Chiều (12:30 - 17:00)', '12:30', '17:00', 500000, 520000, 500000, 520000, N'Đã hoàn thành', N'Không có sự cố phát sinh', DATEADD(DAY, -2, GETDATE())),
 
@@ -397,15 +479,13 @@ VALUES
 GO
 
 -- I. Dữ liệu Lưu thông Mượn - Trả sách
--- Phiếu mượn 1: Đã hoàn thành (mượn tuần trước, đã trả đúng hạn)
 INSERT INTO [dbo].[Phieu_Muon] ([Ma_Phieu_Muon], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [Ngay_Muon], [Ngay_Hen_Tra], [Trang_Thai], [Ghi_Chu], [Ngay_Tao])
 VALUES ('BR0001', 1, 1, 1, DATEADD(DAY, -10, GETDATE()), DATEADD(DAY, 4, GETDATE()), N'Đã hoàn thành', N'Độc giả trả sách đúng hẹn', DATEADD(DAY, -10, GETDATE()));
 DECLARE @PM1 INT = SCOPE_IDENTITY();
 
 INSERT INTO [dbo].[Chi_Tiet_Phieu_Muon] ([Phieu_Muon_Ma_So], [Ban_Sao_Sach_Ma_So], [Ngay_Tra_Thuc_Te], [Tinh_Trang_Khi_Tra], [Tien_Phat])
-VALUES (@PM1, 1, DATEADD(DAY, -2, GETDATE()), N'Bình thường', 0);
+VALUES (@PM1, 1, DATEADD(DAY, -1, CAST(GETDATE() AS DATE)), N'Bình thường', 0);
 
--- Phiếu mượn 2: Đang mượn (còn hạn)
 INSERT INTO [dbo].[Phieu_Muon] ([Ma_Phieu_Muon], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [Ngay_Muon], [Ngay_Hen_Tra], [Trang_Thai], [Ghi_Chu], [Ngay_Tao])
 VALUES ('BR0002', 2, 1, 1, DATEADD(DAY, -3, GETDATE()), DATEADD(DAY, 11, GETDATE()), N'Đang mượn', N'Mượn phục vụ nghiên cứu', DATEADD(DAY, -3, GETDATE()));
 DECLARE @PM2 INT = SCOPE_IDENTITY();
@@ -413,7 +493,6 @@ DECLARE @PM2 INT = SCOPE_IDENTITY();
 INSERT INTO [dbo].[Chi_Tiet_Phieu_Muon] ([Phieu_Muon_Ma_So], [Ban_Sao_Sach_Ma_So], [Ngay_Tra_Thuc_Te], [Tinh_Trang_Khi_Tra], [Tien_Phat])
 VALUES (@PM2, 6, NULL, NULL, 0);
 
--- Phiếu mượn 3: Quá hạn (mượn 20 ngày trước, hạn 14 ngày)
 INSERT INTO [dbo].[Phieu_Muon] ([Ma_Phieu_Muon], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [Ngay_Muon], [Ngay_Hen_Tra], [Trang_Thai], [Ghi_Chu], [Ngay_Tao])
 VALUES ('BR0003', 3, 2, 1, DATEADD(DAY, -20, GETDATE()), DATEADD(DAY, -6, GETDATE()), N'Quá hạn', N'Quá hạn 6 ngày chưa thấy trả', DATEADD(DAY, -20, GETDATE()));
 DECLARE @PM3 INT = SCOPE_IDENTITY();
@@ -422,14 +501,17 @@ INSERT INTO [dbo].[Chi_Tiet_Phieu_Muon] ([Phieu_Muon_Ma_So], [Ban_Sao_Sach_Ma_So
 VALUES (@PM3, 13, NULL, NULL, 30000);
 GO
 
--- J. Dữ liệu Vi phạm & Thu tiền phạt
--- Phiếu phạt 1: Quá hạn đã thanh toán
+-- J. Dữ liệu Vi phạm & Thu tiền phạt 
+-- Ép kiểu sang DATETIME để hỗ trợ datepart HOUR chuẩn xác
+DECLARE @NgayHomQua09Sang DATETIME = DATEADD(HOUR, 9, CAST(DATEADD(DAY, -1, CAST(GETDATE() AS DATE)) AS DATETIME));
+
 INSERT INTO [dbo].[Phieu_Phat] ([Phieu_Muon_Ma_So], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [So_Tien_Phat], [Ly_Do], [Ngay_Lap], [Trang_Thai], [Da_Thanh_Toan], [Ngay_Tao])
-VALUES (1, 1, 1, 1, 20000, N'Trả sách trễ 4 ngày', DATEADD(DAY, -2, GETDATE()), N'Đã thu', 1, DATEADD(DAY, -2, GETDATE()));
+VALUES (1, 1, 1, 1, 20000, N'Trả sách trễ 4 ngày', @NgayHomQua09Sang, N'Đã thu', 1, DATEADD(DAY, -1, GETDATE()));
+
 DECLARE @PP1 INT = SCOPE_IDENTITY();
 
 INSERT INTO [dbo].[Phat_Tien] ([Phieu_Phat_Ma_So], [Thu_Thu_Ma_So], [So_Tien_Thu], [Ngay_Thu], [Hinh_Thuc_Thanh_Toan])
-VALUES (@PP1, 1, 20000, DATEADD(DAY, -2, GETDATE()), N'Tiền mặt');
+VALUES (@PP1, 1, 20000, @NgayHomQua09Sang, N'Tiền mặt');
 
 -- Phiếu phạt 2: Rách mục lục sách (chưa thu)
 INSERT INTO [dbo].[Phieu_Phat] ([Phieu_Muon_Ma_So], [Doc_Gia_Ma_So], [Thu_Thu_Ma_So], [Chi_Nhanh_Ma_So], [So_Tien_Phat], [Ly_Do], [Ngay_Lap], [Trang_Thai], [Da_Thanh_Toan], [Ngay_Tao])

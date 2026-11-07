@@ -130,5 +130,10 @@ namespace Library.UI
                 e.FormattingApplied = true;
             }
         }
+
+        private void pnlHeader_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }
