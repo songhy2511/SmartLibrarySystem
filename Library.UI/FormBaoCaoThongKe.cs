@@ -9,6 +9,10 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Báo cáo dùng chung cho Admin và Thủ thư: doanh thu theo ca, top sách, tỷ lệ quay vòng.
+    /// Xuất CSV (dấu chấm phẩy), Excel, PDF ngang, hoặc xem trước bản in.
+    /// </summary>
     public partial class FormBaoCaoThongKe : Form
     {
         private readonly BaoCaoBLL _bll = new BaoCaoBLL();
@@ -31,13 +35,9 @@ namespace Library.UI
         }
 
         private void btnXem_Click(object sender, EventArgs e) => TaiDuLieuBaoCao();
-
         private void cboChiNhanh_SelectedIndexChanged(object sender, EventArgs e) => TaiDuLieuBaoCao();
-
         private void tabControlBaoCao_SelectedIndexChanged(object sender, EventArgs e) => TaiDuLieuBaoCao();
-
         private void btn7Ngay_Click(object sender, EventArgs e) => ChonKy(DateTime.Today.AddDays(-6), DateTime.Today);
-
         private void btn30Ngay_Click(object sender, EventArgs e) => ChonKy(DateTime.Today.AddDays(-29), DateTime.Today);
 
         private void ChonKy(DateTime tu, DateTime den)
@@ -51,39 +51,30 @@ namespace Library.UI
         {
             try
             {
-                if (dtpTuNgay.Value.Date > dtpDenNgay.Value.Date)
-                {
-                    MessageBox.Show("Mốc 'Từ ngày' không được lớn hơn 'Đến ngày'.", "Lọc dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
                 Cursor = Cursors.WaitCursor;
                 DateTime tu = dtpTuNgay.Value.Date;
                 DateTime den = dtpDenNgay.Value.Date;
                 int? chiNhanh = ChiNhanhDangChon();
-                DataTable dt;
 
-                if (tabControlBaoCao.SelectedTab == tabTopSach)
-                {
-                    dt = _bll.GetTopHotBooks((int)nudTopSach.Value, tu, den, chiNhanh);
-                    GanNguon(dgvTopSach, dt);
-                }
-                else if (tabControlBaoCao.SelectedTab == tabQuayVong)
-                {
-                    dt = _bll.GetQuayVongChiNhanh(tu, den, chiNhanh);
-                    GanNguon(dgvQuayVong, dt);
-                }
-                else
-                {
-                    dt = _bll.GetDoanhThuTheoCa(tu, den, chiNhanh);
-                    GanNguon(dgvDoanhThuCa, dt);
-                }
+                int loaiBaoCao = 0;
+                if (tabControlBaoCao.SelectedTab == tabTopSach) loaiBaoCao = 1;
+                else if (tabControlBaoCao.SelectedTab == tabQuayVong) loaiBaoCao = 2;
+
+                int topLimit = (int)nudTopSach.Value;
+
+                DataTable dt = _bll.LayDuLieuBaoCao(loaiBaoCao, tu, den, chiNhanh, topLimit);
+
+                if (loaiBaoCao == 1) GanNguon(dgvTopSach, dt);
+                else if (loaiBaoCao == 2) GanNguon(dgvQuayVong, dt);
+                else GanNguon(dgvDoanhThuCa, dt);
 
                 BaoCaoKPIDTO kpi = _bll.GetKPISummary(tu, den, chiNhanh);
+
                 lblValTongDoanhThu.Text = kpi.TongTienPhatDaThu.ToString("N0") + " đ";
                 lblValTienConNo.Text = kpi.TongTienPhatChuaThu.ToString("N0") + " đ";
                 lblValLuotMuon.Text = kpi.LuotMuonTrongKy.ToString("N0");
                 lblValCaLech.Text = kpi.SoCaLechTien.ToString("N0");
+
                 lblValCaLech.ForeColor = kpi.SoCaLechTien > 0
                     ? Color.FromArgb(190, 18, 60)
                     : Color.FromArgb(15, 23, 42);
@@ -103,6 +94,10 @@ namespace Library.UI
                     lblCanhBao.Text = "Tiền đã thu gắn vào ca của thủ thư thu tiền. Tiền lý thuyết = tiền đầu ca + tiền đã thu. Chênh lệch quỹ = tiền kết ca − tiền lý thuyết.";
                     lblCanhBao.ForeColor = Color.FromArgb(71, 85, 105);
                 }
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi lọc dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             catch (Exception)
             {
@@ -231,7 +226,6 @@ namespace Library.UI
             }
             catch
             {
-                // Giữ lựa chọn tất cả chi nhánh nếu truy vấn danh mục thất bại
             }
 
             cboChiNhanh.SelectedIndex = 0;
@@ -255,6 +249,7 @@ namespace Library.UI
             {
                 col.HeaderText = BaoCaoBLL.TenCot(col.Name);
                 col.SortMode = DataGridViewColumnSortMode.Automatic;
+
                 bool laTien = col.Name.Contains("Tien", StringComparison.OrdinalIgnoreCase)
                     || col.Name.Contains("ChenhLech", StringComparison.OrdinalIgnoreCase);
                 bool laTyLe = col.Name.Contains("TyLe", StringComparison.OrdinalIgnoreCase);
@@ -327,7 +322,7 @@ namespace Library.UI
 
         private string PhuDeBaoCao()
         {
-            return $"Kỳ {dtpTuNgay.Value:dd/MM/yyyy} - {dtpDenNgay.Value:dd/MM/yyyy}  |  {cboChiNhanh.Text}";
+            return $"Kỳ {dtpTuNgay.Value:dd/MM/yyyy} - {dtpDenNgay.Value:dd/MM/yyyy}   |   {cboChiNhanh.Text}";
         }
 
         private string TenTap()
@@ -340,7 +335,6 @@ namespace Library.UI
         private static float TrongSoCot(string header)
         {
             string name = header.ToLowerInvariant();
-            // Tăng trọng số cho các cột dài để có không gian hiển thị đầy đủ
             if (name.Contains("chi nhánh") || name.Contains("thủ thư") || name.Contains("đầu sách") || name.Contains("tác giả") || name.Contains("thể loại"))
                 return 2.5f;
             if (name.Contains("trạng thái") || name.Contains("lý thuyết") || name.Contains("chênh lệch") || name.Contains("ngày trực"))
@@ -356,11 +350,9 @@ namespace Library.UI
                 var rect = new RectangleF(currentX + 2, y + 2, widths[i] - 4, height - 4);
                 if (laTieuDe) graphics.FillRectangle(background, new RectangleF(currentX, y, widths[i], height));
 
-                // Sử dụng Font nhỏ hơn một chút cho tiêu đề nếu cần thiết để vừa khít ô
                 Font drawFont = font;
                 if (laTieuDe)
                 {
-                    // Tự động co chữ tiêu đề nếu chuỗi dài để tránh bị cắt cụt
                     SizeF textSize = graphics.MeasureString(values[i], font);
                     if (textSize.Width > rect.Width)
                     {
@@ -372,7 +364,7 @@ namespace Library.UI
                 {
                     Alignment = StringAlignment.Center,
                     LineAlignment = StringAlignment.Center,
-                    Trimming = StringTrimming.None, // Không cắt cụt chữ bằng dấu ... nữa
+                    Trimming = StringTrimming.None,
                     FormatFlags = StringFormatFlags.LineLimit
                 };
 

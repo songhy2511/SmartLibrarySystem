@@ -7,6 +7,7 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>Admin xem log SQL, lọc theo ngày, mức, hành động, từ khóa, và mở thư mục file .log trên máy.</summary>
     public partial class FormNhatKyHeThong : Form
     {
         private readonly NhatKyHeThongBLL _bll = new NhatKyHeThongBLL();

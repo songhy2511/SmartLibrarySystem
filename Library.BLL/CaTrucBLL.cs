@@ -48,14 +48,12 @@ namespace Library.BLL
             if (gioBatDau >= gioKetThuc)
                 return (false, "Giờ bắt đầu ca trực phải trước giờ kết thúc!");
 
-            // 1. Kiểm tra ràng buộc: 1 ca ở 1 chi nhánh chỉ có duy nhất 1 thủ thư
             string? thuThuHienTai = _caTrucDal.LayTenThuThuDangTrucTaiChiNhanh(chiNhanhMaSo, ngayTruc, tenCa);
             if (!string.IsNullOrEmpty(thuThuHienTai))
             {
                 return (false, $"Chi nhánh này đã có thủ thư '{thuThuHienTai}' trực '{tenCa}' vào ngày {ngayTruc:dd/MM/yyyy}! Mỗi ca tại một chi nhánh chỉ phân công đúng 1 người.");
             }
 
-            // 2. Kiểm tra ràng buộc: Thủ thư đó không được có lịch cùng ca tại chi nhánh khác
             string? chiNhanhDaTruc = _caTrucDal.LayTenChiNhanhThuThuDangCoLich(thuThuMaSo, ngayTruc, tenCa);
             if (!string.IsNullOrEmpty(chiNhanhDaTruc))
             {
@@ -120,6 +118,7 @@ namespace Library.BLL
             }
         }
 
+        /// <summary>Mã chi nhánh trên lịch hôm nay, để phiếu mượn gắn đúng kho. Không có lịch thì trả 1.</summary>
         public int LayChiNhanhTrucHomNay(int thuThuMaSo)
         {
             if (thuThuMaSo <= 0) return 1;
@@ -127,15 +126,15 @@ namespace Library.BLL
         }
 
         public (bool IsSuccess, string Message) CapNhatCaTruc(
-    int maSoCa,
-    int thuThuMaSo,
-    int chiNhanhMaSo,
-    DateTime ngayTruc,
-    string tenCa,
-    TimeSpan gioBatDau,
-    TimeSpan gioKetThuc,
-    decimal tienDauCa,
-    string? ghiChu)
+            int maSoCa,
+            int thuThuMaSo,
+            int chiNhanhMaSo,
+            DateTime ngayTruc,
+            string tenCa,
+            TimeSpan gioBatDau,
+            TimeSpan gioKetThuc,
+            decimal tienDauCa,
+            string? ghiChu)
         {
             if (maSoCa <= 0)
                 return (false, "Vui lòng chọn ca trực cần cập nhật từ danh sách!");

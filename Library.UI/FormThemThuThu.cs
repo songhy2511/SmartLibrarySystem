@@ -4,6 +4,7 @@ using Library.BLL;
 
 namespace Library.UI
 {
+    /// <summary>Hộp thoại thêm thủ thư. Mã TT hiện trước; mật khẩu do BLL sinh và copy vào clipboard khi lưu thành công.</summary>
     public partial class FormThemThuThu : Form
     {
         private readonly NguoiDungBLL _nguoiDungBLL = new NguoiDungBLL();

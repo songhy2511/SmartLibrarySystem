@@ -11,6 +11,10 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Thủ thư quản lý kho chi nhánh: tìm đầu sách, sửa kệ và giá, đề xuất thanh lý một bản hỏng,
+    /// mở form điều phối bản sao sang chi nhánh khác.
+    /// </summary>
     public partial class FormQuanLySach : Form
     {
         private readonly SachBLL _sachBLL = new SachBLL();

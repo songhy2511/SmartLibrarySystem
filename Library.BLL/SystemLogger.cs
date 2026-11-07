@@ -14,6 +14,11 @@ namespace Library.BLL
         SECURITY    // Đăng nhập, đăng xuất, đổi mật khẩu, phân quyền
     }
 
+    /// <summary>
+    /// Ghi một sự kiện vào hai nơi: bảng Nhat_Ky_He_Thong và file Logs/system_audit_yyyyMMdd.log.
+    /// File vẫn được ghi khi SQL lỗi, nên vẫn lần được sự cố lúc mất kết nối.
+    /// Không được đưa mật khẩu vào tham số chiTiet.
+    /// </summary>
     public static class SystemLogger
     {
         private static readonly NhatKyHeThongDAL _dal = new NhatKyHeThongDAL();
@@ -71,6 +76,7 @@ namespace Library.BLL
             }
         }
 
+        /// <summary>Mở thư mục log bằng Explorer từ nút trên màn nhật ký.</summary>
         public static string LayThuMucLog()
         {
             if (!Directory.Exists(LogDirectory))
@@ -80,6 +86,7 @@ namespace Library.BLL
             return LogDirectory;
         }
 
+        /// <summary>Lấy IPv4 của máy đang chạy app. Không lấy được thì ghi 127.0.0.1.</summary>
         private static string LayDiaChiIP()
         {
             try

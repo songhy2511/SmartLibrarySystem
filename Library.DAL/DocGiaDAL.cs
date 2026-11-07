@@ -5,6 +5,7 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>Bảng Doc_Gia: mã thẻ kế tiếp (cắt từ ký tự thứ 3), thêm, ngừng hoạt động, khóa thẻ, gia hạn.</summary>
     public class DocGiaDAL
     {
         public string GetNextMaDocGia()

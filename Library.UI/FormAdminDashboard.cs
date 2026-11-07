@@ -5,16 +5,22 @@ using System.Windows.Forms;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Khung làm việc của Admin: thanh bên trái chọn chức năng, vùng pnlContent nhúng form con.
+    /// Form con (tổng quan, nhân sự, chi nhánh...) không phải cửa sổ riêng; chúng được Dock.fill vào panel.
+    /// Báo cáo và đổi mật khẩu là hộp thoại riêng (ShowDialog), không nhúng vào panel.
+    /// </summary>
     public partial class FormAdminDashboard : Form
     {
-        private Form? _activeChildForm = null;
-        private Button? _currentActiveButton = null;
+        private Form? _activeChildForm = null;      // Form đang nằm trong vùng nội dung
+        private Button? _currentActiveButton = null; // Nút sidebar đang được tô sáng
 
         public FormAdminDashboard()
         {
             InitializeComponent();
         }
 
+        /// <summary>Chặn người không phải Admin, hiện tên tài khoản, rồi mở sẵn màn Tổng quan.</summary>
         private void FormAdminDashboard_Load(object sender, EventArgs e)
         {
             if (SessionContext.CurrentUser == null || !SessionContext.IsAdmin)
@@ -31,7 +37,10 @@ namespace Library.UI
             btnTongQuan.PerformClick();
         }
 
-        // Hàm cập nhật màu sắc nút Sidebar khi được chọn
+        /// <summary>
+        /// Đưa mọi nút sidebar về màu tối, rồi tô sáng nút đang chọn.
+        /// Nút Báo cáo và Đổi mật khẩu không được tô vì chúng mở popup, không đổi trang nội dung.
+        /// </summary>
         private void HighlightButton(Button selectedButton)
         {
             // Reset toàn bộ các nút về màu Sidebar mặc định
@@ -62,6 +71,10 @@ namespace Library.UI
             }
         }
 
+        /// <summary>
+        /// Đóng form con cũ, nhúng form mới vào pnlContent và đổi tiêu đề trang.
+        /// TopLevel = false là điều kiện để một Form được đặt bên trong control khác.
+        /// </summary>
         private void LoadChildForm(Form childForm, string pageTitle, Button senderButton)
         {
             if (_activeChildForm != null)
@@ -85,50 +98,57 @@ namespace Library.UI
             lblCurrentPageTitle.Text = pageTitle;
         }
 
+        /// <summary>KPI toàn hệ thống: số bạn đọc, đầu sách, sách đang mượn, tiền phạt chưa thu.</summary>
         private void btnTongQuan_Click(object sender, EventArgs e)
         {
             LoadChildForm(new FormTongQuanHeThong(), "TỔNG QUAN HỆ THỐNG & ĐỐI SOÁT KPI", (Button)sender);
         }
 
+        /// <summary>Thêm, sửa, khóa tài khoản và cấp lại mật khẩu thủ thư.</summary>
         private void btnNhanSu_Click(object sender, EventArgs e)
         {
             LoadChildForm(new FormQuanLyNhanSu(), "QUẢN LÝ NHÂN SỰ VÀ TÀI KHOẢN", (Button)sender);
         }
 
+        /// <summary>Thêm chi nhánh mới (mã CN01, CN02... sinh tự động).</summary>
         private void btnChiNhanh_Click(object sender, EventArgs e)
         {
             LoadChildForm(new FormQuanLyChiNhanh(), "QUẢN LÝ HỆ THỐNG CHI NHÁNH", (Button)sender);
         }
 
+        /// <summary>Phân ca sáng/chiều cho thủ thư theo từng chi nhánh.</summary>
         private void btnCaTruc_Click(object sender, EventArgs e)
         {
             LoadChildForm(new FormPhanCaTruc(), "PHÂN CÔNG CA LÀM VIỆC & ĐỐI SOÁT", (Button)sender);
         }
 
+        /// <summary>Sửa tham số động: số sách tối đa, số ngày mượn, tiền phạt/ngày, tỷ lệ đền bù.</summary>
         private void btnQuyChe_Click(object sender, EventArgs e)
         {
             LoadChildForm(new FormQuyCheThamSo(), "QUY CHẾ & CẤU HÌNH THAM SỐ ĐỘNG", (Button)sender);
         }
 
+        /// <summary>Xem nhật ký kiểm toán (INFO, WARNING, ERROR, SECURITY) đã ghi vào SQL.</summary>
         private void btnNhatKy_Click(object sender, EventArgs e)
         {
             LoadChildForm(new FormNhatKyHeThong(), "NHẬT KÝ HOẠT ĐỘNG HỆ THỐNG", (Button)sender);
         }
 
-        // 📊 Mở Form Báo Cáo Thống Kê dạng Popup độc lập (ShowDialog)
+        /// <summary>Mở báo cáo dạng hộp thoại. using giải phóng form ngay khi đóng.</summary>
         private void btnBaoCao_Click(object sender, EventArgs e)
         {
             using var form = new FormBaoCaoThongKe();
             form.ShowDialog(this);
         }
 
-        // 🔑 Mở Form Đổi Mật Khẩu dạng Popup độc lập
+        /// <summary>Admin tự đổi mật khẩu của chính tài khoản đang đăng nhập.</summary>
         private void btnDoiMatKhau_Click(object sender, EventArgs e)
         {
             using var form = new FormDoiMatKhau();
             form.ShowDialog(this);
         }
 
+        /// <summary>Ghi log SECURITY, xóa user khỏi phiên rồi đóng dashboard để form đăng nhập hiện lại.</summary>
         private void btnDangXuat_Click(object sender, EventArgs e)
         {
             var confirm = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -149,6 +169,10 @@ namespace Library.UI
             }
         }
 
+        /// <summary>
+        /// Bấm nút X trên cửa sổ (UserClosing) khi vẫn còn phiên thì thoát cả app.
+        /// Đăng xuất thì CurrentUser đã được gán null trước khi Close, nên nhánh này không chạy.
+        /// </summary>
         private void FormAdminDashboard_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing && SessionContext.CurrentUser != null)

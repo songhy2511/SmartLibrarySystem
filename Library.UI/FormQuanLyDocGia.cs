@@ -12,6 +12,7 @@ using Library.DTO;
 
 namespace Library.UI
 {
+    /// <summary>Thủ thư cấp thẻ, tìm bạn đọc, khóa/mở thẻ, gia hạn thêm năm. Thẻ có từ 3 lần vi phạm được tô nền cảnh báo.</summary>
     public partial class FormQuanLyDocGia : Form
     {
         private readonly DocGiaBLL _bll = new DocGiaBLL();

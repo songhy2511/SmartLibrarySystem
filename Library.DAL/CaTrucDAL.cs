@@ -6,6 +6,7 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>Bảng Ca_Truc: lịch theo ngày, kiểm tra trùng ca, lấy ca chưa chốt hôm nay, ghi tiền kết ca.</summary>
     public class CaTrucDAL
     {
         public List<CaTrucDTO> GetByDateRange(DateTime fromDate, DateTime toDate)
@@ -58,23 +59,23 @@ namespace Library.DAL
         {
             var list = new List<CaTrucDTO>();
             string query = @"
-        SELECT ct.Ma_So, ct.Thu_Thu_Ma_So, ct.Chi_Nhanh_Ma_So, ct.Ngay_Truc, ct.Ten_Ca, 
-               ct.Gio_Bat_Dau, ct.Gio_Ket_Thuc, ct.Tien_Dau_Ca, ct.Tien_Ket_Ca, 
-               ct.Trang_Thai, ct.Ghi_Chu,
-               tt.Ma_Thu_Thu, tt.Ho_Ten, tt.Quay_Phu_Trach,
-               cn.Ma_Chi_Nhanh, cn.Ten_Chi_Nhanh
-        FROM Ca_Truc ct
-        INNER JOIN Thu_Thu tt ON ct.Thu_Thu_Ma_So = tt.Ma_So
-        INNER JOIN Chi_Nhanh cn ON ct.Chi_Nhanh_Ma_So = cn.Ma_So
-        WHERE ct.Thu_Thu_Ma_So = @ThuThuMaSo
-          AND CAST(ct.Ngay_Truc AS DATE) BETWEEN @FromDate AND @ToDate
-        ORDER BY ct.Ngay_Truc ASC, ct.Gio_Bat_Dau ASC";
+                SELECT ct.Ma_So, ct.Thu_Thu_Ma_So, ct.Chi_Nhanh_Ma_So, ct.Ngay_Truc, ct.Ten_Ca, 
+                       ct.Gio_Bat_Dau, ct.Gio_Ket_Thuc, ct.Tien_Dau_Ca, ct.Tien_Ket_Ca, 
+                       ct.Trang_Thai, ct.Ghi_Chu,
+                       tt.Ma_Thu_Thu, tt.Ho_Ten, tt.Quay_Phu_Trach,
+                       cn.Ma_Chi_Nhanh, cn.Ten_Chi_Nhanh
+                FROM Ca_Truc ct
+                INNER JOIN Thu_Thu tt ON ct.Thu_Thu_Ma_So = tt.Ma_So
+                INNER JOIN Chi_Nhanh cn ON ct.Chi_Nhanh_Ma_So = cn.Ma_So
+                WHERE ct.Thu_Thu_Ma_So = @ThuThuMaSo
+                  AND CAST(ct.Ngay_Truc AS DATE) BETWEEN @FromDate AND @ToDate
+                ORDER BY ct.Ngay_Truc ASC, ct.Gio_Bat_Dau ASC";
 
             SqlParameter[] parameters = {
-        new SqlParameter("@ThuThuMaSo", thuThuMaSo),
-        new SqlParameter("@FromDate", fromDate.Date),
-        new SqlParameter("@ToDate", toDate.Date)
-    };
+                new SqlParameter("@ThuThuMaSo", thuThuMaSo),
+                new SqlParameter("@FromDate", fromDate.Date),
+                new SqlParameter("@ToDate", toDate.Date)
+            };
 
             DataTable dt = DatabaseHelper.ExecuteQuery(query, parameters);
             foreach (DataRow row in dt.Rows)
@@ -101,7 +102,7 @@ namespace Library.DAL
             }
             return list;
         }
-        // RÀNG BUỘC 1: Tại chi nhánh X, ca Y ngày Z đã có thủ thư nào trực chưa?
+
         public string? LayTenThuThuDangTrucTaiChiNhanh(int chiNhanhMaSo, DateTime ngayTruc, string tenCa)
         {
             string query = @"SELECT TOP 1 tt.Ho_Ten 
@@ -121,7 +122,6 @@ namespace Library.DAL
             return result?.ToString();
         }
 
-        // RÀNG BUỘC 2: Thủ thư này đã có lịch trực ở chi nhánh khác trong cùng ca và ngày đó chưa?
         public string? LayTenChiNhanhThuThuDangCoLich(int thuThuMaSo, DateTime ngayTruc, string tenCa)
         {
             string query = @"SELECT TOP 1 cn.Ten_Chi_Nhanh 
@@ -174,30 +174,27 @@ namespace Library.DAL
             return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
         }
 
-        /// <summary>
-        /// Lấy thông tin ca trực hiện tại trong ngày của thủ thư (chưa kết ca), bao gồm tổng tiền phạt đã thu.
-        /// </summary>
         public (bool HasShift, int CaTrucId, string TenCa, decimal TienDauCa, decimal TienThuPhat) LayCaTrucHienTai(int thuThuMaSo)
         {
             string query = @"
-        SELECT TOP 1
-            ct.Ma_So,
-            ct.Ten_Ca,
-            ct.Tien_Dau_Ca,
-            ISNULL((
-                SELECT SUM(pt.So_Tien_Thu) 
-                FROM dbo.Phat_Tien pt 
-                JOIN dbo.Phieu_Phat pp ON pt.Phieu_Phat_Ma_So = pp.Ma_So
-                WHERE pt.Thu_Thu_Ma_So = @ThuThuMaSo 
-                  AND CAST(pt.Ngay_Thu AS DATE) = CAST(GETDATE() AS DATE)
-            ), 0) AS Tien_Thu_Phat
-        FROM dbo.Ca_Truc ct
-        WHERE ct.Thu_Thu_Ma_So = @ThuThuMaSo
-          AND CAST(ct.Ngay_Truc AS DATE) = CAST(GETDATE() AS DATE)
-          AND ct.Trang_Thai <> N'Đã kết ca'
-        ORDER BY ct.Ma_So DESC";
+                SELECT TOP 1
+                    ct.Ma_So,
+                    ct.Ten_Ca,
+                    ct.Tien_Dau_Ca,
+                    ISNULL((
+                        SELECT SUM(pt.So_Tien_Thu) 
+                        FROM dbo.Phat_Tien pt 
+                        JOIN dbo.Phieu_Phat pp ON pt.Phieu_Phat_Ma_So = pp.Ma_So
+                        WHERE pt.Thu_Thu_Ma_So = @ThuThuMaSo 
+                          AND CAST(pt.Ngay_Thu AS DATE) = CAST(GETDATE() AS DATE)
+                    ), 0) AS Tien_Thu_Phat
+                FROM dbo.Ca_Truc ct
+                WHERE ct.Thu_Thu_Ma_So = @ThuThuMaSo
+                  AND CAST(ct.Ngay_Truc AS DATE) = CAST(GETDATE() AS DATE)
+                  AND ct.Trang_Thai <> N'Đã kết ca'
+                ORDER BY ct.Ma_So DESC";
 
-            var parameters = new[] { new Microsoft.Data.SqlClient.SqlParameter("@ThuThuMaSo", thuThuMaSo) };
+            var parameters = new[] { new SqlParameter("@ThuThuMaSo", thuThuMaSo) };
             var dt = DatabaseHelper.ExecuteQuery(query, parameters);
 
             if (dt.Rows.Count > 0)
@@ -213,63 +210,56 @@ namespace Library.DAL
             return (false, 0, "", 0, 0);
         }
 
-        /// <summary>
-        /// Chốt ca trực, cập nhật tiền mặt thực tế và đổi trạng thái.
-        /// </summary>
         public bool ChotCaTruc(int caTrucId, decimal tienKetCaThucTe)
         {
             string query = @"
-        UPDATE dbo.Ca_Truc 
-        SET Tien_Ket_Ca = @TienKetCa, 
-            Trang_Thai = N'Đã kết ca' 
-        WHERE Ma_So = @CaTrucId";
+                UPDATE dbo.Ca_Truc 
+                SET Tien_Ket_Ca = @TienKetCa, 
+                    Trang_Thai = N'Đã kết ca' 
+                WHERE Ma_So = @CaTrucId";
 
             var parameters = new[] {
-                new Microsoft.Data.SqlClient.SqlParameter("@CaTrucId", caTrucId),
-                new Microsoft.Data.SqlClient.SqlParameter("@TienKetCa", tienKetCaThucTe)
+                new SqlParameter("@CaTrucId", caTrucId),
+                new SqlParameter("@TienKetCa", tienKetCaThucTe)
             };
 
             return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
         }
-        /// <summary>
-        /// Lấy mã số chi nhánh mà thủ thư đang trực trong ngày hôm nay
-        /// </summary>
+
         public int LayChiNhanhTrucHomNay(int thuThuMaSo)
         {
             string query = @"
-        SELECT TOP 1 Chi_Nhanh_Ma_So 
-        FROM dbo.Ca_Truc 
-        WHERE Thu_Thu_Ma_So = @ThuThuMaSo 
-          AND CAST(Ngay_Truc AS DATE) = CAST(GETDATE() AS DATE)
-          AND Trang_Thai <> N'Đã kết ca'
-        ORDER BY Ma_So DESC";
+                SELECT TOP 1 Chi_Nhanh_Ma_So 
+                FROM dbo.Ca_Truc 
+                WHERE Thu_Thu_Ma_So = @ThuThuMaSo 
+                  AND CAST(Ngay_Truc AS DATE) = CAST(GETDATE() AS DATE)
+                  AND Trang_Thai <> N'Đã kết ca'
+                ORDER BY Ma_So DESC";
 
-            var parameters = new[] { new Microsoft.Data.SqlClient.SqlParameter("@ThuThuMaSo", thuThuMaSo) };
+            var parameters = new[] { new SqlParameter("@ThuThuMaSo", thuThuMaSo) };
             object? result = DatabaseHelper.ExecuteScalar(query, parameters);
 
             return (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : 1;
         }
 
-        // Kiểm tra trùng ca khi sửa (loại trừ chính ca đang cập nhật)
         public bool KiemTraTrungLichKhiSua(int maSoCa, int thuThuMaSo, int chiNhanhMaSo, DateTime ngayTruc, string tenCa, out string thongBaoLoi)
         {
             thongBaoLoi = string.Empty;
 
-            // 1. Chi nhánh đó trong ca đã có người khác trực chưa
             string query1 = @"SELECT TOP 1 tt.Ho_Ten 
-                      FROM Ca_Truc ct
-                      INNER JOIN Thu_Thu tt ON ct.Thu_Thu_Ma_So = tt.Ma_So
-                      WHERE ct.Chi_Nhanh_Ma_So = @ChiNhanhMaSo 
-                        AND CAST(ct.Ngay_Truc AS DATE) = @NgayTruc 
-                        AND ct.Ten_Ca = @TenCa
-                        AND ct.Ma_So <> @MaSo";
+                              FROM Ca_Truc ct
+                              INNER JOIN Thu_Thu tt ON ct.Thu_Thu_Ma_So = tt.Ma_So
+                              WHERE ct.Chi_Nhanh_Ma_So = @ChiNhanhMaSo 
+                                AND CAST(ct.Ngay_Truc AS DATE) = @NgayTruc 
+                                AND ct.Ten_Ca = @TenCa
+                                AND ct.Ma_So <> @MaSo";
 
             SqlParameter[] pars1 = {
-        new SqlParameter("@ChiNhanhMaSo", chiNhanhMaSo),
-        new SqlParameter("@NgayTruc", ngayTruc.Date),
-        new SqlParameter("@TenCa", tenCa),
-        new SqlParameter("@MaSo", maSoCa)
-    };
+                new SqlParameter("@ChiNhanhMaSo", chiNhanhMaSo),
+                new SqlParameter("@NgayTruc", ngayTruc.Date),
+                new SqlParameter("@TenCa", tenCa),
+                new SqlParameter("@MaSo", maSoCa)
+            };
 
             object? res1 = DatabaseHelper.ExecuteScalar(query1, pars1);
             if (res1 != null)
@@ -278,21 +268,20 @@ namespace Library.DAL
                 return true;
             }
 
-            // 2. Thủ thư này đã có lịch ở chi nhánh khác cùng ca chưa
             string query2 = @"SELECT TOP 1 cn.Ten_Chi_Nhanh 
-                      FROM Ca_Truc ct
-                      INNER JOIN Chi_Nhanh cn ON ct.Chi_Nhanh_Ma_So = cn.Ma_So
-                      WHERE ct.Thu_Thu_Ma_So = @ThuThuMaSo 
-                        AND CAST(ct.Ngay_Truc AS DATE) = @NgayTruc 
-                        AND ct.Ten_Ca = @TenCa
-                        AND ct.Ma_So <> @MaSo";
+                              FROM Ca_Truc ct
+                              INNER JOIN Chi_Nhanh cn ON ct.Chi_Nhanh_Ma_So = cn.Ma_So
+                              WHERE ct.Thu_Thu_Ma_So = @ThuThuMaSo 
+                                AND CAST(ct.Ngay_Truc AS DATE) = @NgayTruc 
+                                AND ct.Ten_Ca = @TenCa
+                                AND ct.Ma_So <> @MaSo";
 
             SqlParameter[] pars2 = {
-        new SqlParameter("@ThuThuMaSo", thuThuMaSo),
-        new SqlParameter("@NgayTruc", ngayTruc.Date),
-        new SqlParameter("@TenCa", tenCa),
-        new SqlParameter("@MaSo", maSoCa)
-    };
+                new SqlParameter("@ThuThuMaSo", thuThuMaSo),
+                new SqlParameter("@NgayTruc", ngayTruc.Date),
+                new SqlParameter("@TenCa", tenCa),
+                new SqlParameter("@MaSo", maSoCa)
+            };
 
             object? res2 = DatabaseHelper.ExecuteScalar(query2, pars2);
             if (res2 != null)
@@ -304,32 +293,31 @@ namespace Library.DAL
             return false;
         }
 
-        // Cập nhật thông tin ca trực vào CSDL
         public bool CapNhatCaTruc(CaTrucDTO caTruc)
         {
             string query = @"
-        UPDATE Ca_Truc 
-        SET Thu_Thu_Ma_So = @ThuThuMaSo,
-            Chi_Nhanh_Ma_So = @ChiNhanhMaSo,
-            Ngay_Truc = @NgayTruc,
-            Ten_Ca = @TenCa,
-            Gio_Bat_Dau = @GioBatDau,
-            Gio_Ket_Thuc = @GioKetThuc,
-            Tien_Dau_Ca = @TienDauCa,
-            Ghi_Chu = @GhiChu
-        WHERE Ma_So = @MaSo AND Trang_Thai = N'Chưa bắt đầu'";
+                UPDATE Ca_Truc 
+                SET Thu_Thu_Ma_So = @ThuThuMaSo,
+                    Chi_Nhanh_Ma_So = @ChiNhanhMaSo,
+                    Ngay_Truc = @NgayTruc,
+                    Ten_Ca = @TenCa,
+                    Gio_Bat_Dau = @GioBatDau,
+                    Gio_Ket_Thuc = @GioKetThuc,
+                    Tien_Dau_Ca = @TienDauCa,
+                    Ghi_Chu = @GhiChu
+                WHERE Ma_So = @MaSo AND Trang_Thai = N'Chưa bắt đầu'";
 
             SqlParameter[] parameters = {
-        new SqlParameter("@MaSo", caTruc.Ma_So),
-        new SqlParameter("@ThuThuMaSo", caTruc.Thu_Thu_Ma_So),
-        new SqlParameter("@ChiNhanhMaSo", caTruc.Chi_Nhanh_Ma_So),
-        new SqlParameter("@NgayTruc", caTruc.Ngay_Truc.Date),
-        new SqlParameter("@TenCa", caTruc.Ten_Ca),
-        new SqlParameter("@GioBatDau", caTruc.Gio_Bat_Dau),
-        new SqlParameter("@GioKetThuc", caTruc.Gio_Ket_Thuc),
-        new SqlParameter("@TienDauCa", caTruc.Tien_Dau_Ca),
-        new SqlParameter("@GhiChu", (object?)caTruc.Ghi_Chu ?? DBNull.Value)
-    };
+                new SqlParameter("@MaSo", caTruc.Ma_So),
+                new SqlParameter("@ThuThuMaSo", caTruc.Thu_Thu_Ma_So),
+                new SqlParameter("@ChiNhanhMaSo", caTruc.Chi_Nhanh_Ma_So),
+                new SqlParameter("@NgayTruc", caTruc.Ngay_Truc.Date),
+                new SqlParameter("@TenCa", caTruc.Ten_Ca),
+                new SqlParameter("@GioBatDau", caTruc.Gio_Bat_Dau),
+                new SqlParameter("@GioKetThuc", caTruc.Gio_Ket_Thuc),
+                new SqlParameter("@TienDauCa", caTruc.Tien_Dau_Ca),
+                new SqlParameter("@GhiChu", (object?)caTruc.Ghi_Chu ?? DBNull.Value)
+            };
 
             return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
         }

@@ -5,6 +5,11 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>
+    /// Phiếu mượn và bản sao. ThucHienMuonSach chạy trong transaction:
+    /// tạo phiếu, gắn chi tiết, đổi bản sao sang Đang mượn, giảm So_Luong_Kha_Dung.
+    /// Trả sách làm ngược lại.
+    /// </summary>
     public class PhieuMuonDAL
     {
         /// <summary>

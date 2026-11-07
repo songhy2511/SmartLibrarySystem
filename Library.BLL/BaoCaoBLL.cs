@@ -12,6 +12,10 @@ using QuestPDF.Infrastructure;
 
 namespace Library.BLL
 {
+    /// <summary>
+    /// Báo cáo doanh thu ca, top sách, tỷ lệ quay vòng, rồi xuất CSV, Excel hoặc PDF.
+    /// Hàm static constructor đăng ký font Segoe UI để PDF hiển thị tiếng Việt.
+    /// </summary>
     public class BaoCaoBLL
     {
         private static readonly CultureInfo VietNam = CultureInfo.GetCultureInfo("vi-VN");
@@ -28,6 +32,24 @@ namespace Library.BLL
                     QuestPDF.Drawing.FontManager.RegisterFontFromStream(font);
         }
 
+        /// <summary>
+        /// Phương thức trung chuyển nghiệp vụ: Tự động phân loại và lấy dữ liệu báo cáo 
+        /// dựa vào loại báo cáo, giúp tầng UI hoàn toàn sạch logic.
+        /// </summary>
+        public DataTable LayDuLieuBaoCao(int loaiBaoCao, DateTime tuNgay, DateTime denNgay, int? chiNhanhMaSo, int topLimit = 10)
+        {
+            KiemTraKhoangNgay(tuNgay, denNgay);
+
+            return loaiBaoCao switch
+            {
+                0 => GetDoanhThuTheoCa(tuNgay, denNgay, chiNhanhMaSo),
+                1 => GetTopHotBooks(topLimit, tuNgay, denNgay, chiNhanhMaSo),
+                2 => GetQuayVongChiNhanh(tuNgay, denNgay, chiNhanhMaSo),
+                _ => throw new ArgumentException("Loại báo cáo không hợp lệ.")
+            };
+        }
+
+        /// <summary>Một dòng KPI trong kỳ: bạn đọc, sách sẵn, lượt đang mượn, tiền đã thu, tiền còn nợ, số ca lệch.</summary>
         public BaoCaoKPIDTO GetKPISummary(DateTime tuNgay, DateTime denNgay, int? chiNhanhMaSo)
         {
             KiemTraKhoangNgay(tuNgay, denNgay);
@@ -49,12 +71,14 @@ namespace Library.BLL
             return kpi;
         }
 
+        /// <summary>Mỗi dòng là một ca: tiền đầu ca, phạt đã thu, tiền lý thuyết, tiền kết ca, chênh lệch.</summary>
         public DataTable GetDoanhThuTheoCa(DateTime tuNgay, DateTime denNgay, int? chiNhanhMaSo)
         {
             KiemTraKhoangNgay(tuNgay, denNgay);
             return _dal.GetDoanhThuTheoCa(tuNgay, denNgay, chiNhanhMaSo);
         }
 
+        /// <summary>Sách được mượn nhiều nhất trong kỳ. limit bị kẹp trong khoảng 1–100.</summary>
         public DataTable GetTopHotBooks(int limit, DateTime tuNgay, DateTime denNgay, int? chiNhanhMaSo)
         {
             if (limit <= 0) limit = 10;
@@ -63,6 +87,7 @@ namespace Library.BLL
             return _dal.GetTopHotBooksByFilter(limit, tuNgay, denNgay, chiNhanhMaSo);
         }
 
+        /// <summary>Tỷ lệ quay vòng = lượt mượn trong kỳ chia cho số bản sao đang lưu hành của chi nhánh.</summary>
         public DataTable GetQuayVongChiNhanh(DateTime tuNgay, DateTime denNgay, int? chiNhanhMaSo)
         {
             KiemTraKhoangNgay(tuNgay, denNgay);

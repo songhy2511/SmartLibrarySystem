@@ -6,6 +6,7 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>Bảng Chi_Nhanh. GetNextMaChiNhanh sinh CN01, CN02 từ số lớn nhất hiện có.</summary>
     public class ChiNhanhDAL
     {
         public List<ChiNhanhDTO> GetAll()

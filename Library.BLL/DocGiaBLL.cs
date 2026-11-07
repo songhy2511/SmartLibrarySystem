@@ -9,12 +9,15 @@ using Library.DTO;
 
 namespace Library.BLL
 {
+    /// <summary>Hồ sơ bạn đọc: cấp thẻ, khóa thẻ, gia hạn, tìm kiếm. Ngày cấp là hôm nay, hạn thẻ mặc định 4 năm.</summary>
     public class DocGiaBLL
     {
         private readonly DocGiaDAL _dal = new DocGiaDAL();
 
+        /// <summary>Mã thẻ kế tiếp để hiện trên form trước khi lưu.</summary>
         public string TaoMaDocGiaMoi() => _dal.GetNextMaDocGia();
 
+        /// <summary>Tạo thẻ trạng thái "Hoạt động", hạn 4 năm kể từ hôm nay.</summary>
         public bool ThemDocGia(DocGiaDTO dg, int? nguoiDungMaSo, out string errorMessage)
         {
             errorMessage = string.Empty;
@@ -38,6 +41,8 @@ namespace Library.BLL
             }
             return result;
         }
+
+        /// <summary>Ngừng hoạt động thẻ. DAL thường không xóa cứng để giữ lịch sử mượn.</summary>
         public bool XoaDocGia(string maDocGia, int? nguoiDungMaSo, out string errorMessage)
         {
             errorMessage = string.Empty;
@@ -96,6 +101,8 @@ namespace Library.BLL
 
             return result;
         }
+
+        /// <summary>isKhoa = true thì "Khóa tạm thời", false thì trả về "Hoạt động".</summary>
         public bool ThayDoiTrangThaiKhoa(string maDocGia, bool isKhoa, int? nguoiDungMaSo)
         {
             string trangThaiMoi = isKhoa ? "Khóa tạm thời" : "Hoạt động";
@@ -108,6 +115,7 @@ namespace Library.BLL
             return res;
         }
 
+        /// <summary>Cộng thêm số năm vào ngày hết hạn thẻ hiện tại.</summary>
         public bool GiaHanTheDocGia(string maDocGia, int soNam, int? nguoiDungMaSo)
         {
             bool res = _dal.GiaHanThe(maDocGia, soNam);
@@ -119,6 +127,7 @@ namespace Library.BLL
             return res;
         }
 
+        /// <summary>Tìm theo mã thẻ hoặc họ tên. Chuỗi rỗng trả về danh sách để form tự lọc.</summary>
         public DataTable TimKiemDocGia(string keyword) => _dal.Search(keyword);
     }
 }

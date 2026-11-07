@@ -5,6 +5,7 @@ using Library.BLL;
 
 namespace Library.UI
 {
+    /// <summary>Admin sửa 4 hạn mức mượn-trả và 3 tỷ lệ đền bù (rách, hỏng, mất). Nút khôi phục nạp lại giá trị đang lưu.</summary>
     public partial class FormQuyCheThamSo : Form
     {
         private readonly CauHinhHeThongBLL _bll = new CauHinhHeThongBLL();

@@ -5,8 +5,10 @@ using Library.DTO;
 
 namespace Library.DAL
 {
+    /// <summary>Đọc/ghi bảng Nguoi_Dung: tìm theo tên đăng nhập hoặc mã, cập nhật mật khẩu và cờ khóa.</summary>
     public class NguoiDungDAL
     {
+        /// <summary>Dùng lúc đăng nhập. Không thấy tên thì trả null, BLL sẽ báo sai tài khoản.</summary>
         public NguoiDungDTO? GetByUsername(string username)
         {
             string query = @"SELECT Ma_So, Ten_Dang_Nhap, Mat_Khau_Ma_Hoa, Chuoi_Muoi, Vai_Tro, Dang_Hoat_Dong, Ngay_Tao 

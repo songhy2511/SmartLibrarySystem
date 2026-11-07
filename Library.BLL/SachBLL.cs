@@ -9,18 +9,25 @@ using Library.DTO;
 
 namespace Library.BLL
 {
+    /// <summary>
+    /// Kho sách: thêm đầu sách, sửa số lượng, xóa khi không còn cuốn đang mượn,
+    /// thanh lý một bản hỏng, và chuyển một bản sao sang chi nhánh khác.
+    /// </summary>
     public class SachBLL
     {
         private readonly SachDAL _dal = new SachDAL();
 
+        /// <summary>Mã đầu sách kế tiếp dạng B0001. Chỉ để hiện trước; lúc lưu sẽ lấy lại mã mới.</summary>
         public string TaoMaSachMoi() => _dal.GetNextMaSach();
 
+        /// <summary>Khả dụng không âm và không vượt tổng số bản. Đúng với CHECK của SQL.</summary>
         public bool KiemTraTinhToanVeng(SachDTO sach)
         {
             // Kiểm tra ràng buộc CHECK (So_Luong_Kha_Dung <= Tong_So_Luong) trong SQL
             return sach.So_Luong_Kha_Dung >= 0 && sach.So_Luong_Kha_Dung <= sach.Tong_So_Luong;
         }
 
+        /// <summary>Nhập đầu sách mới. Mã do CSDL sinh lại ngay trước khi Insert để tránh hai người lấy trùng mã.</summary>
         public bool ThemSachMoi(SachDTO sach, int? nguoiDungMaSo, out string errorMessage)
         {
             errorMessage = string.Empty;
@@ -48,6 +55,7 @@ namespace Library.BLL
             return result;
         }
 
+        /// <summary>Sửa thông tin hoặc số lượng. Vẫn kiểm tra khả dụng không lớn hơn tổng.</summary>
         public bool CapNhatKhoSach(SachDTO sach, int? nguoiDungMaSo, out string errorMessage)
         {
             errorMessage = string.Empty;
@@ -67,11 +75,13 @@ namespace Library.BLL
             return result;
         }
 
+        /// <summary>Các bản sao còn sẵn sàng của một đầu sách tại đúng chi nhánh, dùng khi điều phối.</summary>
         public DataTable LayBanSaoSanCoTaiChiNhanh(string maSach, int chiNhanhId)
         {
             return _dal.LayBanSaoSanCoTaiChiNhanh(maSach, chiNhanhId);
         }
 
+        /// <summary>Chuyển một bản sao từ chi nhánh nguồn sang chi nhánh đích. Hai chi nhánh phải khác nhau.</summary>
         public (bool IsSuccess, string Message) DieuPhoiSach(int banSaoMaSo, string maVach, string tieuDe, int chiNhanhNguonId, int chiNhanhDichId, string ghiChu, int? adminUserId)
         {
             if (banSaoMaSo <= 0)
@@ -94,6 +104,10 @@ namespace Library.BLL
 
             return (false, "Điều phối thất bại! Cuốn sách có thể đã đổi trạng thái hoặc không còn sẵn sàng.");
         }
+        /// <summary>
+        /// Xóa đầu sách chỉ khi mọi bản đều còn trên kệ (khả dụng = tổng).
+        /// Nếu khả dụng nhỏ hơn tổng thì còn bản đang cho mượn, không cho xóa.
+        /// </summary>
         public bool XoaSach(string maSach, int? nguoiDungMaSo, out string errorMessage)
         {
             errorMessage = string.Empty;
@@ -124,6 +138,7 @@ namespace Library.BLL
             return result;
         }
 
+        /// <summary>Giảm một bản khả dụng vì hỏng nặng. Không cho thanh lý khi kệ đã hết cuốn sẵn sàng.</summary>
         public bool DeXuatThanhLyCuonSach(string maSach, string tieuDe, int khaDung, int? currentUserId, out string errorMessage)
         {
             errorMessage = string.Empty;

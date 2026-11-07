@@ -5,17 +5,25 @@ using System.Threading.Tasks;
 
 namespace Library.DAL
 {
+    /// <summary>
+    /// Cửa duy nhất mở SQL Server. Mọi DAL gọi ba hàm này thay vì tự new SqlConnection.
+    /// ExecuteQuery: SELECT trả nhiều dòng. ExecuteNonQuery: INSERT/UPDATE/DELETE, trả số dòng.
+    /// ExecuteScalar: một giá trị (COUNT, mã kế tiếp). ExecuteQueryAsync: SELECT không khóa giao diện.
+    /// Tham số SqlParameter chống ghép chuỗi SQL (SQL injection).
+    /// </summary>
     public static class DatabaseHelper
     {
         // Chuỗi kết nối SQL Server (Sửa Data Source cho đúng tên máy nếu không dùng dấu chấm .)
         public static string ConnectionString { get; set; } =
             "Data Source=.;Initial Catalog=LibraryDB;Integrated Security=True;TrustServerCertificate=True";
 
+        /// <summary>Tạo kết nối mới. using ở hàm gọi sẽ đóng kết nối khi xong.</summary>
         public static SqlConnection GetConnection()
         {
             return new SqlConnection(ConnectionString);
         }
 
+        /// <summary>Chạy SELECT và đổ hết kết quả vào DataTable. Fill tự mở kết nối.</summary>
         public static DataTable ExecuteQuery(string query, SqlParameter[]? parameters = null)
         {
             using var conn = GetConnection();
@@ -30,6 +38,7 @@ namespace Library.DAL
             return dt;
         }
 
+        /// <summary>Chạy lệnh ghi. Giá trị trả về là số dòng bị ảnh hưởng; 0 nghĩa là không sửa được dòng nào.</summary>
         public static int ExecuteNonQuery(string query, SqlParameter[]? parameters = null)
         {
             using var conn = GetConnection();
@@ -42,6 +51,7 @@ namespace Library.DAL
             return cmd.ExecuteNonQuery();
         }
 
+        /// <summary>Lấy một ô, ví dụ Gia_Tri của một tham số cấu hình. Null nếu câu lệnh không ra dòng.</summary>
         public static object? ExecuteScalar(string query, SqlParameter[]? parameters = null)
         {
             using var conn = GetConnection();

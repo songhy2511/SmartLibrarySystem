@@ -7,6 +7,10 @@ using Library.DAL;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Lập biên bản: quá hạn, rách (theo % giá bìa), hỏng nặng, mất sách, hoặc vi phạm khác.
+    /// Tiền gợi ý tính từ quy chế; thu tiền thì cộng vào quỹ ca đang trực.
+    /// </summary>
     public partial class FormLapBienBanViPham : Form
     {
         private readonly CauHinhHeThongBLL _cauHinhBLL = new CauHinhHeThongBLL();

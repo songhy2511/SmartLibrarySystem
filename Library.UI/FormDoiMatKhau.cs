@@ -4,6 +4,7 @@ using Library.BLL;
 
 namespace Library.UI
 {
+    /// <summary>Đổi mật khẩu của người đang đăng nhập. Cả Admin và Thủ thư dùng chung form này.</summary>
     public partial class FormDoiMatKhau : Form
     {
         private readonly NguoiDungBLL _nguoiDungBLL = new NguoiDungBLL();
@@ -65,6 +66,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Hiện hoặc giấu cả ba ô mật khẩu cùng lúc.</summary>
         private void chkHienMatKhau_CheckedChanged(object sender, EventArgs e)
         {
             bool showPass = chkHienMatKhau.Checked;

@@ -7,16 +7,22 @@ using Library.DAL;
 
 namespace Library.UI
 {
+    /// <summary>
+    /// Bàn mượn-trả của thủ thư.
+    /// Combo bạn đọc = 0 nghĩa là xem mọi phiếu đang mượn; khi lập phiếu phải chọn một người cụ thể.
+    /// Màu hạn trả tô trong CellFormatting: đỏ quá hạn, vàng hạn cuối, xanh còn ngày.
+    /// </summary>
     public partial class FormBanLuuThong : Form
     {
         private readonly PhieuMuonBLL _phieuMuonBLL = new PhieuMuonBLL();
-        private bool _isInitialized = false;
+        private bool _isInitialized = false; // Chặn SelectedIndexChanged chạy lúc đang nạp combo lần đầu
 
         public FormBanLuuThong()
         {
             InitializeComponent();
         }
 
+        /// <summary>Dựng lưới, nạp bạn đọc, gợi ý sách, đặt hạn trả theo quy chế rồi mới cho phép lọc.</summary>
         private void FormBanLuuThong_Load(object sender, EventArgs e)
         {
             DinhDangDataGridView();
@@ -55,6 +61,10 @@ namespace Library.UI
             dgvSachDangMuon.EnableDoubleBuffered(true);
         }
 
+        /// <summary>
+        /// Mỗi đầu sách thêm bốn cách gõ: "Tên (Còn n)", tên, mã sách, và "mã - tên".
+        /// DAL khi mượn sẽ cắt phần trước dấu " - " nếu người dùng chọn dạng mã - tên.
+        /// </summary>
         private void CaiDatAutoCompleteTimKiemSach()
         {
             try
@@ -84,6 +94,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Chỉ thẻ "Hoạt động". Dòng đầu MaDocGia = 0 là mục xem tất cả, không dùng để cho mượn.</summary>
         private void LoadDanhSachDocGia()
         {
             try
@@ -125,6 +136,7 @@ namespace Library.UI
             TaiDanhSachDangMuon();
         }
 
+        /// <summary>Đổ phiếu đang mượn theo bạn đọc đang chọn và cờ "chỉ quá hạn".</summary>
         private void TaiDanhSachDangMuon()
         {
             try
@@ -146,6 +158,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Đổi ngày sang dd/MM/yyyy và viết câu trạng thái hạn kèm màu, không sửa dữ liệu gốc trong DataTable.</summary>
         private void dgvSachDangMuon_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= dgvSachDangMuon.Rows.Count) return;
@@ -188,6 +201,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Mã hồ sơ thủ thư trong phiên. Trả 0 nếu mất phiên để nút gọi dừng lại.</summary>
         private int KiemTraVaLayMaThuThu()
         {
             if (SessionContext.CurrentLibrarian == null)
@@ -198,6 +212,10 @@ namespace Library.UI
             return SessionContext.CurrentLibrarian.Ma_So;
         }
 
+        /// <summary>
+        /// Gọi PhieuMuonBLL.LapPhieuMuon. Chi nhánh lấy từ ca trực hôm nay của thủ thư.
+        /// Exception nghiệp vụ (hết hạn mức, hết sách) hiện nguyên câu BLL ném ra.
+        /// </summary>
         private void btnLapPhieuMuon_Click(object sender, EventArgs e)
         {
             try
@@ -245,6 +263,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Gia hạn dòng đang chọn thêm 7 ngày, tối đa một lần và không gia hạn phiếu đã quá hạn.</summary>
         private void btnGiaHan_Click(object sender, EventArgs e)
         {
             if (dgvSachDangMuon.SelectedRows.Count == 0)
@@ -284,6 +303,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Ngày trả là hôm nay. Nếu quá hạn, hộp thoại hiện số tiền = số ngày trễ × đơn giá quy chế.</summary>
         private void btnXacNhanTra_Click(object sender, EventArgs e)
         {
             if (dgvSachDangMuon.SelectedRows.Count == 0)
@@ -322,6 +342,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Hộp thoại nhỏ tự tạo để sửa SĐT. Lấy DocGiaMaSo từ dòng dữ liệu, không cắt chuỗi mã thẻ.</summary>
         private void btnDoiSDT_Click(object sender, EventArgs e)
         {
             if (dgvSachDangMuon.SelectedRows.Count == 0)
@@ -393,6 +414,7 @@ namespace Library.UI
             }
         }
 
+        /// <summary>Xóa ô sách, đặt lại ngày theo quy chế, bỏ lọc quá hạn và nạp lại gợi ý.</summary>
         private void btnLamMoi_Click(object sender, EventArgs e)
         {
             txtMaSach.Clear();
