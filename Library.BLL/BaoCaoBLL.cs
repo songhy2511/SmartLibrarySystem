@@ -132,7 +132,6 @@ namespace Library.BLL
                     GanGiaTriExcel(cell, value, ten);
                 }
             }
-
             sheet.Columns().AdjustToContents();
             sheet.SheetView.FreezeRows(4);
             workbook.SaveAs(filePath);

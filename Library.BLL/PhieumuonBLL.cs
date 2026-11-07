@@ -64,7 +64,6 @@ namespace Library.BLL
         {
             if (string.IsNullOrWhiteSpace(inputSach))
                 throw new Exception("Vui lòng nhập mã sách, mã vạch hoặc tên sách cần mượn!");
-
             // 1. Kiểm tra giới hạn số lượng mượn theo quy chế hệ thống
             DataTable dtDangMuon = _phieuMuonDAL.LayDanhSachDangMuon(maDocGia);
             int maxBooks = LaySoSachMuonToiDa();
@@ -72,37 +71,30 @@ namespace Library.BLL
             {
                 throw new Exception($"Độc giả đã đạt giới hạn mượn tối đa {maxBooks} cuốn sách theo quy định!");
             }
-
             // 2. Kiểm tra tồn tại đầu sách
             if (!_phieuMuonDAL.KiemTraSachTonTai(inputSach, out string tenSach, out int khaDung))
             {
                 throw new Exception($"Không tìm thấy đầu sách hoặc mã vạch nào khớp với '{inputSach}'!");
             }
-
             // 3. Kiểm tra số lượng sách còn khả dụng trên kệ
             if (khaDung <= 0)
             {
                 throw new Exception($"Đầu sách '{tenSach}' hiện đã hết cuốn khả dụng trên kệ (đang cho mượn hết hoặc bảo trì)!");
             }
-
             // 4. Tìm kiếm bản sao vật lý sẵn sàng
             DataRow? banSao = _phieuMuonDAL.TimKiemBanSaoKhaDung(inputSach);
             if (banSao == null)
             {
                 throw new Exception($"Không tìm thấy bản sao vật lý nào ở trạng thái 'Sẵn sàng' cho cuốn '{tenSach}'!");
             }
-
             int banSaoMaSo = Convert.ToInt32(banSao["BanSaoMaSo"]);
             int sachMaSo = Convert.ToInt32(banSao["SachMaSo"]);
             int chiNhanhId = chiNhanhMaSo ?? Convert.ToInt32(banSao["ChiNhanhMaSo"]);
             int thuThuId = thuThuMaSo ?? 1;
-
             int.TryParse(maDocGia, out int docGiaId);
             if (docGiaId <= 0) docGiaId = 1;
-
             string maPhieu = _phieuMuonDAL.GetNextMaPhieuMuon();
             DateTime ngayHenHan = ngayMuon.AddDays(LaySoNgayMuonToiDa());
-
             bool success = _phieuMuonDAL.ThucHienMuonSach(maPhieu, docGiaId, thuThuId, chiNhanhId, ngayMuon, ngayHenHan, banSaoMaSo, sachMaSo);
             return success ? maPhieu : string.Empty;
         }

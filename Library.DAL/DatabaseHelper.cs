@@ -9,7 +9,7 @@ namespace Library.DAL
     {
         // Chuỗi kết nối SQL Server (Sửa Data Source cho đúng tên máy nếu không dùng dấu chấm .)
         public static string ConnectionString { get; set; } =
-            "Data Source=.;Initial Catalog=LibraryDB;Integrated Security=True;TrustServerCertificate=True";
+            "Data Source=.\\SQLEXPRESS;Initial Catalog=LibraryDB;Integrated Security=True;TrustServerCertificate=True";
 
         public static SqlConnection GetConnection()
         {
