@@ -168,11 +168,11 @@ namespace Library.BLL
 
         // Xử lý tạo mới thủ thư và cấp tài khoản mặc định
         public (bool IsSuccess, string Message, string MaThuThu, string MatKhauKhoiTao) ThemThuThu(
-    string tenDangNhap,
-    string hoTen,
-    string? soDienThoai,
-    string? email,
-    string quayPhuTrach)
+            string tenDangNhap,
+            string hoTen,
+            string? soDienThoai,
+            string? email,
+            string quayPhuTrach)
         {
             if (string.IsNullOrWhiteSpace(tenDangNhap))
                 return (false, "Tên đăng nhập không được để trống!", string.Empty, string.Empty);
@@ -223,7 +223,8 @@ namespace Library.BLL
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi cơ sở dữ liệu: {ex.Message}", string.Empty, string.Empty);
+                SystemLogger.Log(LogLevel.ERROR, "Lỗi tạo tài khoản thủ thư", ex.Message);
+                return (false, "Đã xảy ra lỗi khi tạo tài khoản và hồ sơ nhân sự. Vui lòng kiểm tra lại thông tin nhập!", string.Empty, string.Empty);
             }
         }
 

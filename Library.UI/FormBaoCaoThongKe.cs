@@ -104,9 +104,10 @@ namespace Library.UI
                     lblCanhBao.ForeColor = Color.FromArgb(71, 85, 105);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Lỗi nạp dữ liệu báo cáo: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể trích xuất số liệu báo cáo cho khoảng thời gian đã chọn. Vui lòng thử lại!",
+                                "Lỗi trích xuất số liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -310,9 +311,10 @@ namespace Library.UI
                 xuat(dt, sfd.FileName);
                 MessageBox.Show("Xuất file báo cáo thành công.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Lỗi xuất file: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể lưu file báo cáo. Vui lòng kiểm tra xem bạn có đang mở file trùng tên này trong Excel/PDF không và thử đóng lại trước khi xuất!",
+                                "Không thể ghi tệp", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

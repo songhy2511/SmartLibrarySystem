@@ -341,5 +341,28 @@ namespace Library.DAL
             };
             return DatabaseHelper.ExecuteNonQuery(query, parameters) > 0;
         }
+
+        /// <summary>
+        /// Sinh mã phiếu mượn tự tăng theo định dạng BR + yyMMdd + 3 chữ số (BR261107001)
+        /// </summary>
+        public string GetNextMaPhieuMuon()
+        {
+            string prefix = "BR" + DateTime.Now.ToString("yyMMdd");
+            string query = "SELECT MAX(Ma_Phieu_Muon) FROM dbo.Phieu_Muon WHERE Ma_Phieu_Muon LIKE @Prefix + '%'";
+
+            var pars = new[] { new Microsoft.Data.SqlClient.SqlParameter("@Prefix", prefix) };
+            object? result = DatabaseHelper.ExecuteScalar(query, pars);
+
+            int nextIndex = 1;
+            if (result != null && result != DBNull.Value)
+            {
+                string maxCode = result.ToString()!;
+                if (maxCode.Length >= prefix.Length + 3 && int.TryParse(maxCode.Substring(prefix.Length), out int currentNum))
+                {
+                    nextIndex = currentNum + 1;
+                }
+            }
+            return $"{prefix}{nextIndex:D3}";
+        }
     }
 }

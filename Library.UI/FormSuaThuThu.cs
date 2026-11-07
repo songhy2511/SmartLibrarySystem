@@ -44,6 +44,12 @@ namespace Library.UI
             var (isSuccess, message) = _nguoiDungBLL.CapNhatThongTinThuThu(_thuThu);
             if (isSuccess)
             {
+                SystemLogger.Log(
+                    LogLevel.INFO,
+                    "Cập nhật nhân sự",
+                    $"Cập nhật hồ sơ thủ thư {_thuThu.Ma_Thu_Thu} ({_thuThu.Ho_Ten}, Quầy: {_thuThu.Quay_Phu_Trach}).",
+                    SessionContext.CurrentUser?.Ma_So
+                );
                 MessageBox.Show(message, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;
                 this.Close();

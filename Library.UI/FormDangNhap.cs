@@ -98,7 +98,8 @@ namespace Library.UI
                     $"Ngoại lệ khi thực hiện đăng nhập tài khoản '{username}': {ex.Message}"
                 );
 
-                MessageBox.Show($"Lỗi kết nối cơ sở dữ liệu: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không thể kết nối đến máy chủ cơ sở dữ liệu. Vui lòng kiểm tra đường truyền mạng hoặc liên hệ Quản trị viên!",
+                "Sự cố kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

@@ -115,8 +115,15 @@ namespace Library.BLL
             }
             catch (Exception ex)
             {
-                return (false, "Lỗi khi chốt ca: " + ex.Message);
+                SystemLogger.Log(LogLevel.ERROR, "Lỗi chốt ca trực", ex.Message);
+                return (false, "Không thể hoàn tất chốt ca trực lúc này. Vui lòng kiểm tra lại đường truyền cơ sở dữ liệu!");
             }
+        }
+
+        public int LayChiNhanhTrucHomNay(int thuThuMaSo)
+        {
+            if (thuThuMaSo <= 0) return 1;
+            return _caTrucDal.LayChiNhanhTrucHomNay(thuThuMaSo);
         }
     }
 }

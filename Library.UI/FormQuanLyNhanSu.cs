@@ -31,9 +31,9 @@ namespace Library.UI
                 _danhSachNhanSu = _nguoiDungBLL.LayDanhSachNhanSu();
                 HienThiDanhSach(_danhSachNhanSu);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Lỗi tải dữ liệu: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Không thể đồng bộ danh sách nhân viên từ máy chủ!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

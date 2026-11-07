@@ -33,9 +33,9 @@ namespace Library.UI
                 dgvChiNhanh.DataSource = null;
                 dgvChiNhanh.DataSource = list;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Lỗi tải dữ liệu chi nhánh: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Không thể tải danh sách chi nhánh thư viện!", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
