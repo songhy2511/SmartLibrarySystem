@@ -347,5 +347,17 @@ namespace Library.UI
         private Label lblLibrarianInfo;
         private Panel pnlContent;
         private Label lblWelcome;
-    }
+
+
+
+
+        this.pnlSidebar.Controls.Add(this.btnDangXuat);
+        this.pnlSidebar.Controls.Add(this.btnDoiMatKhau);
+        this.pnlSidebar.Controls.Add(this.btnLichTruc);
+        this.pnlSidebar.Controls.Add(this.btnViPham);
+        this.pnlSidebar.Controls.Add(this.btnBanLuuThong);
+        this.pnlSidebar.Controls.Add(this.btnQuanLySach);    // Đặt trên Bàn Lưu Thông
+        this.pnlSidebar.Controls.Add(this.btnQuanLyDocGia);  // Đặt trên Quản Lý Kho Sách
+        this.pnlSidebar.Controls.Add(this.pnlHeaderLogo);
+        }
 }
